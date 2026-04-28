@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── CSS Variables ── */
 :root {
   --purple: #9970A6;
   --purple-dark: #7A5489;
@@ -46,9 +47,18 @@
   --shadow-glow-purple: 0 0 32px rgba(153,112,166,0.3);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Base reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html { scroll-behavior: smooth; font-size: 16px; -webkit-font-smoothing: antialiased; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
 
 body {
   font-family: 'DM Sans', sans-serif;
@@ -75,7 +85,9 @@ body {
 .reveal-delay-5 { transition-delay: 0.5s; }
 
 /* ── Flip card ── */
-.flip-card { perspective: 1000px; }
+.flip-card {
+  perspective: 1000px;
+}
 .flip-card-inner {
   position: relative;
   width: 100%;
@@ -83,7 +95,9 @@ body {
   transform-style: preserve-3d;
   transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
 .flip-card-front,
 .flip-card-back {
   position: absolute;
@@ -93,7 +107,9 @@ body {
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
-.flip-card-back { transform: rotateY(180deg); }
+.flip-card-back {
+  transform: rotateY(180deg);
+}
 
 /* ── Infinity carousel ── */
 .carousel-track {
@@ -101,7 +117,9 @@ body {
   width: max-content;
   animation: scrollLeft 32s linear infinite;
 }
-.carousel-track:hover { animation-play-state: paused; }
+.carousel-track:hover {
+  animation-play-state: paused;
+}
 @keyframes scrollLeft {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -139,7 +157,10 @@ body {
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: var(--shadow-glow-green);
 }
-.btn-glow-green:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(99,153,34,0.45); }
+.btn-glow-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 48px rgba(99,153,34,0.45);
+}
 
 .btn-glow-orange {
   background: linear-gradient(135deg, #EA8F4F, #BA7517);
@@ -152,7 +173,9 @@ body {
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: var(--shadow-glow-orange);
 }
-.btn-glow-orange:hover { transform: translateY(-2px); }
+.btn-glow-orange:hover {
+  transform: translateY(-2px);
+}
 
 .btn-glow-purple {
   background: linear-gradient(135deg, #9970A6, #534AB7);
@@ -165,9 +188,45 @@ body {
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: var(--shadow-glow-purple);
 }
-.btn-glow-purple:hover { transform: translateY(-2px); }
+.btn-glow-purple:hover {
+  transform: translateY(-2px);
+}
 
-/* ── Section transitions / diagonal dividers ── */
+/* ── Nav CTA: desktop only ── */
+.nav-cta {
+  display: none !important;
+}
+@media (min-width: 768px) {
+  .nav-cta {
+    display: inline-block !important;
+  }
+}
+
+/* ── Mobile nav dropdown ── */
+.mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.mobile-menu.open {
+  max-height: 400px;
+}
+
+/* ── Proof bar gradient ── */
+.proof-bar {
+  background: linear-gradient(135deg, var(--g600) 0%, var(--t600) 100%);
+}
+
+/* ── Hover lift cards ── */
+.hover-lift {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ── Section wave divider ── */
 .section-wave {
   position: relative;
 }
@@ -183,29 +242,7 @@ body {
   pointer-events: none;
 }
 
-/* ── Proof bar gradient ── */
-.proof-bar {
-  background: linear-gradient(135deg, var(--g600) 0%, var(--t600) 100%);
-}
-
-/* ── Mobile nav ── */
-.mobile-menu {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease;
-}
-.mobile-menu.open { max-height: 400px; }
-
-/* ── Smooth hover cards ── */
-.hover-lift {
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-/* ── Scrollbar ── */
+/* ── Custom scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #C0DD97; border-radius: 3px; }
