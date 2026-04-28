@@ -51,9 +51,9 @@ export const ROLES = [
 ] as const;
 
 export const PATHWAYS = [
-  { name: 'Entry', grades: '1–3', score: 'Below 40%', color: '#C4A8D0', bg: '#F5EFF8' },
-  { name: 'Foundation', grades: '3–5', score: '40–59%', color: '#9970A6', bg: '#EDE0F4' },
-  { name: 'Foundation Plus', grades: '4–6', score: '60–69%', color: '#BA7517', bg: '#FAEEDA' },
-  { name: 'Higher', grades: '6–7', score: '70–79%', color: '#639922', bg: '#EAF3DE' },
-  { name: 'Higher Plus', grades: '8–9', score: '80%+', color: '#0F6E56', bg: '#E1F5EE' },
+  { name: 'Entry', grades: '1–3',  color: '#C4A8D0', bg: '#F5EFF8' },
+  { name: 'Foundation', grades: '3–5',  color: '#9970A6', bg: '#EDE0F4' },
+  { name: 'Foundation Plus', grades: '4–6', color: '#BA7517', bg: '#FAEEDA' },
+  { name: 'Higher', grades: '6–7',  color: '#639922', bg: '#EAF3DE' },
+  { name: 'Higher Plus', grades: '8–9', color: '#0F6E56', bg: '#E1F5EE' },
 ] as const;

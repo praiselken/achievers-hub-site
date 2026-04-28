@@ -41,7 +41,7 @@ export default function Nav() {
 
         {/* CTA */}
         <Link to="/signup"
-          className="hidden md:inline-flex btn-glow-green text-sm py-2.5 px-5 no-underline">
+          className="nav-cta hidden btn-glow-green text-sm py-2.5 px-5 no-underline">
           Take free diagnostic
         </Link>
 
