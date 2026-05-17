@@ -17,11 +17,11 @@
   --green-light: #B5C47A;
   --green-faint: #F2F5E8;
 
-  /* Client palette */
-  --g400: #639922;
-  --g600: #3B6D11;
-  --t400: #1D9E75;
-  --t600: #0F6E56;
+  /* Client palette — brightened */
+  --g400: #78B828;
+  --g600: #4A8A14;
+  --t400: #22B885;
+  --t600: #138563;
   --a400: #BA7517;
   --c400: #D85A30;
 
@@ -32,7 +32,7 @@
   --off-white: #FDFCF8;
   --white: #FFFFFF;
 
-  --nav-h: 64px;
+  --nav-h: 80px;
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
@@ -41,8 +41,8 @@
   --shadow-sm: 0 1px 3px rgba(28,28,46,0.06);
   --shadow-md: 0 4px 20px rgba(28,28,46,0.08);
   --shadow-lg: 0 12px 48px rgba(28,28,46,0.12);
-  --shadow-glow-green: 0 0 32px rgba(99,153,34,0.3);
-  --shadow-glow-teal: 0 0 32px rgba(15,110,86,0.3);
+  --shadow-glow-green: 0 0 32px rgba(120,184,40,0.32);
+  --shadow-glow-teal: 0 0 32px rgba(34,184,133,0.30);
   --shadow-glow-orange: 0 0 32px rgba(234,143,79,0.3);
   --shadow-glow-purple: 0 0 32px rgba(153,112,166,0.3);
 }
@@ -192,13 +192,15 @@ body {
   transform: translateY(-2px);
 }
 
-/* ── Nav CTA: desktop only ── */
+/* ── Nav CTA: desktop only, compact padding for pill nav ── */
 .nav-cta {
   display: none !important;
 }
 @media (min-width: 768px) {
   .nav-cta {
     display: inline-block !important;
+    padding: 8px 18px !important;
+    font-size: 13px !important;
   }
 }
 
@@ -245,4 +247,4 @@ body {
 /* ── Custom scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #C0DD97; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #C8E49A; border-radius: 3px; }

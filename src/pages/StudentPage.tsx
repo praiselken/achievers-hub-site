@@ -2,21 +2,25 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../lib/useScrollReveal';
 import StudyCard from '../components/StudyCard';
+import CardStack from '../components/CardStack';
 import { PATHWAYS } from '../constants/brand';
+import {
+  IconTarget,
+  IconCalendar,
+  IconBooks,
+  IconDocument,
+  IconMap,
+  IconSparkle,
+} from '../components/icons';
 
-const SUBJECTS = [
-  { id: 'maths', label: 'GCSE Maths', boards: ['AQA', 'Edexcel', 'OCR'], color: '#639922', faint: '#EAF3DE' },
-  { id: 'economics', label: 'GCSE Economics', boards: ['AQA', 'OCR'], color: '#0F6E56', faint: '#E1F5EE' },
-  { id: 'more', label: 'More coming', boards: [], color: '#B4B2A9', faint: '#F1EFE8', soon: true },
-];
 
 const FEATURES = [
-  { icon: '🎯', title: 'Personalised diagnostic', body: 'A 10-minute assessment that maps where you are across the full GCSE spec — no guessing, no generic lists.', tag: 'All plans' },
-  { icon: '📅', title: 'Daily 5 questions', body: '3 at your level, 1 on your weakest topic, 1 stretch question. Done in under 15 minutes.', tag: 'All plans' },
-  { icon: '📚', title: 'Topic Hub', body: 'Every topic has a study card, practice questions, and a YouTube video — always sorted by your weak areas first.', tag: 'All plans' },
-  { icon: '📄', title: 'Past Paper Hub', body: 'Download paper, mark scheme & examiner report. Log your score, get a diagnostic, watch the walkthrough — all in one flow.', tag: 'Achiever+' },
-  { icon: '🗺️', title: 'Spec Mapper', body: 'See exactly how much of the GCSE spec you\'ve covered — by topic, by week. Know what\'s left.', tag: 'Achiever+' },
-  { icon: '🧠', title: 'Daily mindset prompt', body: 'A short daily identity-driven prompt — on mindset, voice, or resilience. Free for all students.', tag: 'All plans' },
+  { Icon: IconTarget,   title: 'Personalised diagnostic', body: 'A 10-minute assessment that maps where you are across the full GCSE spec — no guessing, no generic lists.', tag: 'All plans' },
+  { Icon: IconCalendar, title: 'Daily 5 questions', body: '3 at your level, 1 on your weakest topic, 1 stretch question. Done in under 15 minutes.', tag: 'All plans' },
+  { Icon: IconBooks,    title: 'Topic Hub', body: 'Every topic has a study card, practice questions, and a YouTube video — always sorted by your weak areas first.', tag: 'All plans' },
+  { Icon: IconDocument, title: 'Past Paper Hub', body: 'Download paper, mark scheme & examiner report. Log your score, get a diagnostic, watch the walkthrough — all in one flow.', tag: 'Achiever+' },
+  { Icon: IconMap,      title: 'Spec Mapper', body: 'See exactly how much of the GCSE spec you\'ve covered — by topic, by week. Know what\'s left.', tag: 'Achiever+' },
+  { Icon: IconSparkle,  title: 'Daily mindset prompt', body: 'A short daily identity-driven prompt — on mindset, voice, or resilience. Free for all students.', tag: 'All plans' },
 ];
 
 const DAILY5_QUESTIONS = [
@@ -66,45 +70,102 @@ export default function StudentPage() {
   return (
     <main className="pt-16 min-h-screen">
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden px-5 pt-14 pb-14 md:pt-20 md:pb-20"
+      {/* ── Hero — fullscreen card stack ── */}
+      <section className="relative overflow-hidden px-5 pt-12 pb-16 md:pt-20 md:pb-24"
                style={{ background: 'var(--off-white)' }}>
+        {/* Mesh background */}
         <div className="absolute inset-0 pointer-events-none"
-             style={{ background: 'radial-gradient(ellipse 80% 60% at 80% -10%, #C0DD97 0%, transparent 55%), radial-gradient(ellipse 50% 40% at -5% 90%, #9FE1CB 0%, transparent 55%)' }}
+             style={{ background: 'radial-gradient(ellipse 70% 60% at 90% -10%, #C8E49A 0%, transparent 55%), radial-gradient(ellipse 60% 50% at -10% 90%, #9FE4CE 0%, transparent 55%), radial-gradient(ellipse 40% 40% at 50% 110%, #D8B8E0 0%, transparent 50%)' }}
              aria-hidden />
 
-        <div className="relative z-10 max-w-2xl mx-auto text-center flex flex-col items-center">
-          <div className="inline-block bg-green-50 border border-green-100 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
-            For Students
-          </div>
-          <h1 className="font-display font-bold text-gray-900 leading-[1.1] mb-5"
-              style={{ fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)' }}>
-            Stop revising blindly.<br />
-            <em className="grad-text-green">Start revising smartly.</em>
-          </h1>
-          <p className="font-body text-gray-500 leading-relaxed mb-7 max-w-lg"
-             style={{ fontSize: 'clamp(1rem, 2vw, 1.1rem)' }}>
-            Get a personalised GCSE revision pathway based on where you actually are — not where you hope you are. Five targeted questions a day. 15 minutes. Real improvement.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center mb-8">
-            <Link to="/signup" className="btn-glow-green text-[15px] no-underline">Start your free diagnostic →</Link>
-            <a href="#daily5" className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] hover:border-green-300 transition-colors no-underline">See Daily 5</a>
-          </div>
+        <div className="relative z-10 max-w-6xl mx-auto">
+          {/* Desktop: two columns. Mobile: stacked (text first, cards second) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center">
 
-          {/* Subject toggle */}
-          <div className="flex flex-wrap items-center gap-2 justify-center">
-            <span className="text-xs text-gray-400 font-medium">Subjects:</span>
-            {SUBJECTS.map(s => (
-              <button key={s.id}
-                onClick={() => !s.soon && setActiveSubject(s.id as 'maths' | 'economics')}
-                className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border-2 transition-all
-                  ${s.soon ? 'opacity-40 cursor-default border-gray-200 text-gray-400' : 'cursor-pointer'}
-                  ${activeSubject === s.id && !s.soon ? 'border-current' : 'border-transparent'}`}
-                style={!s.soon ? { background: s.faint, color: s.color, borderColor: activeSubject === s.id ? s.color : 'transparent' } : {}}>
-                {s.label}
-                {s.soon && <span className="ml-1.5 bg-gray-200 text-gray-400 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Soon</span>}
-              </button>
-            ))}
+            {/* LEFT — text + CTA */}
+            <div className="flex flex-col items-start">
+              <div className="inline-block bg-green-50 border border-green-100 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
+                For Students
+              </div>
+
+              <h1 className="font-display font-bold text-gray-900 leading-[1.08] mb-5"
+                  style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)' }}>
+                Stop revising blindly.<br />
+                <em className="grad-text-green">Start revising smartly.</em>
+              </h1>
+
+              <p className="font-body text-gray-500 leading-relaxed mb-7 max-w-md"
+                 style={{ fontSize: 'clamp(1rem, 1.8vw, 1.1rem)' }}>
+                Get a personalised GCSE revision pathway based on where you actually are. Five targeted questions a day. 15 minutes. Real improvement.
+              </p>
+
+              <div className="flex flex-wrap gap-3 mb-7">
+                <Link to="/signup" className="btn-glow-green text-[15px] no-underline">
+                  Start your free diagnostic →
+                </Link>
+                <a href="#daily5"
+                   className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] hover:border-green-300 transition-colors no-underline">
+                  See Daily 5
+                </a>
+              </div>
+
+              {/* Social proof */}
+              <div className="flex flex-wrap items-center gap-4 mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-2.5">
+                    {[
+                      { initials: 'A', bg: '#78B828' },
+                      { initials: 'J', bg: '#22B885' },
+                      { initials: 'M', bg: '#4A8A14' },
+                      { initials: 'S', bg: '#138563' },
+                    ].map((av, i) => (
+                      <div key={i}
+                        className="w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                        style={{ background: av.bg }}>
+                        {av.initials}
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <div className="flex gap-0.5 mb-0.5">
+                      {[1,2,3,4,5].map(i => (
+                        <svg key={i} viewBox="0 0 12 12" className="w-3 h-3" style={{ fill: '#FBBF24' }}>
+                          <path d="M6 1l1.3 2.7 3.1.5-2.2 2.2.5 3L6 8.1 3.3 9.4l.5-3L1.6 4.2l3.1-.5z"/>
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Join <strong className="text-gray-700">1,200+</strong> students already revising smarter
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 bg-white border border-green-100 rounded-full px-4 py-2 shadow-sm">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"
+                       strokeLinecap="round" strokeLinejoin="round"
+                       className="w-3.5 h-3.5 text-green-600">
+                    <path d="M8 1l1.5 3.1 3.5.5-2.5 2.5.6 3.4L8 9l-3.1 1.5.6-3.4L3 4.6l3.5-.5z"/>
+                  </svg>
+                  <span className="text-xs font-semibold text-green-800">Built by teachers &amp; examiners</span>
+                </div>
+              </div>
+
+              {/* Exam board logos */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-400 font-medium">Covers:</span>
+                {['AQA', 'Edexcel', 'OCR'].map(board => (
+                  <span key={board}
+                    className="text-xs font-bold text-gray-500 border border-gray-200 rounded-lg px-3 py-1.5 bg-white">
+                    {board}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT — Card stack (also shows below text on mobile due to grid-cols-1 ordering) */}
+            <div className="w-full">
+              <CardStack />
+            </div>
           </div>
         </div>
       </section>
@@ -141,7 +202,6 @@ export default function StudentPage() {
                 <div className="h-1 rounded-full mb-4" style={{ background: p.color }} />
                 <div className="font-body font-bold text-gray-900 text-sm mb-1">{p.name}</div>
                 <div className="font-display font-bold text-3xl" style={{ color: p.color }}>{p.grades}</div>
-                <div className="font-mono text-xs text-gray-400 mt-1">{p.score}</div>
               </div>
             ))}
           </div>
@@ -188,7 +248,7 @@ export default function StudentPage() {
             {/* Study Card Demo */}
             <div className="reveal reveal-delay-2">
               <div className="mb-4 flex items-center justify-between">
-                <p className="font-body font-semibold text-gray-700 text-sm">📖 Study card — try flipping it</p>
+                <p className="font-body font-semibold text-gray-700 text-sm">Study card — try flipping it</p>
                 <div className="flex gap-2">
                   {(['maths', 'economics'] as const).map(s => (
                     <button key={s} onClick={() => setActiveSubject(s)}
@@ -222,7 +282,10 @@ export default function StudentPage() {
             {FEATURES.map((f, i) => (
               <div key={f.title} className={`reveal reveal-delay-${(i % 3) + 1} bg-white border border-gray-100 rounded-2xl p-6 hover-lift flex flex-col gap-3`}
                    style={{ boxShadow: 'var(--shadow-sm)' }}>
-                <div className="text-3xl">{f.icon}</div>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                     style={{ background: '#EDF5E2', color: '#4A8A14' }}>
+                  <f.Icon className="w-5 h-5" />
+                </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-body font-bold text-gray-900 text-[15px]">{f.title}</h3>

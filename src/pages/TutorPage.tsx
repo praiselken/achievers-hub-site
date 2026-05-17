@@ -1,13 +1,21 @@
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../lib/useScrollReveal';
+import {
+  IconBarChart,
+  IconCalendar,
+  IconLineChart,
+  IconLink,
+  IconNote,
+  IconGift,
+} from '../components/icons';
 
 const FEATURES = [
-  { icon: '📊', title: 'Student weak-topic data', body: 'Before every session, see exactly which topics each student is struggling with — ranked by diagnostic score.', tag: 'All tiers' },
-  { icon: '📅', title: 'Session booking', body: 'Students book directly on the platform. You add a meeting link and pre-session notes. No back-and-forth.', tag: 'Starter+' },
-  { icon: '📈', title: 'Progress tracking', body: 'Track each student\'s pathway changes, score trends, and Daily 5 consistency between sessions.', tag: 'All tiers' },
-  { icon: '🔗', title: 'External calendar', body: 'Connect Calendly or Google Calendar so students see your availability directly. Full in-platform calendar management coming later.', tag: 'Phase 1' },
-  { icon: '📝', title: 'Pre-session notes', body: 'Add context to each booking — what to cover, which topics to push on. Students see it before the session.', tag: 'Starter+' },
-  { icon: '🎯', title: 'Referral tracking', body: 'A referral code tied to your profile. Students you bring to the platform are automatically linked to your dashboard.', tag: 'Later phase', soon: true },
+  { Icon: IconBarChart, title: 'Student weak-topic data', body: 'Before every session, see exactly which topics each student is struggling with — ranked by diagnostic score.', tag: 'All tiers' },
+  { Icon: IconCalendar, title: 'Session booking', body: 'Students book directly on the platform. You add a meeting link and pre-session notes. No back-and-forth.', tag: 'Starter+' },
+  { Icon: IconLineChart, title: 'Progress tracking', body: 'Track each student\'s pathway changes, score trends, and Daily 5 consistency between sessions.', tag: 'All tiers' },
+  { Icon: IconLink, title: 'External calendar', body: 'Connect Calendly or Google Calendar so students see your availability directly. Full in-platform calendar management coming later.', tag: 'Phase 1' },
+  { Icon: IconNote, title: 'Pre-session notes', body: 'Add context to each booking — what to cover, which topics to push on. Students see it before the session.', tag: 'Starter+' },
+  { Icon: IconGift, title: 'Referral tracking', body: 'A referral code tied to your profile. Students you bring to the platform are automatically linked to your dashboard.', tag: 'Later phase', soon: true },
 ];
 
 const TUTOR_PLANS = [
@@ -26,26 +34,25 @@ export default function TutorPage() {
       <section className="relative overflow-hidden px-5 pt-14 pb-14 md:pt-20 md:pb-20"
                style={{ background: 'var(--off-white)' }}>
         <div className="absolute inset-0 pointer-events-none"
-             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #C4A8D0 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #C0DD97 0%, transparent 60%)' }}
+             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #C8E49A 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #9FE4CE 0%, transparent 60%)' }}
              aria-hidden />
 
         <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-purple-50 text-purple-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6"
-                 style={{ background: '#EEEDFE', color: '#3C3489' }}>
+            <div className="inline-block bg-green-50 border border-green-100 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
               For Tutors
             </div>
             <h1 className="font-display font-bold text-gray-900 leading-[1.1] mb-5"
                 style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)' }}>
-              Walk into every session <em className="grad-text-purple italic">knowing exactly where to focus.</em>
+              Walk into every session <em className="grad-text-green italic">knowing exactly where to focus.</em>
             </h1>
             <p className="font-body text-gray-500 leading-relaxed mb-7"
                style={{ fontSize: 'clamp(1rem, 2vw, 1.05rem)' }}>
               The Achievers Hub gives you real diagnostic data on your students — their weak topics, pathway, and progress between sessions. So you spend session time teaching, not diagnosing.
             </p>
             <div className="flex flex-wrap gap-3 mb-5">
-              <Link to="/signup" className="btn-glow-purple text-[15px] no-underline">Set up your tutor profile →</Link>
-              <Link to="/student" className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] no-underline hover:border-purple-300 transition-colors">See student experience</Link>
+              <Link to="/signup" className="btn-glow-green text-[15px] no-underline">Set up your tutor profile →</Link>
+              <Link to="/student" className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] no-underline hover:border-teal-300 transition-colors">See student experience</Link>
             </div>
             <p className="text-xs text-gray-400">✓ Free to join &nbsp;·&nbsp; Students book directly &nbsp;·&nbsp; Data-informed sessions</p>
           </div>
@@ -55,12 +62,12 @@ export default function TutorPage() {
             <div className="bg-white border border-gray-100 rounded-2xl p-6" style={{ boxShadow: 'var(--shadow-md)' }}>
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0"
-                     style={{ background: '#9970A6' }}>S</div>
+                     style={{ background: '#78B828' }}>S</div>
                 <div className="flex-1">
                   <div className="font-body font-bold text-gray-900 text-sm">Student A</div>
                   <div className="font-mono text-xs text-gray-400">GCSE Maths · AQA · Foundation Plus</div>
                 </div>
-                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: '#FAEEDA', color: '#BA7517' }}>
+                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: '#EDF5E2', color: '#4A8A14' }}>
                   Foundation Plus
                 </span>
               </div>
@@ -76,7 +83,7 @@ export default function TutorPage() {
               </div>
 
               <div className="border-t border-gray-100 pt-4 flex flex-col gap-2">
-                {[{ l: 'Daily 5 this week', v: '4 / 5', vc: '#639922' }, { l: 'Streak', v: '🔥 11 days', vc: '#BA7517' }, { l: 'Next session', v: 'Thu 14:00', vc: '#1C1C2E' }].map(r => (
+                {[{ l: 'Daily 5 this week', v: '4 / 5', vc: '#78B828' }, { l: 'Streak', v: '🔥 11 days', vc: '#BA7517' }, { l: 'Next session', v: 'Thu 14:00', vc: '#1C1C2E' }].map(r => (
                   <div key={r.l} className="flex justify-between">
                     <span className="text-sm text-gray-500">{r.l}</span>
                     <span className="text-sm font-semibold" style={{ color: r.vc }}>{r.v}</span>
@@ -104,24 +111,27 @@ export default function TutorPage() {
       <section className="py-16 md:py-24 px-5 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#9970A6' }}>What tutors get</p>
+            <p className="reveal text-xs font-bold uppercase tracking-widest mb-3 text-green-700">What tutors get</p>
             <h2 className="reveal reveal-delay-1 font-display font-bold text-gray-900"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-              Tools built around <em className="grad-text-purple italic">how you actually work.</em>
+              Tools built around <em className="grad-text-green italic">how you actually work.</em>
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {FEATURES.map((f, i) => (
               <div key={f.title} className={`reveal reveal-delay-${(i % 3) + 1} bg-white border border-gray-100 rounded-2xl p-6 hover-lift flex gap-4 ${f.soon ? 'opacity-70' : ''}`}
                    style={{ boxShadow: 'var(--shadow-sm)' }}>
-                <div className="text-2xl flex-shrink-0 mt-0.5">{f.icon}</div>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                     style={{ background: '#EDF5E2', color: '#4A8A14' }}>
+                  <f.Icon className="w-5 h-5" />
+                </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-body font-bold text-gray-900 text-[15px]">{f.title}</h3>
                     {f.soon && <span className="text-[9px] font-bold bg-gray-100 text-gray-400 px-2 py-0.5 rounded uppercase tracking-wider">Later phase</span>}
                   </div>
                   <p className="font-body text-sm text-gray-500 leading-relaxed mb-2">{f.body}</p>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#EEEDFE', color: '#534AB7' }}>{f.tag}</span>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#EDF5E2', color: '#4A8A14' }}>{f.tag}</span>
                 </div>
               </div>
             ))}
@@ -132,7 +142,7 @@ export default function TutorPage() {
       {/* ── Booking flow ── */}
       <section className="py-16 md:py-24 px-5 bg-gray-900 text-center">
         <div className="max-w-5xl mx-auto">
-          <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#B5C47A' }}>Session booking</p>
+          <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#C8E49A' }}>Session booking</p>
           <h2 className="reveal reveal-delay-1 font-display font-bold text-white mb-4"
               style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
             How booking works — Phase 1
@@ -150,7 +160,7 @@ export default function TutorPage() {
               <div key={s.n} className={`reveal reveal-delay-${i + 1} rounded-2xl p-6 border`}
                    style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 <div className="font-mono text-xs font-bold px-3 py-1.5 rounded-lg inline-block mb-4"
-                     style={{ background: 'rgba(181,196,122,0.2)', color: '#B5C47A' }}>{s.n}</div>
+                     style={{ background: 'rgba(200,228,154,0.2)', color: '#C8E49A' }}>{s.n}</div>
                 <h3 className="font-body font-bold text-white mb-2 text-[14px]">{s.t}</h3>
                 <p className="font-body text-xs text-white/45 leading-relaxed">{s.b}</p>
               </div>
@@ -162,7 +172,7 @@ export default function TutorPage() {
       {/* ── Tutor pricing ── */}
       <section className="py-16 md:py-24 px-5 bg-white text-center">
         <div className="max-w-5xl mx-auto">
-          <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#9970A6' }}>Tutor plans</p>
+          <p className="reveal text-xs font-bold uppercase tracking-widest mb-3 text-green-700">Tutor plans</p>
           <h2 className="reveal reveal-delay-1 font-display font-bold text-gray-900 mb-4"
               style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
             Join free. Upgrade as you grow.
@@ -185,7 +195,7 @@ export default function TutorPage() {
                   {plan.missing.map(f => <li key={f} className="flex items-start gap-2 text-sm text-gray-300"><span>—</span>{f}</li>)}
                 </ul>
                 <Link to="/signup"
-                  className={`block text-center py-3 rounded-xl font-semibold text-sm no-underline transition-all border border-gray-200 text-gray-700 hover:border-purple-400 hover:text-purple-700`}>
+                  className="block text-center py-3 rounded-xl font-semibold text-sm no-underline transition-all border border-gray-200 text-gray-700 hover:border-teal-400 hover:text-teal-700">
                   {plan.price === 'Free' ? 'Join free' : `Get ${plan.name}`}
                 </Link>
               </div>
@@ -195,7 +205,7 @@ export default function TutorPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: '#EEEDFE' }}>
+      <section className="py-20 px-5 text-center" style={{ background: '#EDF5E2' }}>
         <div className="max-w-lg mx-auto">
           <h2 className="reveal font-display font-bold text-gray-900 mb-5"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
@@ -204,7 +214,7 @@ export default function TutorPage() {
           <p className="reveal reveal-delay-1 font-body text-gray-500 mb-8 leading-relaxed">
             Set up your tutor profile, get access to student diagnostic data, booking tools, and progress tracking.
           </p>
-          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-purple inline-block text-base no-underline">
+          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-green inline-block text-base no-underline">
             Set up your tutor profile →
           </Link>
           <p className="mt-4 text-xs text-gray-400">Free to join. Students book directly through the platform.</p>

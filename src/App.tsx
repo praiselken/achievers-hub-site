@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -13,11 +13,12 @@ export default function App() {
     <BrowserRouter>
       <Nav />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Navigate to="/student" replace />} />
         <Route path="/student" element={<StudentPage />} />
         <Route path="/parent" element={<ParentPage />} />
         <Route path="/tutor" element={<TutorPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/overview" element={<HomePage />} />
       </Routes>
       <Footer />
     </BrowserRouter>

@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../lib/useScrollReveal';
+import {
+  IconAlertCircle,
+  IconLayers,
+  IconTrendDown,
+  IconEye,
+} from '../components/icons';
 
 const PROBLEMS = [
-  { icon: '😰', bg: '#FAECE7', title: '"I don\'t know what they don\'t know"', body: 'Without visibility on specific weak topics, you can\'t have useful conversations or find a tutor who\'ll target the right things.' },
-  { icon: '📚', bg: '#FAEEDA', title: 'Generic resources go nowhere', body: 'Revision guides and YouTube cover everything — which means they fix nothing specific to your child\'s gaps.' },
-  { icon: '📉', bg: '#EEEDFE', title: 'Revision that fizzles out', body: 'Without daily structure and accountability, even motivated students lose momentum weeks before exams.' },
-  { icon: '🔍', bg: '#EAF3DE', title: 'No real visibility as a parent', body: 'Your child says "I\'ve been revising." But are they? And are they revising the right things for their exam board?' },
+  { Icon: IconAlertCircle, bg: '#EDF5E2', color: '#4A8A14', title: '"I don\'t know what they don\'t know"', body: 'Without visibility on specific weak topics, you can\'t have useful conversations or find a tutor who\'ll target the right things.' },
+  { Icon: IconLayers, bg: '#E0F6EE', color: '#138563', title: 'Generic resources go nowhere', body: 'Revision guides and YouTube cover everything — which means they fix nothing specific to your child\'s gaps.' },
+  { Icon: IconTrendDown, bg: '#EDF5E2', color: '#4A8A14', title: 'Revision that fizzles out', body: 'Without daily structure and accountability, even motivated students lose momentum weeks before exams.' },
+  { Icon: IconEye, bg: '#E0F6EE', color: '#138563', title: 'No real visibility as a parent', body: 'Your child says "I\'ve been revising." But are they? And are they revising the right things for their exam board?' },
 ];
 
 const PARENT_FEATURES = [
@@ -25,26 +31,26 @@ export default function ParentPage() {
       <section className="relative overflow-hidden px-5 pt-14 pb-14 md:pt-20 md:pb-20"
                style={{ background: 'var(--off-white)' }}>
         <div className="absolute inset-0 pointer-events-none"
-             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #FAC775 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #9FE1CB 0%, transparent 60%)' }}
+             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #9FE4CE 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #C8E49A 0%, transparent 60%)' }}
              aria-hidden />
 
         <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           {/* Text */}
           <div>
-            <div className="inline-block bg-amber-50 border border-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
+            <div className="inline-block bg-green-50 border border-green-100 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
               For Parents
             </div>
             <h1 className="font-display font-bold text-gray-900 leading-[1.1] mb-5"
                 style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)' }}>
-              Your child's GCSE results, <em className="grad-text-orange italic">finally in your hands.</em>
+              Your child's GCSE results, <em className="grad-text-green italic">finally in your hands.</em>
             </h1>
             <p className="font-body text-gray-500 leading-relaxed mb-7"
                style={{ fontSize: 'clamp(1rem, 2vw, 1.05rem)' }}>
               The Achievers Hub diagnoses exactly where your child is struggling, builds a targeted daily revision habit in just 15 minutes, and gives you real visibility into their progress — every week.
             </p>
             <div className="flex flex-wrap gap-3 mb-5">
-              <Link to="/signup" className="btn-glow-orange text-[15px] no-underline">Take the free diagnostic test</Link>
-              <a href="#how" className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] no-underline hover:border-amber-300 transition-colors">See how it works</a>
+              <Link to="/signup" className="btn-glow-green text-[15px] no-underline">Take the free diagnostic test</Link>
+              <a href="#how" className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] no-underline hover:border-green-300 transition-colors">See how it works</a>
             </div>
             <p className="text-xs text-gray-400">✓ Free to start &nbsp;·&nbsp; No credit card needed &nbsp;·&nbsp; Built by teachers & examiners</p>
           </div>
@@ -54,7 +60,9 @@ export default function ParentPage() {
             <div className="bg-white border border-gray-100 rounded-2xl p-5" style={{ boxShadow: 'var(--shadow-md)' }}>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Amara's pathway</span>
-                <span className="bg-amber-50 text-amber-600 text-xs font-bold px-3 py-1 rounded-full">🔥 14-day streak</span>
+                <span className="bg-green-50 text-green-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                  <span className="text-xs">🔥</span> 14-day streak
+                </span>
               </div>
               <div className="text-xs text-teal-600 font-semibold mb-1">Current level — Maths (AQA)</div>
               <div className="font-display font-semibold text-xl text-gray-900 mb-3">Foundation Plus</div>
@@ -92,15 +100,15 @@ export default function ParentPage() {
             </div>
 
             {/* Spec mapper preview */}
-            <div className="rounded-2xl p-5" style={{ background: '#0F6E56' }}>
+            <div className="rounded-2xl p-5" style={{ background: '#138563' }}>
               <div className="text-xs font-bold text-white/55 uppercase tracking-wider mb-3">Spec mapper — topic coverage</div>
               <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(8, 1fr)' }}>
                 {Array.from({ length: 16 }, (_, i) => (
-                  <div key={i} className="h-4 rounded" style={{ background: [0,1,2,3,6,9,10].includes(i) ? '#5DCAA5' : 'rgba(255,255,255,0.15)' }} />
+                  <div key={i} className="h-4 rounded" style={{ background: [0,1,2,3,6,9,10].includes(i) ? '#56CEAA' : 'rgba(255,255,255,0.15)' }} />
                 ))}
               </div>
               <div className="flex gap-4 mt-2">
-                {[{ c: '#5DCAA5', l: 'Covered' }, { c: 'rgba(255,255,255,0.2)', l: 'Not yet' }].map(l => (
+                {[{ c: '#56CEAA', l: 'Covered' }, { c: 'rgba(255,255,255,0.2)', l: 'Not yet' }].map(l => (
                   <div key={l.l} className="flex items-center gap-1.5 text-xs text-white/60">
                     <div className="w-2 h-2 rounded-sm" style={{ background: l.c }} />{l.l}
                   </div>
@@ -126,10 +134,10 @@ export default function ParentPage() {
       {/* ── Problem section ── */}
       <section className="py-16 md:py-24 px-5" style={{ background: '#FBF9F4' }}>
         <div className="max-w-5xl mx-auto">
-          <div className="inline-block bg-amber-50 text-amber-700 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">For parents</div>
+          <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">For parents</div>
           <h2 className="reveal font-display font-bold text-gray-900 mb-3"
               style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-            You want to help. But <em className="grad-text-orange italic">where do you even start?</em>
+            You want to help. But <em className="grad-text-green italic">where do you even start?</em>
           </h2>
           <p className="reveal reveal-delay-1 font-body text-gray-500 max-w-xl mb-10 leading-relaxed">
             Most parents face the same wall: they know their child is struggling, but they have no idea which topics are the problem — or how to help without becoming a GCSE tutor themselves.
@@ -137,8 +145,10 @@ export default function ParentPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {PROBLEMS.map((p, i) => (
               <div key={p.title} className={`reveal reveal-delay-${i + 1} bg-white border border-gray-100 rounded-2xl p-6 hover-lift`}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4"
-                     style={{ background: p.bg }}>{p.icon}</div>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 flex-shrink-0"
+                     style={{ background: p.bg, color: p.color }}>
+                  <p.Icon className="w-5 h-5" />
+                </div>
                 <h3 className="font-body font-semibold text-gray-900 mb-2">{p.title}</h3>
                 <p className="font-body text-sm text-gray-500 leading-relaxed">{p.body}</p>
               </div>
@@ -151,7 +161,7 @@ export default function ParentPage() {
       <section id="how" className="py-16 md:py-24 px-5 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-block bg-amber-50 text-amber-700 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">How it works</div>
+            <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">How it works</div>
             <h2 className="reveal font-display font-bold text-gray-900"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
               From diagnosis to daily progress — in four steps
@@ -165,7 +175,7 @@ export default function ParentPage() {
               { n: '04', title: 'Book a tutor with data', body: 'Every tutor sees your child\'s real diagnostic data — so sessions target the right topics.' },
             ].map((s, i) => (
               <div key={s.n} className={`reveal reveal-delay-${i + 1} bg-white border border-gray-100 rounded-2xl p-6`}>
-                <div className="font-display font-bold text-5xl mb-3" style={{ color: '#FAC775', lineHeight: 1 }}>{s.n}</div>
+                <div className="font-display font-bold text-5xl mb-3" style={{ color: '#C8E49A', lineHeight: 1 }}>{s.n}</div>
                 <h3 className="font-body font-semibold text-gray-900 mb-2 text-[15px]">{s.title}</h3>
                 <p className="font-body text-sm text-gray-500 leading-relaxed">{s.body}</p>
               </div>
@@ -178,7 +188,7 @@ export default function ParentPage() {
       <section className="py-16 md:py-24 px-5" style={{ background: '#F4F8F0' }}>
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-green-50 text-green-700 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">For parents</div>
+            <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">For parents</div>
             <h2 className="reveal font-display font-bold text-gray-900 mb-3"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
               Full visibility. <em className="grad-text-green italic">No more guessing.</em>
@@ -190,7 +200,7 @@ export default function ParentPage() {
               {PARENT_FEATURES.map((f, i) => (
                 <div key={f.title} className={`reveal reveal-delay-${i + 1} flex items-start gap-3`}>
                   <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5"
-                       style={{ background: '#639922' }}>✓</div>
+                       style={{ background: '#78B828' }}>✓</div>
                   <div>
                     <div className="font-body font-semibold text-gray-900 mb-0.5">{f.title}</div>
                     <p className="font-body text-sm text-gray-500 leading-relaxed">{f.body}</p>
@@ -212,9 +222,9 @@ export default function ParentPage() {
               <div className="bg-gray-50 rounded-xl p-4 mb-4">
                 <div className="text-xs text-gray-400 font-semibold mb-3 uppercase tracking-wider">Maths (AQA) — Amara</div>
                 {[
-                  { l: 'Pathway', v: 'Foundation Plus', vc: '#0F6E56' },
+                  { l: 'Pathway', v: 'Foundation Plus', vc: '#138563' },
                   { l: 'Active days this week', v: '5 / 7', vc: '#1C1C2E' },
-                  { l: 'Score trend (4 weeks)', v: '↑ +12%', vc: '#639922' },
+                  { l: 'Score trend (4 weeks)', v: '↑ +12%', vc: '#78B828' },
                   { l: 'Spec coverage', v: '68%', vc: '#1C1C2E' },
                 ].map(r => (
                   <div key={r.l} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
@@ -222,7 +232,7 @@ export default function ParentPage() {
                     <span className="text-sm font-semibold" style={{ color: r.vc }}>{r.v}</span>
                   </div>
                 ))}
-                <div className="text-xs font-bold text-coral-600 mt-3 mb-2" style={{ color: '#993C1D' }}>Weak topics flagged</div>
+                <div className="text-xs font-bold mt-3 mb-2" style={{ color: '#993C1D' }}>Weak topics flagged</div>
                 <div className="flex flex-wrap gap-1.5">
                   {['Fractions', 'Ratio & Proportion', 'Angle Facts'].map(t => (
                     <span key={t} className="text-xs font-semibold px-3 py-1 rounded-full"
@@ -241,7 +251,7 @@ export default function ParentPage() {
       {/* ── Pricing ── */}
       <section className="py-16 md:py-24 px-5 bg-white text-center">
         <div className="max-w-5xl mx-auto">
-          <div className="inline-block bg-amber-50 text-amber-700 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">Pricing</div>
+          <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">Pricing</div>
           <h2 className="reveal font-display font-bold text-gray-900 mb-3"
               style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
             Start free. Upgrade when you're ready.

@@ -2,6 +2,13 @@ import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../lib/useScrollReveal';
 import InfinityCarousel from '../components/InfinityCarousel';
 import { ROLES, PATHWAYS } from '../constants/brand';
+import { IconGradCap, IconPeople, IconLightbulb } from '../components/icons';
+
+const ROLE_ICONS: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  student: IconGradCap,
+  parent: IconPeople,
+  tutor: IconLightbulb,
+};
 
 export default function HomePage() {
   useScrollReveal();
@@ -41,9 +48,31 @@ export default function HomePage() {
             </a>
           </div>
 
-          <p className="text-xs text-gray-400 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            ✓ Free to start &nbsp;·&nbsp; No credit card needed &nbsp;·&nbsp; Built by teachers & examiners
-          </p>
+          {/* Social proof */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2.5">
+                {[{ initials: 'A', bg: '#78B828' }, { initials: 'J', bg: '#22B885' }, { initials: 'M', bg: '#4A8A14' }, { initials: 'S', bg: '#138563' }].map((av, i) => (
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                       style={{ background: av.bg }}>{av.initials}</div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 text-left">
+                <strong className="text-gray-700">1,200+</strong> students revising smarter
+              </p>
+            </div>
+            <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-full px-4 py-1.5">
+              <span className="text-xs font-semibold text-green-800">Built by teachers &amp; examiners</span>
+            </div>
+          </div>
+
+          {/* Exam board row */}
+          <div className="flex items-center justify-center gap-3 mt-4 animate-fade-in" style={{ animationDelay: '0.25s' }}>
+            <span className="text-xs text-gray-400">Covers:</span>
+            {['AQA', 'Edexcel', 'OCR'].map(board => (
+              <span key={board} className="text-xs font-bold text-gray-500 border border-gray-200 rounded-lg px-3 py-1.5 bg-white">{board}</span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -88,10 +117,12 @@ export default function HomePage() {
               <Link key={role.key} to={role.path}
                 className={`reveal reveal-delay-${i + 1} hover-lift group block no-underline bg-white border border-gray-100 rounded-2xl p-6 cursor-pointer`}
                 style={{ boxShadow: 'var(--shadow-md)' }}>
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4 transition-transform group-hover:scale-110"
-                     style={{ background: role.faint }}>
-                  {role.emoji}
+                {(() => { const RoleIcon = ROLE_ICONS[role.key]; return (
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+                     style={{ background: role.faint, color: role.color }}>
+                  <RoleIcon className="w-6 h-6" />
                 </div>
+                ); })()}
                 <div className="font-body font-bold text-lg text-gray-900 mb-1">{role.label}</div>
                 <p className="font-body text-sm text-gray-500 leading-relaxed mb-4">{role.tagline}</p>
                 <span className="text-sm font-semibold no-underline transition-colors"
@@ -119,7 +150,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { n: '01', title: 'Take the free diagnostic', body: 'A short assessment that maps exactly where the student is against the full GCSE specification. Takes about 10 minutes.' },
-              { n: '02', title: 'Get your personalised pathway', body: 'Placed on one of five pathways — Entry, Foundation, Foundation Plus, Higher, or Higher Plus — matched to their actual level.' },
+              { n: '02', title: 'Get your personalised pathway', body: 'Placed on one of five pathways — Numeracy, Foundation, Foundation Plus, Higher, or Higher Plus — matched to their actual level.' },
               { n: '03', title: 'Revise with purpose daily', body: 'Five targeted questions every day. Three at their level, one on their weakest topic, one stretch question to push forward.' },
             ].map((s, i) => (
               <div key={s.n} className={`reveal reveal-delay-${i + 1} bg-white border border-gray-100 rounded-2xl p-7 text-left hover-lift`}>
@@ -149,7 +180,6 @@ export default function HomePage() {
                 <div className="h-1 rounded-full mb-4" style={{ background: p.color }} />
                 <div className="font-body font-bold text-gray-900 text-sm mb-1">{p.name}</div>
                 <div className="font-display font-bold text-3xl" style={{ color: p.color }}>{p.grades}</div>
-                <div className="font-mono text-xs text-gray-400 mt-1">{p.score}</div>
               </div>
             ))}
           </div>
