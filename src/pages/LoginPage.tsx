@@ -327,7 +327,7 @@ export default function LoginPage() {
     <div className="flex flex-col" style={{ background: '#f0fdf4' }}>
 
       {/* Desktop */}
-      <div className="hidden md:flex" style={{ height: 'calc(100vh - var(--nav-h))', marginTop: 'var(--nav-h)', background: '#f0fdf4' }}>
+      <div className="hidden md:flex" style={{ minHeight: 'calc(100vh - var(--nav-h))', marginTop: 'var(--nav-h)', background: '#f0fdf4' }}>
         <FormPanel />
 
         {/* Reviews panel — same background, no dividing line */}
