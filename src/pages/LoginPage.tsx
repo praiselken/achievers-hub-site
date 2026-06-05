@@ -225,6 +225,30 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
       <h1 className="font-display font-bold text-2xl text-gray-900 text-center mb-1">Create your account</h1>
       <p className="font-body text-gray-400 text-sm text-center mb-6">Join thousands getting results</p>
 
+      {/* Google signup */}
+      <button
+        onClick={async () => {
+          if (!supabase) { setError('Supabase is not configured yet.'); return; }
+          setError('');
+          await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: `${window.location.origin}${ROLE_DEST[role]}`,
+              queryParams: { access_type: 'offline', prompt: 'consent' },
+            },
+          });
+        }}
+        type="button"
+        className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl border-2 border-gray-100 bg-white font-body font-semibold text-sm text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all mb-4">
+        <GoogleIcon /> Continue with Google
+      </button>
+
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex-1 h-px bg-gray-100" />
+        <span className="font-body text-xs text-gray-400 uppercase tracking-wide">or</span>
+        <div className="flex-1 h-px bg-gray-100" />
+      </div>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
           <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Email</label>
@@ -301,12 +325,11 @@ export default function LoginPage() {
     <div className="flex flex-col" style={{ background: '#f0fdf4' }}>
 
       {/* Desktop */}
-      <div className="hidden md:flex" style={{ height: 'calc(100vh - var(--nav-h))', marginTop: 'var(--nav-h)' }}>
+      <div className="hidden md:flex" style={{ height: 'calc(100vh - var(--nav-h))', marginTop: 'var(--nav-h)', background: '#f0fdf4' }}>
         <FormPanel />
 
-        {/* Reviews panel */}
-        <div className="flex flex-1 flex-col justify-center gap-5 overflow-hidden"
-             style={{ background: 'linear-gradient(135deg, #e8f5d0 0%, #d0f0e8 100%)' }}>
+        {/* Reviews panel — same background, no dividing line */}
+        <div className="flex flex-1 flex-col justify-center gap-5 overflow-hidden">
           <div className="px-8 pb-2">
             <h2 className="font-display font-bold text-2xl text-gray-900 mb-1">
               Trusted by students,<br />parents &amp; tutors
@@ -320,7 +343,7 @@ export default function LoginPage() {
       {/* Mobile */}
       <div className="md:hidden flex flex-col" style={{ paddingTop: 'var(--nav-h)' }}>
         <FormPanel isMobile />
-        <div className="py-8 overflow-hidden" style={{ background: 'linear-gradient(135deg, #e8f5d0 0%, #d0f0e8 100%)' }}>
+        <div className="py-8 overflow-hidden">
           <h2 className="font-display font-bold text-xl text-gray-900 text-center mb-1">What people are saying</h2>
           <p className="font-body text-sm text-gray-500 text-center mb-5">Real results from real people</p>
           <ReviewsCarousel />
