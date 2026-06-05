@@ -34,7 +34,7 @@ export default function TutorPage() {
       <section className="relative overflow-hidden px-5 pt-14 pb-14 md:pt-20 md:pb-20"
                style={{ background: 'var(--off-white)' }}>
         <div className="absolute inset-0 pointer-events-none"
-             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #C8E49A 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #9FE4CE 0%, transparent 60%)' }}
+             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #D8B8E0 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #C8E49A 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 100% 100%, #C4A8D0 0%, transparent 50%)' }}
              aria-hidden />
 
         <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -206,19 +206,19 @@ export default function TutorPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-faint)' }}>
+      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-dark)' }}>
         <div className="max-w-lg mx-auto">
-          <h2 className="reveal font-display font-bold text-gray-900 mb-5"
+          <h2 className="reveal font-display font-bold text-white mb-5"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
             Start working with better-prepared students.
           </h2>
-          <p className="reveal reveal-delay-1 font-body text-gray-500 mb-8 leading-relaxed">
+          <p className="reveal reveal-delay-1 font-body mb-8 leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
             Set up your tutor profile, get access to student diagnostic data, booking tools, and progress tracking.
           </p>
           <Link to="/signup" className="reveal reveal-delay-2 btn-glow-green inline-block text-base no-underline">
             Set up your tutor profile →
           </Link>
-          <p className="mt-4 text-xs text-gray-400">Free to join. Students book directly through the platform.</p>
+          <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Free to join. Students book directly through the platform.</p>
         </div>
       </section>
     </main>

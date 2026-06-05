@@ -75,7 +75,7 @@ export default function StudentPage() {
                style={{ background: 'var(--off-white)' }}>
         {/* Mesh background */}
         <div className="absolute inset-0 pointer-events-none"
-             style={{ background: 'radial-gradient(ellipse 70% 60% at 90% -10%, #C8E49A 0%, transparent 55%), radial-gradient(ellipse 60% 50% at -10% 90%, #9FE4CE 0%, transparent 55%), radial-gradient(ellipse 40% 40% at 50% 110%, #D8B8E0 0%, transparent 50%)' }}
+             style={{ background: 'radial-gradient(ellipse 75% 65% at 90% -10%, #D8B8E0 0%, transparent 55%), radial-gradient(ellipse 55% 50% at -10% 90%, #C8E49A 0%, transparent 55%), radial-gradient(ellipse 50% 45% at 50% 110%, #C4A8D0 0%, transparent 50%)' }}
              aria-hidden />
 
         <div className="relative z-10 max-w-6xl mx-auto">
@@ -331,19 +331,19 @@ export default function StudentPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-faint)' }}>
+      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-dark)' }}>
         <div className="max-w-lg mx-auto">
-          <h2 className="reveal font-display font-bold text-gray-900 mb-5"
+          <h2 className="reveal font-display font-bold text-white mb-5"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
             Ready to find your pathway?
           </h2>
-          <p className="reveal reveal-delay-1 font-body text-gray-600 mb-8 leading-relaxed">
+          <p className="reveal reveal-delay-1 font-body mb-8 leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
             Take the free diagnostic. 10 minutes. Tells you exactly where to focus your revision.
           </p>
           <Link to="/signup" className="reveal reveal-delay-2 btn-glow-green inline-block text-base no-underline">
             Start your free diagnostic →
           </Link>
-          <p className="mt-4 text-xs text-gray-400">Free to start. No card required.</p>
+          <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Free to start. No card required.</p>
         </div>
       </section>
     </main>

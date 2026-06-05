@@ -31,7 +31,7 @@ export default function ParentPage() {
       <section className="relative overflow-hidden px-5 pt-14 pb-14 md:pt-20 md:pb-20"
                style={{ background: 'var(--off-white)' }}>
         <div className="absolute inset-0 pointer-events-none"
-             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #9FE4CE 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #C8E49A 0%, transparent 60%)' }}
+             style={{ background: 'radial-gradient(ellipse 80% 60% at 70% -10%, #D8B8E0 0%, transparent 60%), radial-gradient(ellipse 60% 50% at -10% 80%, #C8E49A 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 100% 100%, #C4A8D0 0%, transparent 50%)' }}
              aria-hidden />
 
         <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
