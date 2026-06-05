@@ -13,7 +13,7 @@ export default function SignUpPage() {
         {/* Logo */}
         <div className="flex items-center gap-2.5 justify-center mb-6">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-xl text-white"
-               style={{ background: 'linear-gradient(135deg, #639922, #1D9E75)' }}>A</div>
+               style={{ background: 'linear-gradient(135deg, #9970A6, #7A5489)' }}>A</div>
           <span className="font-body font-semibold text-lg text-gray-900">
             Achievers<span className="text-green-600">Hub</span>
           </span>

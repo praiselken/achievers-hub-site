@@ -84,14 +84,15 @@ export default function StudentPage() {
 
             {/* LEFT — text + CTA */}
             <div className="flex flex-col items-start">
-              <div className="inline-block bg-green-50 border border-green-100 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
+              <div className="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6"
+                   style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1px solid var(--purple-light)' }}>
                 For Students
               </div>
 
               <h1 className="font-display font-bold text-gray-900 leading-[1.08] mb-5"
                   style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)' }}>
                 Stop revising blindly.<br />
-                <em className="grad-text-green">Start revising smartly.</em>
+                <em className="grad-text-purple">Start revising smartly.</em>
               </h1>
 
               <p className="font-body text-gray-500 leading-relaxed mb-7 max-w-md"
@@ -100,7 +101,7 @@ export default function StudentPage() {
               </p>
 
               <div className="flex flex-wrap gap-3 mb-7">
-                <Link to="/signup" className="btn-glow-green text-[15px] no-underline">
+                <Link to="/signup" className="btn-glow-purple text-[15px] no-underline">
                   Start your free diagnostic →
                 </Link>
                 <a href="#daily5"
@@ -146,7 +147,7 @@ export default function StudentPage() {
                        className="w-3.5 h-3.5 text-green-600">
                     <path d="M8 1l1.5 3.1 3.5.5-2.5 2.5.6 3.4L8 9l-3.1 1.5.6-3.4L3 4.6l3.5-.5z"/>
                   </svg>
-                  <span className="text-xs font-semibold text-green-800">Built by teachers &amp; examiners</span>
+                  <span className="text-xs font-semibold" style={{ color: 'var(--purple-dark)' }}>Built by teachers &amp; examiners</span>
                 </div>
               </div>
 
@@ -186,10 +187,10 @@ export default function StudentPage() {
       <section className="py-16 md:py-24 px-5 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="reveal text-xs font-bold uppercase tracking-widest text-green-600 mb-3">Your pathway</p>
+            <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--purple)' }}>Your pathway</p>
             <h2 className="reveal reveal-delay-1 font-display font-bold text-gray-900 mb-3"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-              Five tiers. One that fits <em className="grad-text-green">where you are right now.</em>
+              Five tiers. One that fits <em className="grad-text-purple">where you are right now.</em>
             </h2>
             <p className="reveal reveal-delay-2 font-body text-gray-500 max-w-md mx-auto text-sm leading-relaxed">
               After your diagnostic you're placed on a pathway. As you improve, it updates automatically.
@@ -212,10 +213,10 @@ export default function StudentPage() {
       <section id="daily5" className="py-16 md:py-24 px-5" style={{ background: '#F4F8F0' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="reveal text-xs font-bold uppercase tracking-widest text-green-600 mb-3">Daily Practice</p>
+            <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--purple)' }}>Daily Practice</p>
             <h2 className="reveal reveal-delay-1 font-display font-bold text-gray-900 mb-3"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-              The Daily 5 — <em className="grad-text-green">how it works.</em>
+              The Daily 5 — <em className="grad-text-purple">how it works.</em>
             </h2>
             <p className="reveal reveal-delay-2 font-body text-gray-500 max-w-md mx-auto text-sm leading-relaxed">
               Five questions every day. Each one serves a purpose. Done in 15 minutes.
@@ -272,10 +273,10 @@ export default function StudentPage() {
       <section className="py-16 md:py-24 px-5 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="reveal text-xs font-bold uppercase tracking-widest text-green-600 mb-3">What you get</p>
+            <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--purple)' }}>What you get</p>
             <h2 className="reveal reveal-delay-1 font-display font-bold text-gray-900"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-              Everything you need to <em className="grad-text-green">go from A to B.</em>
+              Everything you need to <em className="grad-text-purple">go from A to B.</em>
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
@@ -283,7 +284,7 @@ export default function StudentPage() {
               <div key={f.title} className={`reveal reveal-delay-${(i % 3) + 1} bg-white border border-gray-100 rounded-2xl p-6 hover-lift flex flex-col gap-3`}
                    style={{ boxShadow: 'var(--shadow-sm)' }}>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                     style={{ background: '#EDF5E2', color: '#4A8A14' }}>
+                     style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>
                   <f.Icon className="w-5 h-5" />
                 </div>
                 <div>
@@ -293,7 +294,7 @@ export default function StudentPage() {
                   <p className="font-body text-sm text-gray-500 leading-relaxed">{f.body}</p>
                 </div>
                 <span className="self-start text-xs font-bold px-3 py-1 rounded-full mt-auto"
-                      style={{ background: '#EAF3DE', color: '#3B6D11' }}>
+                      style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>
                   {f.tag}
                 </span>
               </div>
@@ -330,7 +331,7 @@ export default function StudentPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: '#EAF3DE' }}>
+      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-faint)' }}>
         <div className="max-w-lg mx-auto">
           <h2 className="reveal font-display font-bold text-gray-900 mb-5"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>

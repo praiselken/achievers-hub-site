@@ -37,19 +37,20 @@ export default function ParentPage() {
         <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           {/* Text */}
           <div>
-            <div className="inline-block bg-green-50 border border-green-100 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
+            <div className="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6"
+                   style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1px solid var(--purple-light)' }}>
               For Parents
             </div>
             <h1 className="font-display font-bold text-gray-900 leading-[1.1] mb-5"
                 style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)' }}>
-              Your child's GCSE results, <em className="grad-text-green italic">finally in your hands.</em>
+              Your child's GCSE results, <em className="grad-text-purple italic">finally in your hands.</em>
             </h1>
             <p className="font-body text-gray-500 leading-relaxed mb-7"
                style={{ fontSize: 'clamp(1rem, 2vw, 1.05rem)' }}>
               The Achievers Hub diagnoses exactly where your child is struggling, builds a targeted daily revision habit in just 15 minutes, and gives you real visibility into their progress — every week.
             </p>
             <div className="flex flex-wrap gap-3 mb-5">
-              <Link to="/signup" className="btn-glow-green text-[15px] no-underline">Take the free diagnostic test</Link>
+              <Link to="/signup" className="btn-glow-purple text-[15px] no-underline">Take the free diagnostic test</Link>
               <a href="#how" className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] no-underline hover:border-green-300 transition-colors">See how it works</a>
             </div>
             <p className="text-xs text-gray-400">✓ Free to start &nbsp;·&nbsp; No credit card needed &nbsp;·&nbsp; Built by teachers & examiners</p>
@@ -134,10 +135,10 @@ export default function ParentPage() {
       {/* ── Problem section ── */}
       <section className="py-16 md:py-24 px-5" style={{ background: '#FBF9F4' }}>
         <div className="max-w-5xl mx-auto">
-          <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">For parents</div>
+          <div className="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4" style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>For parents</div>
           <h2 className="reveal font-display font-bold text-gray-900 mb-3"
               style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-            You want to help. But <em className="grad-text-green italic">where do you even start?</em>
+            You want to help. But <em className="grad-text-purple italic">where do you even start?</em>
           </h2>
           <p className="reveal reveal-delay-1 font-body text-gray-500 max-w-xl mb-10 leading-relaxed">
             Most parents face the same wall: they know their child is struggling, but they have no idea which topics are the problem — or how to help without becoming a GCSE tutor themselves.
@@ -161,7 +162,7 @@ export default function ParentPage() {
       <section id="how" className="py-16 md:py-24 px-5 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">How it works</div>
+            <div className="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4" style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>How it works</div>
             <h2 className="reveal font-display font-bold text-gray-900"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
               From diagnosis to daily progress — in four steps
@@ -188,10 +189,10 @@ export default function ParentPage() {
       <section className="py-16 md:py-24 px-5" style={{ background: '#F4F8F0' }}>
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">For parents</div>
+            <div className="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4" style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>For parents</div>
             <h2 className="reveal font-display font-bold text-gray-900 mb-3"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-              Full visibility. <em className="grad-text-green italic">No more guessing.</em>
+              Full visibility. <em className="grad-text-purple italic">No more guessing.</em>
             </h2>
             <p className="reveal reveal-delay-1 font-body text-gray-500 mb-6 leading-relaxed">
               You shouldn't have to take your child's word for it. The parent dashboard gives you a clear, honest picture — and the data to act on it.
@@ -251,7 +252,7 @@ export default function ParentPage() {
       {/* ── Pricing ── */}
       <section className="py-16 md:py-24 px-5 bg-white text-center">
         <div className="max-w-5xl mx-auto">
-          <div className="inline-block bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4">Pricing</div>
+          <div className="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full mb-4" style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>Pricing</div>
           <h2 className="reveal font-display font-bold text-gray-900 mb-3"
               style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
             Start free. Upgrade when you're ready.
@@ -272,10 +273,10 @@ export default function ParentPage() {
                 missing: [] },
             ].map((plan) => (
               <div key={plan.name}
-                   className={`reveal hover-lift bg-white rounded-2xl p-7 relative border-2 ${plan.featured ? 'border-green-400' : 'border-transparent'}`}
-                   style={{ boxShadow: plan.featured ? 'var(--shadow-glow-green)' : 'var(--shadow-sm)' }}>
+                   className={`reveal hover-lift bg-white rounded-2xl p-7 relative border-2 ${plan.featured ? 'border-purple-400' : 'border-transparent'}`}
+                   style={{ boxShadow: plan.featured ? 'var(--shadow-glow-purple)' : 'var(--shadow-sm)' }}>
                 {plan.featured && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-green-400 text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap" style={{ background: 'var(--purple)' }}>
                     Most popular
                   </div>
                 )}
@@ -286,12 +287,12 @@ export default function ParentPage() {
                 </div>
                 <div className="h-px bg-gray-100 my-4" />
                 <ul className="space-y-2.5 mb-6">
-                  {plan.features.map(f => <li key={f} className="flex items-start gap-2 text-sm text-gray-700"><span className="text-green-500 font-bold">✓</span>{f}</li>)}
+                  {plan.features.map(f => <li key={f} className="flex items-start gap-2 text-sm text-gray-700"><span className="font-bold" style={{ color: 'var(--purple)' }}>✓</span>{f}</li>)}
                   {plan.missing.map(f => <li key={f} className="flex items-start gap-2 text-sm text-gray-300"><span className="font-bold">—</span>{f}</li>)}
                 </ul>
                 <Link to="/signup"
                   className={`block text-center py-3 rounded-xl font-semibold text-sm no-underline transition-all
-                    ${plan.featured ? 'btn-glow-green' : 'border border-gray-200 text-gray-700 hover:border-green-400'}`}>
+                    ${plan.featured ? 'btn-glow-green' : 'border border-gray-200 text-gray-700 hover:border-purple-400'}`}>
                   {plan.cta}
                 </Link>
               </div>
@@ -301,11 +302,11 @@ export default function ParentPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center bg-gray-900">
+      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-dark)' }}>
         <div className="max-w-xl mx-auto">
           <h2 className="reveal font-display font-bold text-white mb-5"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
-            Your child's grades <em className="grad-text-green italic">can</em> improve.<br />The first step is free.
+            Your child's grades <em className="grad-text-purple italic">can</em> improve.<br />The first step is free.
           </h2>
           <p className="reveal reveal-delay-1 font-body text-white/55 mb-8 leading-relaxed">
             Take the free diagnostic today and find out exactly where your child stands — and precisely what to do about it.

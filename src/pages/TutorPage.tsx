@@ -39,19 +39,20 @@ export default function TutorPage() {
 
         <div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-green-50 border border-green-100 text-green-800 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6">
+            <div className="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-6"
+                   style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1px solid var(--purple-light)' }}>
               For Tutors
             </div>
             <h1 className="font-display font-bold text-gray-900 leading-[1.1] mb-5"
                 style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)' }}>
-              Walk into every session <em className="grad-text-green italic">knowing exactly where to focus.</em>
+              Walk into every session <em className="grad-text-purple italic">knowing exactly where to focus.</em>
             </h1>
             <p className="font-body text-gray-500 leading-relaxed mb-7"
                style={{ fontSize: 'clamp(1rem, 2vw, 1.05rem)' }}>
               The Achievers Hub gives you real diagnostic data on your students — their weak topics, pathway, and progress between sessions. So you spend session time teaching, not diagnosing.
             </p>
             <div className="flex flex-wrap gap-3 mb-5">
-              <Link to="/signup" className="btn-glow-green text-[15px] no-underline">Set up your tutor profile →</Link>
+              <Link to="/signup" className="btn-glow-purple text-[15px] no-underline">Set up your tutor profile →</Link>
               <Link to="/student" className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] no-underline hover:border-teal-300 transition-colors">See student experience</Link>
             </div>
             <p className="text-xs text-gray-400">✓ Free to join &nbsp;·&nbsp; Students book directly &nbsp;·&nbsp; Data-informed sessions</p>
@@ -67,7 +68,7 @@ export default function TutorPage() {
                   <div className="font-body font-bold text-gray-900 text-sm">Student A</div>
                   <div className="font-mono text-xs text-gray-400">GCSE Maths · AQA · Foundation Plus</div>
                 </div>
-                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: '#EDF5E2', color: '#4A8A14' }}>
+                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>
                   Foundation Plus
                 </span>
               </div>
@@ -111,10 +112,10 @@ export default function TutorPage() {
       <section className="py-16 md:py-24 px-5 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="reveal text-xs font-bold uppercase tracking-widest mb-3 text-green-700">What tutors get</p>
+            <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--purple)' }}>What tutors get</p>
             <h2 className="reveal reveal-delay-1 font-display font-bold text-gray-900"
                 style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
-              Tools built around <em className="grad-text-green italic">how you actually work.</em>
+              Tools built around <em className="grad-text-purple italic">how you actually work.</em>
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
@@ -122,7 +123,7 @@ export default function TutorPage() {
               <div key={f.title} className={`reveal reveal-delay-${(i % 3) + 1} bg-white border border-gray-100 rounded-2xl p-6 hover-lift flex gap-4 ${f.soon ? 'opacity-70' : ''}`}
                    style={{ boxShadow: 'var(--shadow-sm)' }}>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                     style={{ background: '#EDF5E2', color: '#4A8A14' }}>
+                     style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>
                   <f.Icon className="w-5 h-5" />
                 </div>
                 <div>
@@ -131,7 +132,7 @@ export default function TutorPage() {
                     {f.soon && <span className="text-[9px] font-bold bg-gray-100 text-gray-400 px-2 py-0.5 rounded uppercase tracking-wider">Later phase</span>}
                   </div>
                   <p className="font-body text-sm text-gray-500 leading-relaxed mb-2">{f.body}</p>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#EDF5E2', color: '#4A8A14' }}>{f.tag}</span>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>{f.tag}</span>
                 </div>
               </div>
             ))}
@@ -172,7 +173,7 @@ export default function TutorPage() {
       {/* ── Tutor pricing ── */}
       <section className="py-16 md:py-24 px-5 bg-white text-center">
         <div className="max-w-5xl mx-auto">
-          <p className="reveal text-xs font-bold uppercase tracking-widest mb-3 text-green-700">Tutor plans</p>
+          <p className="reveal text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--purple)' }}>Tutor plans</p>
           <h2 className="reveal reveal-delay-1 font-display font-bold text-gray-900 mb-4"
               style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
             Join free. Upgrade as you grow.
@@ -191,7 +192,7 @@ export default function TutorPage() {
                 </div>
                 <div className="h-px bg-gray-100 my-4" />
                 <ul className="space-y-2.5 mb-6">
-                  {plan.features.map(f => <li key={f} className="flex items-start gap-2 text-sm text-gray-700"><span className="text-green-500 font-bold">✓</span>{f}</li>)}
+                  {plan.features.map(f => <li key={f} className="flex items-start gap-2 text-sm text-gray-700"><span className="font-bold" style={{ color: 'var(--purple)' }}>✓</span>{f}</li>)}
                   {plan.missing.map(f => <li key={f} className="flex items-start gap-2 text-sm text-gray-300"><span>—</span>{f}</li>)}
                 </ul>
                 <Link to="/signup"
@@ -205,7 +206,7 @@ export default function TutorPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: '#EDF5E2' }}>
+      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-faint)' }}>
         <div className="max-w-lg mx-auto">
           <h2 className="reveal font-display font-bold text-gray-900 mb-5"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>

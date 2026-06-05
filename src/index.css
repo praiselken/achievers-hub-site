@@ -216,7 +216,7 @@ body {
 
 /* ── Proof bar gradient ── */
 .proof-bar {
-  background: linear-gradient(135deg, var(--g600) 0%, var(--t600) 100%);
+  background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 100%);
 }
 
 /* ── Hover lift cards ── */
@@ -260,4 +260,4 @@ body {
 /* ── Custom scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #C8E49A; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--purple-light); border-radius: 3px; }

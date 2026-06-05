@@ -72,9 +72,9 @@ function AuthForm({
     <>
       <div className="flex items-center gap-2.5 justify-center mb-6">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-xl text-white"
-             style={{ background: 'linear-gradient(135deg, #639922, #1D9E75)' }}>A</div>
+             style={{ background: "linear-gradient(135deg, #9970A6, #7A5489)" }}>A</div>
         <span className="font-body font-semibold text-lg text-gray-900">
-          Achievers<span style={{ color: 'var(--g400)' }}>Hub</span>
+          Achievers<span style={{ color: 'var(--purple)' }}>Hub</span>
         </span>
       </div>
 
@@ -99,7 +99,7 @@ function AuthForm({
             value={email} onChange={e => setEmail(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
             style={{ background: '#fafafa' }}
-            onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--purple)'}
             onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
           />
         </div>
@@ -109,7 +109,7 @@ function AuthForm({
             value={password} onChange={e => setPassword(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
             style={{ background: '#fafafa' }}
-            onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--purple)'}
             onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
           />
         </div>
@@ -119,14 +119,14 @@ function AuthForm({
 
         <button type="submit" disabled={loading}
           className="w-full py-3 rounded-xl font-body font-semibold text-sm text-white transition-all disabled:opacity-60 mt-1"
-          style={{ background: 'linear-gradient(135deg, var(--g400), var(--t400))', boxShadow: 'var(--shadow-glow-green)' }}>
+          style={{ background: 'linear-gradient(135deg, var(--purple), var(--purple-dark))', boxShadow: 'var(--shadow-glow-purple)' }}>
           {loading ? 'Please wait…' : 'Sign in'}
         </button>
       </form>
 
       <p className="font-body text-sm text-gray-400 text-center mt-5">
         Don't have an account?{' '}
-        <button onClick={onSwitchToSignup} className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>
+        <button onClick={onSwitchToSignup} className="font-semibold hover:underline" style={{ color: 'var(--purple)' }}>
           Sign up
         </button>
       </p>
@@ -139,9 +139,9 @@ function RoleStep({ onSelect }: { onSelect: (r: Role) => void }) {
     <>
       <div className="flex items-center gap-2.5 justify-center mb-6">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-xl text-white"
-             style={{ background: 'linear-gradient(135deg, #639922, #1D9E75)' }}>A</div>
+             style={{ background: "linear-gradient(135deg, #9970A6, #7A5489)" }}>A</div>
         <span className="font-body font-semibold text-lg text-gray-900">
-          Achievers<span style={{ color: 'var(--g400)' }}>Hub</span>
+          Achievers<span style={{ color: 'var(--purple)' }}>Hub</span>
         </span>
       </div>
 
@@ -208,9 +208,9 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
 
       <div className="flex items-center gap-2.5 justify-center mb-5">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-xl text-white"
-             style={{ background: 'linear-gradient(135deg, #639922, #1D9E75)' }}>A</div>
+             style={{ background: "linear-gradient(135deg, #9970A6, #7A5489)" }}>A</div>
         <span className="font-body font-semibold text-lg text-gray-900">
-          Achievers<span style={{ color: 'var(--g400)' }}>Hub</span>
+          Achievers<span style={{ color: 'var(--purple)' }}>Hub</span>
         </span>
       </div>
 
@@ -258,7 +258,7 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
             value={email} onChange={e => setEmail(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
             style={{ background: '#fafafa' }}
-            onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--purple)'}
             onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
           />
         </div>
@@ -268,7 +268,7 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
             value={password} onChange={e => setPassword(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
             style={{ background: '#fafafa' }}
-            onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--purple)'}
             onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
           />
         </div>
@@ -278,14 +278,14 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
 
         <button type="submit" disabled={loading}
           className="w-full py-3 rounded-xl font-body font-semibold text-sm text-white transition-all disabled:opacity-60 mt-1"
-          style={{ background: 'linear-gradient(135deg, var(--g400), var(--t400))', boxShadow: 'var(--shadow-glow-green)' }}>
+          style={{ background: 'linear-gradient(135deg, var(--purple), var(--purple-dark))', boxShadow: 'var(--shadow-glow-purple)' }}>
           {loading ? 'Creating account…' : 'Create account'}
         </button>
       </form>
 
       <p className="font-body text-sm text-gray-400 text-center mt-5">
         Already have an account?{' '}
-        <button onClick={onSwitchToLogin} className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>
+        <button onClick={onSwitchToLogin} className="font-semibold hover:underline" style={{ color: 'var(--purple)' }}>
           Sign in
         </button>
       </p>

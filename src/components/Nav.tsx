@@ -51,10 +51,24 @@ export default function Nav() {
           <div className="hidden md:flex items-center gap-0.5">
             {NAV_LINKS.map((l) => (
               <Link key={l.path} to={l.path}
-                className={`font-body text-sm font-medium px-3.5 py-1.5 rounded-xl transition-all no-underline
-                  ${pathname === l.path || (pathname === '/' && l.path === '/student')
-                    ? 'bg-green-50 text-green-700'
-                    : 'text-gray-600 hover:text-green-700 hover:bg-green-50/70'}`}>
+                className="font-body text-sm font-medium px-3.5 py-1.5 rounded-xl transition-all no-underline"
+                style={
+                  pathname === l.path || (pathname === '/' && l.path === '/student')
+                    ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)' }
+                    : { color: '#4b5563' }
+                }
+                onMouseEnter={e => {
+                  if (pathname !== l.path) {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--purple-faint)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--purple-dark)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (pathname !== l.path) {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    (e.currentTarget as HTMLElement).style.color = '#4b5563';
+                  }
+                }}>
                 {l.label}
               </Link>
             ))}
@@ -72,14 +86,22 @@ export default function Nav() {
 
           {/* Login icon */}
           <Link to="/login"
-            className="hidden md:flex items-center justify-center w-8 h-8 rounded-xl border border-gray-200/80 text-gray-500 hover:border-green-400 hover:text-green-700 transition-all no-underline"
+            className="hidden md:flex items-center justify-center w-8 h-8 rounded-xl border transition-all no-underline"
+            style={{ borderColor: '#e5e7eb', color: '#6b7280' }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--purple-light)';
+              (e.currentTarget as HTMLElement).style.color = 'var(--purple-dark)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = '#e5e7eb';
+              (e.currentTarget as HTMLElement).style.color = '#6b7280';
+            }}
             aria-label="Log in">
             <UserIcon />
           </Link>
 
           {/* CTA */}
-          <Link to="/signup"
-            className="nav-cta hidden btn-glow-green text-sm py-2 px-4 no-underline">
+          <Link to="/signup" className="nav-cta hidden btn-glow-purple text-sm py-2 px-4 no-underline">
             Take free diagnostic
           </Link>
 
@@ -93,7 +115,7 @@ export default function Nav() {
           </button>
         </div>
 
-        {/* Mobile menu — drops inside the pill */}
+        {/* Mobile menu */}
         <div className={`mobile-menu ${open ? 'open' : ''} px-4`}>
           <div className="py-3 flex flex-col gap-1 border-t border-gray-100/80">
             {NAV_LINKS.map((l) => (
@@ -113,11 +135,14 @@ export default function Nav() {
               </span>
             ))}
             <Link to="/signup" onClick={() => setOpen(false)}
-              className="btn-glow-green mt-3 text-center text-[15px] no-underline">
+              className="btn-glow-purple mt-3 text-center text-[15px] no-underline">
               Take free diagnostic
             </Link>
             <Link to="/login" onClick={() => setOpen(false)}
-              className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 mt-2 text-sm font-medium text-gray-600 no-underline hover:border-green-300">
+              className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 mt-2 text-sm font-medium text-gray-600 no-underline"
+              style={{}}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--purple-light)'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = '#e5e7eb'}>
               <UserIcon /> Log in
             </Link>
           </div>
