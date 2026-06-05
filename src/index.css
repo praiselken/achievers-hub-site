@@ -244,16 +244,17 @@ body {
   pointer-events: none;
 }
 
-/* ── Reviews vertical carousel ── */
-.reviews-track {
-  animation: scrollUp 40s linear infinite;
+/* ── Reviews horizontal carousel ── */
+.reviews-row-left {
+  width: max-content;
+  animation: reviewsLeft 35s linear infinite;
 }
-.reviews-track:hover {
+.reviews-row-left:hover {
   animation-play-state: paused;
 }
-@keyframes scrollUp {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-50%); }
+@keyframes reviewsLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* ── Custom scrollbar ── */

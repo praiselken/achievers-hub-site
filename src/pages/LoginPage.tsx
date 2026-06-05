@@ -57,145 +57,209 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen pt-[var(--nav-h)] flex flex-col md:flex-row"
-         style={{ background: '#f0fdf4' }}>
+    <div className="flex flex-col" style={{ background: '#f0fdf4' }}>
 
-      {/* ── Left panel: reviews carousel (desktop only) ── */}
-      <div className="hidden md:flex flex-col flex-1 max-w-md xl:max-w-lg p-8 relative"
-           style={{ minHeight: 'calc(100vh - var(--nav-h))' }}>
-        <div className="mb-6">
-          <h2 className="font-display font-bold text-2xl text-gray-900 mb-1">
-            Trusted by students,<br />
-            parents &amp; tutors
-          </h2>
-          <p className="font-body text-sm text-gray-500">Real results from real people</p>
+      {/* ── Desktop: two columns, exactly viewport height ── */}
+      <div className="hidden md:flex"
+           style={{ height: 'calc(100vh - var(--nav-h))', marginTop: 'var(--nav-h)' }}>
+
+        {/* Left: auth form */}
+        <div className="flex flex-1 items-center justify-center p-8 overflow-y-auto">
+          <div className="bg-white border border-gray-100 rounded-3xl p-8 w-full max-w-md"
+               style={{ boxShadow: 'var(--shadow-lg)' }}>
+
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 justify-center mb-6">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-xl text-white"
+                   style={{ background: 'linear-gradient(135deg, #639922, #1D9E75)' }}>A</div>
+              <span className="font-body font-semibold text-lg text-gray-900">
+                Achievers<span style={{ color: 'var(--g400)' }}>Hub</span>
+              </span>
+            </div>
+
+            <h1 className="font-display font-bold text-2xl text-gray-900 text-center mb-1">
+              {mode === 'login' ? 'Welcome back' : 'Create your account'}
+            </h1>
+            <p className="font-body text-gray-400 text-sm text-center mb-7">
+              {mode === 'login' ? 'Sign in to continue your revision' : 'Join thousands of students getting results'}
+            </p>
+
+            {/* Google */}
+            <button
+              onClick={handleGoogleAuth}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl border-2 border-gray-100 bg-white font-body font-semibold text-sm text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all mb-4">
+              <GoogleIcon />
+              Continue with Google
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-gray-100" />
+              <span className="font-body text-xs text-gray-400 uppercase tracking-wide">or</span>
+              <div className="flex-1 h-px bg-gray-100" />
+            </div>
+
+            <form onSubmit={handleEmailAuth} className="flex flex-col gap-3">
+              <div>
+                <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Email</label>
+                <input
+                  type="email" required placeholder="you@example.com"
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
+                  style={{ background: '#fafafa' }}
+                  onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+                />
+              </div>
+              <div>
+                <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Password</label>
+                <input
+                  type="password" required minLength={6} placeholder="••••••••"
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
+                  style={{ background: '#fafafa' }}
+                  onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 font-body text-sm text-red-700">{error}</div>
+              )}
+              {success && (
+                <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 font-body text-sm text-green-800">{success}</div>
+              )}
+
+              <button type="submit" disabled={loading}
+                className="w-full py-3 rounded-xl font-body font-semibold text-sm text-white transition-all disabled:opacity-60 mt-1"
+                style={{ background: 'linear-gradient(135deg, var(--g400), var(--t400))', boxShadow: 'var(--shadow-glow-green)' }}>
+                {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+              </button>
+            </form>
+
+            <p className="font-body text-sm text-gray-400 text-center mt-5">
+              {mode === 'login' ? (
+                <>Don't have an account?{' '}
+                  <button onClick={() => { setMode('signup'); setError(''); setSuccess(''); }}
+                          className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>Sign up</button>
+                </>
+              ) : (
+                <>Already have an account?{' '}
+                  <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
+                          className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>Sign in</button>
+                </>
+              )}
+            </p>
+
+            {mode === 'signup' && (
+              <p className="font-body text-xs text-gray-400 text-center mt-3">
+                Want to choose your role first?{' '}
+                <Link to="/signup" className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>Select role →</Link>
+              </p>
+            )}
+          </div>
         </div>
-        <div className="flex-1 overflow-hidden" style={{ height: 'calc(100vh - var(--nav-h) - 120px)' }}>
+
+        {/* Right: reviews */}
+        <div className="flex flex-1 flex-col justify-center gap-5 overflow-hidden"
+             style={{ background: 'linear-gradient(135deg, #e8f5d0 0%, #d0f0e8 100%)' }}>
+          <div className="px-8 pb-2">
+            <h2 className="font-display font-bold text-2xl text-gray-900 mb-1">Trusted by students,<br />parents &amp; tutors</h2>
+            <p className="font-body text-sm text-gray-500">Real results from real people</p>
+          </div>
           <ReviewsCarousel />
         </div>
       </div>
 
-      {/* ── Right panel: auth form ── */}
-      <div className="flex flex-1 items-center justify-center p-6 md:p-12">
-        <div className="bg-white border border-gray-100 rounded-3xl p-8 w-full max-w-md"
-             style={{ boxShadow: 'var(--shadow-lg)' }}>
+      {/* ── Mobile: stacked ── */}
+      <div className="md:hidden flex flex-col" style={{ paddingTop: 'var(--nav-h)' }}>
+        {/* Form */}
+        <div className="flex items-center justify-center px-5 py-10">
+          <div className="bg-white border border-gray-100 rounded-3xl p-7 w-full max-w-md"
+               style={{ boxShadow: 'var(--shadow-lg)' }}>
 
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 justify-center mb-6">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-xl text-white"
-                 style={{ background: 'linear-gradient(135deg, #639922, #1D9E75)' }}>A</div>
-            <span className="font-body font-semibold text-lg text-gray-900">
-              Achievers<span style={{ color: 'var(--g400)' }}>Hub</span>
-            </span>
-          </div>
-
-          <h1 className="font-display font-bold text-2xl text-gray-900 text-center mb-1">
-            {mode === 'login' ? 'Welcome back' : 'Create your account'}
-          </h1>
-          <p className="font-body text-gray-400 text-sm text-center mb-7">
-            {mode === 'login' ? 'Sign in to continue your revision' : 'Join thousands of students getting results'}
-          </p>
-
-          {/* Google */}
-          <button
-            onClick={handleGoogleAuth}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl border-2 border-gray-100 bg-white font-body font-semibold text-sm text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all mb-4">
-            <GoogleIcon />
-            Continue with Google
-          </button>
-
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-gray-100" />
-            <span className="font-body text-xs text-gray-400 uppercase tracking-wide">or</span>
-            <div className="flex-1 h-px bg-gray-100" />
-          </div>
-
-          {/* Email form */}
-          <form onSubmit={handleEmailAuth} className="flex flex-col gap-3">
-            <div>
-              <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Email</label>
-              <input
-                type="email"
-                required
-                placeholder="you@example.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
-                style={{ background: '#fafafa' }}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
-                onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
-              />
-            </div>
-            <div>
-              <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Password</label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
-                style={{ background: '#fafafa' }}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
-                onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
-              />
+            <div className="flex items-center gap-2.5 justify-center mb-5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-xl text-white"
+                   style={{ background: 'linear-gradient(135deg, #639922, #1D9E75)' }}>A</div>
+              <span className="font-body font-semibold text-lg text-gray-900">
+                Achievers<span style={{ color: 'var(--g400)' }}>Hub</span>
+              </span>
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 font-body text-sm text-red-700">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 font-body text-sm text-green-800">
-                {success}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-body font-semibold text-sm text-white transition-all disabled:opacity-60 mt-1"
-              style={{ background: 'linear-gradient(135deg, var(--g400), var(--t400))', boxShadow: 'var(--shadow-glow-green)' }}>
-              {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
-            </button>
-          </form>
-
-          <p className="font-body text-sm text-gray-400 text-center mt-5">
-            {mode === 'login' ? (
-              <>Don't have an account?{' '}
-                <button onClick={() => { setMode('signup'); setError(''); setSuccess(''); }}
-                        className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>
-                  Sign up
-                </button>
-              </>
-            ) : (
-              <>Already have an account?{' '}
-                <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
-                        className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>
-                  Sign in
-                </button>
-              </>
-            )}
-          </p>
-
-          {mode === 'signup' && (
-            <p className="font-body text-xs text-gray-400 text-center mt-3">
-              Want to choose your role first?{' '}
-              <Link to="/signup" className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>
-                Select role →
-              </Link>
+            <h1 className="font-display font-bold text-2xl text-gray-900 text-center mb-1">
+              {mode === 'login' ? 'Welcome back' : 'Create your account'}
+            </h1>
+            <p className="font-body text-gray-400 text-sm text-center mb-6">
+              {mode === 'login' ? 'Sign in to continue your revision' : 'Join thousands of students getting results'}
             </p>
-          )}
-        </div>
-      </div>
 
-      {/* ── Mobile reviews (below form) ── */}
-      <div className="md:hidden px-4 pb-12">
-        <h2 className="font-display font-bold text-xl text-gray-900 mb-1 text-center">What people are saying</h2>
-        <p className="font-body text-sm text-gray-500 text-center mb-5">Real results from real people</p>
-        <div style={{ height: '420px' }}>
+            <button onClick={handleGoogleAuth}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl border-2 border-gray-100 bg-white font-body font-semibold text-sm text-gray-700 hover:border-gray-300 transition-all mb-4">
+              <GoogleIcon />
+              Continue with Google
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-gray-100" />
+              <span className="font-body text-xs text-gray-400 uppercase tracking-wide">or</span>
+              <div className="flex-1 h-px bg-gray-100" />
+            </div>
+
+            <form onSubmit={handleEmailAuth} className="flex flex-col gap-3">
+              <div>
+                <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Email</label>
+                <input type="email" required placeholder="you@example.com"
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
+                  style={{ background: '#fafafa' }}
+                  onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+                />
+              </div>
+              <div>
+                <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Password</label>
+                <input type="password" required minLength={6} placeholder="••••••••"
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
+                  style={{ background: '#fafafa' }}
+                  onFocus={e => e.currentTarget.style.borderColor = 'var(--g400)'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 font-body text-sm text-red-700">{error}</div>
+              )}
+              {success && (
+                <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 font-body text-sm text-green-800">{success}</div>
+              )}
+
+              <button type="submit" disabled={loading}
+                className="w-full py-3 rounded-xl font-body font-semibold text-sm text-white transition-all disabled:opacity-60 mt-1"
+                style={{ background: 'linear-gradient(135deg, var(--g400), var(--t400))', boxShadow: 'var(--shadow-glow-green)' }}>
+                {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+              </button>
+            </form>
+
+            <p className="font-body text-sm text-gray-400 text-center mt-5">
+              {mode === 'login' ? (
+                <>Don't have an account?{' '}
+                  <button onClick={() => { setMode('signup'); setError(''); setSuccess(''); }}
+                          className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>Sign up</button>
+                </>
+              ) : (
+                <>Already have an account?{' '}
+                  <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }}
+                          className="font-semibold hover:underline" style={{ color: 'var(--g400)' }}>Sign in</button>
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Reviews strip */}
+        <div className="py-8 overflow-hidden" style={{ background: 'linear-gradient(135deg, #e8f5d0 0%, #d0f0e8 100%)' }}>
+          <h2 className="font-display font-bold text-xl text-gray-900 text-center mb-1">What people are saying</h2>
+          <p className="font-body text-sm text-gray-500 text-center mb-5">Real results from real people</p>
           <ReviewsCarousel />
         </div>
       </div>
