@@ -244,6 +244,18 @@ body {
   pointer-events: none;
 }
 
+/* ── Reviews vertical carousel ── */
+.reviews-track {
+  animation: scrollUp 40s linear infinite;
+}
+.reviews-track:hover {
+  animation-play-state: paused;
+}
+@keyframes scrollUp {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
 /* ── Custom scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

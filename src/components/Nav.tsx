@@ -71,7 +71,7 @@ export default function Nav() {
           </div>
 
           {/* Login icon */}
-          <Link to="/signup"
+          <Link to="/login"
             className="hidden md:flex items-center justify-center w-8 h-8 rounded-xl border border-gray-200/80 text-gray-500 hover:border-green-400 hover:text-green-700 transition-all no-underline"
             aria-label="Log in">
             <UserIcon />
@@ -116,7 +116,7 @@ export default function Nav() {
               className="btn-glow-green mt-3 text-center text-[15px] no-underline">
               Take free diagnostic
             </Link>
-            <Link to="/signup" onClick={() => setOpen(false)}
+            <Link to="/login" onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 mt-2 text-sm font-medium text-gray-600 no-underline hover:border-green-300">
               <UserIcon /> Log in
             </Link>
