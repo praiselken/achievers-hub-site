@@ -304,26 +304,30 @@ export default function StudentPage() {
       </section>
 
       {/* ── Mindset section ── */}
-      <section className="py-16 md:py-20 px-5 text-center" style={{ background: '#0F6E56' }}>
+      <section className="py-16 md:py-20 px-5 text-center" style={{ background: '#EDE0F4' }}>
         <div className="max-w-2xl mx-auto">
-          <div className="reveal inline-block bg-white/15 border border-white/25 text-white/85 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
-            Mindset & growth
+          <div className="reveal inline-block text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6"
+               style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1px solid var(--purple-light)' }}>
+            Mindset &amp; growth
           </div>
-          <h2 className="reveal reveal-delay-1 font-display font-bold text-white mb-3"
-              style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
+          <h2 className="reveal reveal-delay-1 font-display font-bold mb-3"
+              style={{ color: 'var(--purple-dark)', fontSize: 'clamp(1.7rem, 3.5vw, 2.5rem)' }}>
             Not just revision. <em className="italic">A belief in themselves.</em>
           </h2>
-          <p className="reveal reveal-delay-2 font-body text-white/65 mb-10 leading-relaxed">
+          <p className="reveal reveal-delay-2 font-body mb-10 leading-relaxed" style={{ color: 'var(--purple)' }}>
             Each session opens with a short identity-driven prompt — building the confidence to approach hard questions without giving up.
           </p>
-          <div className="reveal reveal-delay-3 relative bg-teal-600/60 border border-white/20 rounded-3xl p-8 text-left"
-               style={{ backdropFilter: 'blur(12px)' }}>
-            <div className="absolute top-4 left-6 font-display text-9xl text-white/8 leading-none select-none">"</div>
-            <p className="font-display italic text-white text-xl leading-relaxed mb-5 relative z-10">
+          <div className="reveal reveal-delay-3 relative rounded-3xl p-8 text-left border"
+               style={{ background: 'rgba(255,255,255,0.6)', borderColor: 'var(--purple-light)', backdropFilter: 'blur(12px)' }}>
+            <div className="absolute top-4 left-6 font-display text-9xl leading-none select-none"
+                 style={{ color: 'var(--purple-light)', opacity: 0.4 }}>"</div>
+            <p className="font-display italic text-xl leading-relaxed mb-5 relative z-10"
+               style={{ color: 'var(--purple-dark)' }}>
               "I possess a capacity for deep insight. I see solutions where others only see problems. I am a solver."
             </p>
-            <div className="text-xs font-bold text-white/45 uppercase tracking-wider mb-2">Today's reflection</div>
-            <div className="bg-white/12 rounded-xl px-5 py-4 text-sm text-white/80 leading-relaxed">
+            <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--purple)' }}>Today's reflection</div>
+            <div className="rounded-xl px-5 py-4 text-sm leading-relaxed"
+                 style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)' }}>
               When I face a difficult question today, what is one alternative strategy I can try before asking for help?
             </div>
           </div>
@@ -331,19 +335,19 @@ export default function StudentPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-dark)' }}>
+      <section className="py-20 px-5 text-center" style={{ background: '#F0E6F8' }}>
         <div className="max-w-lg mx-auto">
-          <h2 className="reveal font-display font-bold text-white mb-5"
-              style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
+          <h2 className="reveal font-display font-bold mb-5"
+              style={{ color: 'var(--purple-dark)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
             Ready to find your pathway?
           </h2>
-          <p className="reveal reveal-delay-1 font-body mb-8 leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
+          <p className="reveal reveal-delay-1 font-body mb-8 leading-relaxed" style={{ color: 'var(--purple)' }}>
             Take the free diagnostic. 10 minutes. Tells you exactly where to focus your revision.
           </p>
-          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-green inline-block text-base no-underline">
+          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-purple inline-block text-base no-underline">
             Start your free diagnostic →
           </Link>
-          <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Free to start. No card required.</p>
+          <p className="mt-4 text-xs" style={{ color: 'var(--purple)' }}>Free to start. No card required.</p>
         </div>
       </section>
     </main>

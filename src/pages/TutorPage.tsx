@@ -206,19 +206,19 @@ export default function TutorPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-dark)' }}>
+      <section className="py-20 px-5 text-center" style={{ background: '#F0E6F8' }}>
         <div className="max-w-lg mx-auto">
-          <h2 className="reveal font-display font-bold text-white mb-5"
-              style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
+          <h2 className="reveal font-display font-bold mb-5"
+              style={{ color: 'var(--purple-dark)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
             Start working with better-prepared students.
           </h2>
-          <p className="reveal reveal-delay-1 font-body mb-8 leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
+          <p className="reveal reveal-delay-1 font-body mb-8 leading-relaxed" style={{ color: 'var(--purple)' }}>
             Set up your tutor profile, get access to student diagnostic data, booking tools, and progress tracking.
           </p>
-          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-green inline-block text-base no-underline">
+          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-purple inline-block text-base no-underline">
             Set up your tutor profile →
           </Link>
-          <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Free to join. Students book directly through the platform.</p>
+          <p className="mt-4 text-xs" style={{ color: 'var(--purple)' }}>Free to join. Students book directly through the platform.</p>
         </div>
       </section>
     </main>

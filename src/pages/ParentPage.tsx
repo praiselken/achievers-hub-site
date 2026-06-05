@@ -302,16 +302,16 @@ export default function ParentPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-5 text-center" style={{ background: 'var(--purple-dark)' }}>
+      <section className="py-20 px-5 text-center" style={{ background: '#F0E6F8' }}>
         <div className="max-w-xl mx-auto">
-          <h2 className="reveal font-display font-bold text-white mb-5"
-              style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
+          <h2 className="reveal font-display font-bold mb-5"
+              style={{ color: 'var(--purple-dark)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
             Your child's grades <em className="grad-text-purple italic">can</em> improve.<br />The first step is free.
           </h2>
-          <p className="reveal reveal-delay-1 font-body text-white/55 mb-8 leading-relaxed">
+          <p className="reveal reveal-delay-1 font-body mb-8 leading-relaxed" style={{ color: 'var(--purple)' }}>
             Take the free diagnostic today and find out exactly where your child stands — and precisely what to do about it.
           </p>
-          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-green inline-block text-base no-underline">
+          <Link to="/signup" className="reveal reveal-delay-2 btn-glow-purple inline-block text-base no-underline">
             Take the free diagnostic →
           </Link>
         </div>
