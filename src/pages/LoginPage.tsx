@@ -230,6 +230,8 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
         onClick={async () => {
           if (!supabase) { setError('Supabase is not configured yet.'); return; }
           setError('');
+          // persist role so the auth listener can save it after the OAuth redirect
+          localStorage.setItem('pending_role', role);
           await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
