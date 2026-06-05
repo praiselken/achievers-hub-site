@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 const NAV_LINKS = [
   { label: 'For Students', path: '/student' },
@@ -25,6 +26,14 @@ function UserIcon() {
 export default function Nav() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setLoggedIn(!!s));
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center px-4 pt-3">
@@ -100,10 +109,16 @@ export default function Nav() {
             <UserIcon />
           </Link>
 
-          {/* CTA */}
-          <Link to="/signup" className="nav-cta hidden btn-glow-purple text-sm py-2 px-4 no-underline">
-            Take free diagnostic
-          </Link>
+          {/* CTA / Dashboard */}
+          {loggedIn ? (
+            <Link to="/dashboard" className="nav-cta hidden btn-glow-purple text-sm py-2 px-4 no-underline">
+              My Dashboard
+            </Link>
+          ) : (
+            <Link to="/signup" className="nav-cta hidden btn-glow-purple text-sm py-2 px-4 no-underline">
+              Take free diagnostic
+            </Link>
+          )}
 
           {/* Burger */}
           <button onClick={() => setOpen((o) => !o)}
@@ -134,10 +149,17 @@ export default function Nav() {
                 </span>
               </span>
             ))}
-            <Link to="/signup" onClick={() => setOpen(false)}
-              className="btn-glow-purple mt-3 text-center text-[15px] no-underline">
-              Take free diagnostic
-            </Link>
+            {loggedIn ? (
+              <Link to="/dashboard" onClick={() => setOpen(false)}
+                className="btn-glow-purple mt-3 text-center text-[15px] no-underline">
+                My Dashboard
+              </Link>
+            ) : (
+              <Link to="/signup" onClick={() => setOpen(false)}
+                className="btn-glow-purple mt-3 text-center text-[15px] no-underline">
+                Take free diagnostic
+              </Link>
+            )}
             <Link to="/login" onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 mt-2 text-sm font-medium text-gray-600 no-underline"
               style={{}}

@@ -12,11 +12,6 @@ const ROLES: { key: Role; label: string; emoji: string; sub: string; bg: string;
   { key: 'tutor',   label: 'Tutor',    emoji: '📚', sub: 'I tutor GCSE students',                bg: '#EEEDFE', color: '#534AB7' },
 ];
 
-const ROLE_DEST: Record<Role, string> = {
-  student: '/student',
-  parent:  '/parent',
-  tutor:   '/tutor',
-};
 
 function GoogleIcon() {
   return (
@@ -57,12 +52,7 @@ function AuthForm({
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { setError(error.message); return; }
-      // fetch role to redirect correctly
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-        navigate(profile?.role ? ROLE_DEST[profile.role as Role] : '/student');
-      }
+      navigate('/dashboard');
     } finally {
       setLoading(false);
     }
@@ -191,7 +181,7 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
 
       if (data.session) {
         // email confirmation disabled — go straight in
-        navigate(ROLE_DEST[role]);
+        navigate('/dashboard');
       } else {
         setSuccess('Account created! Check your email to confirm, then sign in.');
       }
@@ -235,7 +225,7 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
           await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-              redirectTo: `${window.location.origin}${ROLE_DEST[role]}`,
+              redirectTo: `${window.location.origin}/dashboard`,
               queryParams: { access_type: 'offline', prompt: 'consent' },
             },
           });
