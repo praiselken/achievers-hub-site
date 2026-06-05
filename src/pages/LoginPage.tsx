@@ -319,7 +319,7 @@ function FormPanel({ isMobile = false }: { isMobile?: boolean }) {
   );
 
   if (isMobile) return <div className="flex items-center justify-center px-5 py-10">{card}</div>;
-  return <div className="flex flex-1 items-center justify-center p-8 overflow-y-auto">{card}</div>;
+  return <div className="flex flex-1 items-center justify-center p-8">{card}</div>;
 }
 
 export default function LoginPage() {
