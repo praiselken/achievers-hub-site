@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 import { PATHWAYS } from '../../../constants/specTopics';
+import { useSubject } from '../DashboardLayout';
 
 interface Stats {
   streak: number;
@@ -19,8 +20,10 @@ const DEFAULT_STATS: Stats = {
 };
 
 export default function HomeTab() {
+  const { subject } = useSubject();
   const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
+  const [totalTopics, setTotalTopics] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -28,13 +31,16 @@ export default function HomeTab() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const [streakRes, diagnosticRes, topicsRes, sessionsRes, papersRes] = await Promise.all([
+      const [streakRes, diagnosticRes, topicsRes, sessionsRes, papersRes, totalRes] = await Promise.all([
         supabase.from('streaks').select('*').eq('user_id', user.id).single(),
-        supabase.from('diagnostic_results').select('pathway').eq('user_id', user.id).order('taken_at', { ascending: false }).limit(1).single(),
-        supabase.from('topic_progress').select('status').eq('user_id', user.id).eq('status', 'covered'),
-        supabase.from('daily_sessions').select('completed_at, score, total').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(30),
+        supabase.from('diagnostic_results').select('pathway').eq('user_id', user.id).eq('subject', subject).order('taken_at', { ascending: false }).limit(1).single(),
+        supabase.from('topic_progress').select('topic_id').eq('user_id', user.id).eq('status', 'covered'),
+        supabase.from('daily_sessions').select('completed_at, score, total').eq('user_id', user.id).eq('subject', subject).order('completed_at', { ascending: false }).limit(30),
         supabase.from('past_paper_logs').select('score, max_score').eq('user_id', user.id),
+        supabase.from('topics').select('id', { count: 'exact', head: true }).eq('subject', subject),
       ]);
+
+      setTotalTopics(totalRes.count ?? 0);
 
       const today = new Date().toDateString();
       const dailyDoneToday = sessionsRes.data?.some(
@@ -95,7 +101,7 @@ export default function HomeTab() {
         <div className="bg-white rounded-2xl p-5 border border-gray-100" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
           <div className="font-body text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Topics covered</div>
           <div className="font-display font-bold text-3xl text-gray-900">{stats.topicsCovered}</div>
-          <div className="font-body text-xs text-gray-400 mt-1">of 69 total</div>
+          <div className="font-body text-xs text-gray-400 mt-1">of {totalTopics} total</div>
         </div>
 
         {/* Avg score */}

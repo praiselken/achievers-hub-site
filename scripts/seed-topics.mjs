@@ -9,7 +9,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { parseArgs } from 'util';
 import { createRequire } from 'module';
@@ -72,34 +72,67 @@ function parseFinalAnswer(raw = '') {
 function processWorkbook(filePath, subject) {
   const wb = XLSX.readFile(filePath);
 
-  // Use "Ready-to-Use Card Copy" sheet
-  const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('ready')) || wb.SheetNames[1];
+  // Maths files use "Ready-to-Use Card Copy"; economics files use "Study Cards"
+  const sheetName =
+    wb.SheetNames.find(n => n.toLowerCase().includes('ready')) ||
+    wb.SheetNames.find(n => n.toLowerCase() === 'study cards') ||
+    wb.SheetNames[1];
   if (!sheetName) { console.warn(`  No sheet found in ${filePath}`); return []; }
 
   const ws = wb.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+  let rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+  // If first row's keys look like a preamble (no recognised column names), find the real header row
+  if (rows.length > 0 && !rows[0]['Topic Title'] && !rows[0]['Topic heading'] && !rows[0]['Topic'] && !rows[0]['Card Title']) {
+    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    const headerIdx = raw.findIndex(r =>
+      r.some(c => ['Topic Title', 'Topic heading', 'Topic', 'Card Title', 'Card ID'].includes(c))
+    );
+    if (headerIdx !== -1) {
+      const headers = raw[headerIdx];
+      rows = raw.slice(headerIdx + 1).map(r => {
+        const obj = {};
+        headers.forEach((h, i) => { if (h) obj[h] = r[i] ?? ''; });
+        return obj;
+      });
+    }
+  }
 
   const topics = [];
   for (const row of rows) {
-    // Column names from the spreadsheet
-    const title     = (row['Topic heading'] || row['Topic title'] || '').toString().trim();
-    const microSkill = (row['Micro-skill'] || row['Card copy block'] || '').toString().trim();
-    const rule      = (row['Student-facing rule'] || '').toString().trim();
-    const steps     = parseSteps((row['How-to steps'] || row['Card copy block'] || '').toString());
-    const workedEx  = parseQuestion((row['Worked example block'] || row['Worked example'] || '').toString());
-    const finalAns  = parseFinalAnswer((row['Worked example block'] || row['Final answer'] || '').toString());
-    const realWorld = (row['Real-world box'] || row['Real-world applications'] || '').toString().trim();
-    const proTip    = (row['Pro-tip/checkpoint'] || '').toString().trim();
-    const status    = (row['Production'] || row['Production status'] || '').toString().trim();
+    // Support maths column names, economics v1 (Topic Title) and economics v2 (Topic / Card Title)
+    const title      = (row['Topic heading'] || row['Topic Title'] || row['Topic title'] || row['Topic'] || row['Card Title'] || '').toString().trim();
+    const microSkill = (row['Micro-skill'] || row['Short Student Summary'] || row['Card copy block'] || '').toString().trim();
+    const rule       = (row['Student-facing rule'] || '').toString().trim();
+    const steps      = parseSteps((row['How-to steps'] || row['Card copy block'] || '').toString());
+    const workedEx   = parseQuestion((row['Worked example block'] || row['Worked example'] || '').toString());
+    const finalAns   = parseFinalAnswer((row['Worked example block'] || row['Final answer'] || '').toString());
+    const realWorld  = (row['Real-world box'] || row['Real-world applications'] || '').toString().trim();
+    const proTip     = (row['Pro-tip/checkpoint'] || row['Exam Tip / Mistake Text'] || '').toString().trim();
+    const status     = (row['Production'] || row['Production status'] || row['Build Status'] || row['Status'] || '').toString().trim();
+    const command    = (row['Command word'] || row['Command'] || '').toString().trim() || null;
+    // Economics cards are diagram-based; maths are worked-example based
+    const bodyFormat = (row['Body Format'] || row['Recommended Format'] || '').toString().toLowerCase();
+    const cardFormat = bodyFormat.includes('diagram') || bodyFormat.includes('graph')
+      ? 'diagram'
+      : bodyFormat.includes('definition')
+      ? 'definition'
+      : 'worked_example';
+    // Economics files use 'Theme' as the area grouping
+    const area       = row['Theme']
+      ? row['Theme'].toString().trim()
+      : parseArea(title);
+    // Economics files encode exam board in spec relevance field
+    const examBoard  = row['Exam Board / Spec Relevance']
+      ? (row['Exam Board / Spec Relevance'].toString().includes('OCR') ? 'all' : 'AQA')
+      : 'AQA';
 
     if (!title || title.length < 3) continue;
-    if (status && !status.toLowerCase().includes('draft') && !status.toLowerCase().includes('ready')) continue;
-
-    const area = parseArea(title);
+    if (status && !['', 'draft', 'ready', 'complete', 'final', 'design'].some(s => status.toLowerCase().includes(s))) continue;
 
     topics.push({
       subject,
-      exam_board: 'AQA', // default; can update later
+      exam_board: examBoard,
       area,
       name: title,
       description: microSkill || realWorld,
@@ -107,10 +140,25 @@ function processWorkbook(filePath, subject) {
       exam_tip: proTip || rule,
       practice_q: workedEx,
       practice_a: finalAns,
+      command,
+      card_format: cardFormat,
       pathway_min: 'numeracy',
     });
   }
   return topics;
+}
+
+function collectExcelFiles(dir) {
+  const results = [];
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      results.push(...collectExcelFiles(full));
+    } else if (entry.endsWith('.xlsx') || entry.endsWith('.xls')) {
+      results.push(full);
+    }
+  }
+  return results;
 }
 
 async function main() {
@@ -120,16 +168,16 @@ async function main() {
   console.log(`\n📂 Reading: ${dir}`);
   console.log(`📚 Subject: ${subject}\n`);
 
-  const files = readdirSync(dir).filter(f => f.endsWith('.xlsx') || f.endsWith('.xls'));
+  const files = collectExcelFiles(dir);
   if (files.length === 0) {
-    console.error('No Excel files found in that folder.');
+    console.error('No Excel files found in that folder (searched recursively).');
     process.exit(1);
   }
 
   const allTopics = [];
   for (const file of files) {
-    console.log(`  Reading ${file}…`);
-    const topics = processWorkbook(join(dir, file), subject);
+    console.log(`  Reading ${file.replace(dir + '/', '')}…`);
+    const topics = processWorkbook(file, subject);
     console.log(`  → ${topics.length} topics found`);
     allTopics.push(...topics);
   }

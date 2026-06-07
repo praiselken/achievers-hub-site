@@ -14,6 +14,8 @@ create table if not exists topics (
   practice_q  text,
   practice_a  text,
   video_url   text,
+  command     text,                    -- e.g. 'Calculate', 'Identify', 'Define'
+  card_format text default 'worked_example', -- 'worked_example' | 'diagram' | 'definition'
   pathway_min text default 'numeracy', -- minimum pathway level
   created_at  timestamptz default now()
 );
@@ -116,6 +118,69 @@ create policy "Past papers are public" on past_papers for select using (true);
 
 -- Past paper logs: own rows only
 create policy "Own paper logs" on past_paper_logs for all using (auth.uid() = user_id);
+
+-- ── Mindset prompts ──────────────────────────────────────────────────────────
+create table if not exists mindset_prompts (
+  id          uuid default gen_random_uuid() primary key,
+  month       text not null,
+  month_theme text,
+  day         integer not null,
+  confession  text not null,
+  reflection  text,
+  unique(month, day)
+);
+
+alter table mindset_prompts enable row level security;
+create policy "Mindset prompts are public" on mindset_prompts for select using (true);
+
+-- ── Questions (Daily 5 + Question Bank) ─────────────────────────────────────
+create table if not exists questions (
+  id               uuid default gen_random_uuid() primary key,
+  subject          text not null,
+  pathway          text,              -- maths: 'numeracy' | economics: 'paper_1' | 'paper_2'
+  month            text not null,     -- 'January', 'February' etc.
+  day              integer not null,  -- 1–31
+  question_number  integer not null,  -- 1–5
+  question_id      text,              -- e.g. 'JAN01-Q1', 'ECO-001'
+  topic_id         text,
+  topic_title      text,
+  question         text not null,
+  answer           text,
+  marks            integer,
+  difficulty       text,              -- 'Core' | 'Extension'
+  skill_type       text,              -- 'Quick Check' | 'Calculate' etc.
+  solution_steps   text,
+  hints            text,
+  exam_board       text,
+  calculator       text,              -- 'Calc' | 'Non-Calc'
+  has_diagram      boolean default false,
+  diagram_notes    text,
+  created_at       timestamptz default now(),
+  unique(subject, pathway, month, day, question_number)
+);
+
+alter table questions enable row level security;
+create policy "Questions are public" on questions for select using (true);
+
+-- ── Subjects ─────────────────────────────────────────────────────────────────
+create table if not exists subjects (
+  slug        text primary key,
+  name        text not null,
+  icon        text,
+  color       text,
+  exam_boards text[],
+  active      boolean default false,
+  coming_soon boolean default false,
+  sort_order  integer default 0
+);
+
+alter table subjects enable row level security;
+create policy "Subjects are public" on subjects for select using (true);
+
+insert into subjects (slug, name, icon, color, exam_boards, active, coming_soon, sort_order) values
+  ('maths',     'GCSE Maths',     '📐', '#9970A6', '{AQA,Edexcel,OCR}', true,  false, 1),
+  ('economics', 'GCSE Economics', '📊', '#639922', '{AQA,Edexcel,OCR}', true,  false, 2)
+on conflict (slug) do nothing;
 
 -- ── Storage buckets ───────────────────────────────────────────────────────────
 -- Run these separately in Supabase → Storage → New bucket:

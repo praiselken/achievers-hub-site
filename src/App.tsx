@@ -9,6 +9,7 @@ import TutorPage from './pages/TutorPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
+import ParentDashboard from './pages/dashboard/parent/ParentDashboard';
 import { supabase } from './lib/supabase';
 import './index.css';
 
@@ -51,12 +52,18 @@ export default function App() {
         <Route path="/login"    element={<LoginPage />} />
         <Route path="/overview" element={<MarketingLayout><HomePage /></MarketingLayout>} />
 
-        {/* Dashboard — no marketing nav/footer */}
+        {/* Student dashboard */}
         <Route path="/dashboard"        element={<StudentDashboard tab="home" />} />
         <Route path="/dashboard/daily5" element={<StudentDashboard tab="daily5" />} />
         <Route path="/dashboard/topics" element={<StudentDashboard tab="topics" />} />
         <Route path="/dashboard/papers" element={<StudentDashboard tab="papers" />} />
         <Route path="/dashboard/spec"   element={<StudentDashboard tab="spec" />} />
+
+        {/* Parent dashboard */}
+        <Route path="/parent-dashboard"           element={<ParentDashboard tab="overview" />} />
+        <Route path="/parent-dashboard/progress"  element={<ParentDashboard tab="progress" />} />
+        <Route path="/parent-dashboard/spec"      element={<ParentDashboard tab="spec" />} />
+        <Route path="/parent-dashboard/bookings"  element={<ParentDashboard tab="bookings" />} />
       </Routes>
     </BrowserRouter>
   );

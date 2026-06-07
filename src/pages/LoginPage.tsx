@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import ReviewsCarousel from '../components/ReviewsCarousel';
 
@@ -41,7 +41,7 @@ function AuthForm({
     setError('');
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/student` },
+      options: { redirectTo: `${window.location.origin}/dashboard` },
     });
   }
 
@@ -283,8 +283,8 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
   );
 }
 
-function FormPanel({ isMobile = false }: { isMobile?: boolean }) {
-  const [mode, setMode] = useState<Mode>('login');
+function FormPanel({ isMobile = false, initialMode = 'login' }: { isMobile?: boolean; initialMode?: Mode }) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const card = (
@@ -313,12 +313,15 @@ function FormPanel({ isMobile = false }: { isMobile?: boolean }) {
 }
 
 export default function LoginPage() {
+  const [params] = useSearchParams();
+  const initialMode: Mode = params.get('mode') === 'signup' ? 'signup-role' : 'login';
+
   return (
     <div className="flex flex-col" style={{ background: '#f0fdf4' }}>
 
       {/* Desktop */}
       <div className="hidden md:flex" style={{ minHeight: 'calc(100vh - var(--nav-h))', marginTop: 'var(--nav-h)', background: '#f0fdf4' }}>
-        <FormPanel />
+        <FormPanel initialMode={initialMode} />
 
         {/* Reviews panel — same background, no dividing line */}
         <div className="flex flex-1 flex-col justify-center gap-5 overflow-hidden">
@@ -334,7 +337,7 @@ export default function LoginPage() {
 
       {/* Mobile */}
       <div className="md:hidden flex flex-col" style={{ paddingTop: 'var(--nav-h)' }}>
-        <FormPanel isMobile />
+        <FormPanel isMobile initialMode={initialMode} />
         <div className="py-8 overflow-hidden">
           <h2 className="font-display font-bold text-xl text-gray-900 text-center mb-1">What people are saying</h2>
           <p className="font-body text-sm text-gray-500 text-center mb-5">Real results from real people</p>

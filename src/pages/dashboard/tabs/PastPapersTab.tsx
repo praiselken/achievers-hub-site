@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useSubject } from '../DashboardLayout';
 
 interface Paper {
   id: string;
@@ -140,6 +141,13 @@ function PaperCard({ paper, log, onLog }: { paper: Paper; log?: PaperLog; onLog:
             Mark scheme
           </a>
         )}
+        {paper.examiner_url && (
+          <a href={paper.examiner_url} target="_blank" rel="noopener noreferrer"
+             className="font-body text-xs font-semibold px-3 py-1.5 rounded-lg no-underline"
+             style={{ background: '#FAEEDA', color: '#BA7517' }}>
+            Examiner report
+          </a>
+        )}
         <button onClick={onLog}
           className="font-body text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all"
           style={{ borderColor: pct !== null ? 'var(--purple-light)' : '#e5e7eb', color: pct !== null ? 'var(--purple)' : '#6b7280' }}>
@@ -151,11 +159,17 @@ function PaperCard({ paper, log, onLog }: { paper: Paper; log?: PaperLog; onLog:
 }
 
 export default function PastPapersTab() {
+  const { subject } = useSubject();
   const [papers, setPapers] = useState<Paper[]>([]);
   const [logs, setLogs] = useState<Record<string, PaperLog>>({});
   const [loading, setLoading] = useState(true);
   const [subjectFilter, setSubjectFilter] = useState('All');
   const [boardFilter, setBoardFilter] = useState('All');
+
+  // Sync subject switcher with global context
+  useEffect(() => {
+    setSubjectFilter(subject.charAt(0).toUpperCase() + subject.slice(1));
+  }, [subject]);
   const [yearFilter, setYearFilter] = useState('All');
   const [logTarget, setLogTarget] = useState<Paper | null>(null);
 
