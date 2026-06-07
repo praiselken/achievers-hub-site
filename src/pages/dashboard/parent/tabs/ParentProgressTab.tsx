@@ -48,7 +48,7 @@ export default function ParentProgressTab() {
       ]);
 
       setSessions(sessRes.data ?? []);
-      setPapers((papersRes.data ?? []) as PaperLog[]);
+      setPapers((papersRes.data ?? []) as unknown as PaperLog[]);
 
       const progress = progressRes.data ?? [];
       const allTopics = topicsRes.data ?? [];

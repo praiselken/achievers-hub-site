@@ -9,6 +9,7 @@ interface Question {
   question_number: number;
   question: string;
   answer: string;
+  marks: number | null;
   topic_title: string | null;
   difficulty: string | null;
   skill_type: string | null;

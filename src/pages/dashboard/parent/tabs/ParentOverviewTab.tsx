@@ -119,7 +119,7 @@ export default function ParentOverviewTab() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               { icon: '🔥', title: 'Daily streak',       sub: 'See if your child is staying consistent every day' },
-              { icon: '📚', title: 'Topic coverage',     sub: 'Which topics they've covered across Maths and Economics' },
+              { icon: '📚', title: 'Topic coverage',     sub: "Which topics they've covered across Maths and Economics" },
               { icon: '📄', title: 'Past paper scores',  sub: 'Track their improvement over time on past papers' },
               { icon: '📅', title: 'Tutor bookings',     sub: 'View and manage upcoming tutor sessions' },
             ].map(c => (
