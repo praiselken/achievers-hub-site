@@ -34,6 +34,7 @@ export default function AuthRouter() {
       }
 
       if (profile.role === 'parent') navigate('/parent-dashboard');
+      else if (profile.role === 'tutor') navigate('/tutor-dashboard');
       else navigate('/dashboard');
     }
     route();

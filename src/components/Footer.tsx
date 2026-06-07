@@ -2,207 +2,179 @@ import { Link } from 'react-router-dom';
 
 const P = '#A97DC0';
 
-const FooterLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
+const FooterLink = ({ to, children, soon }: { to: string; children: React.ReactNode; soon?: boolean }) => (
   <li>
-    <Link
-      to={to}
-      style={{
-        color: 'rgba(255,255,255,0.55)',
-        textDecoration: 'none',
-        fontSize: 14,
-        lineHeight: 1,
-        transition: 'color 0.15s',
-      }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'; }}
-    >
-      {children}
-    </Link>
+    {soon ? (
+      <span className="flex items-center gap-2 font-body text-sm" style={{ color: 'rgba(255,255,255,0.35)', cursor: 'default' }}>
+        {children}
+        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{ background: 'rgba(169,125,192,0.2)', color: P }}>Soon</span>
+      </span>
+    ) : (
+      <Link to={to} className="font-body text-sm no-underline transition-colors"
+            style={{ color: 'rgba(255,255,255,0.55)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'; }}>
+        {children}
+      </Link>
+    )}
   </li>
 );
 
+const COLUMNS = [
+  {
+    heading: 'Platform',
+    links: [
+      { label: 'For Students',      to: '/student' },
+      { label: 'For Parents',       to: '/parent' },
+      { label: 'For Tutors',        to: '/tutor' },
+      { label: 'Pricing',           to: '/pricing' },
+    ],
+  },
+  {
+    heading: 'Learning',
+    links: [
+      { label: 'Daily 5 Engine',    to: '/student' },
+      { label: 'Topic Hub',         to: '/student' },
+      { label: 'Spec Mapper',       to: '/student' },
+      { label: 'Diagnostic Test',   to: '/student', soon: true },
+    ],
+  },
+  {
+    heading: 'Connect',
+    links: [
+      { label: 'Find a Tutor',      to: '/find-a-tutor', soon: true },
+      { label: 'Success Stories',   to: '/student' },
+      { label: 'Blog',              to: '/blog', soon: true },
+      { label: 'Contact Us',        to: '/contact', soon: true },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { label: 'Privacy Policy',    to: '/privacy' },
+      { label: 'Terms of Service',  to: '/terms' },
+      { label: 'Cookie Policy',     to: '/cookies' },
+      { label: 'Safeguarding',      to: '/safeguarding' },
+    ],
+  },
+];
+
+const SOCIAL = [
+  {
+    label: 'Instagram',
+    href: '#',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.6"/>
+        <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.6"/>
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor"/>
+      </svg>
+    ),
+  },
+  {
+    label: 'TikTok',
+    href: '#',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    label: 'YouTube',
+    href: '#',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" strokeWidth="1.6"/>
+        <path d="M10 9l5 3-5 3V9z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+];
+
 export default function Footer() {
   return (
-    <footer style={{ background: '#1a1a2e', color: '#fff' }}>
+    <footer style={{ background: '#12111e', color: '#fff' }}>
+      <div className="max-w-6xl mx-auto px-6 pt-16 pb-10">
 
-      {/* ── Main footer body ── */}
-      <div style={{
-        maxWidth: 1100,
-        margin: '0 auto',
-        padding: '64px 24px 48px',
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr 1fr',
-        gap: 48,
-      }}
-        className="footer-grid"
-      >
+        {/* Top grid */}
+        <div className="grid gap-12" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr' }}>
 
-        {/* Left — logo, tagline, social icons */}
-        <div>
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: 11,
-              background: `linear-gradient(135deg, ${P} 0%, #BF96D4 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 800, fontSize: 18, color: '#fff', flexShrink: 0,
-            }}>
-              A
+          {/* Brand column */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-5">
+              <img src="/Logo-final.jpeg" alt="Achievers' Hub" className="h-8 w-auto object-contain rounded-lg" />
             </div>
-            <span style={{ fontWeight: 700, fontSize: 17, color: '#fff', letterSpacing: '-0.01em' }}>
-              Achiever's Hub
-            </span>
+            <p className="font-body text-sm leading-relaxed mb-6"
+               style={{ color: 'rgba(255,255,255,0.45)', maxWidth: 240 }}>
+              The personalised GCSE revision engine. Helping Maths and Economics students build lasting habits and hit their target grade.
+            </p>
+            {/* Social icons */}
+            <div className="flex gap-2.5">
+              {SOCIAL.map(s => (
+                <a key={s.label} href={s.href} aria-label={s.label}
+                   className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                   style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)' }}
+                   onMouseEnter={e => {
+                     const el = e.currentTarget as HTMLElement;
+                     el.style.borderColor = P; el.style.color = P;
+                     el.style.background = 'rgba(169,125,192,0.1)';
+                   }}
+                   onMouseLeave={e => {
+                     const el = e.currentTarget as HTMLElement;
+                     el.style.borderColor = 'rgba(255,255,255,0.1)';
+                     el.style.color = 'rgba(255,255,255,0.45)';
+                     el.style.background = 'transparent';
+                   }}>
+                  {s.icon}
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* Tagline */}
-          <p style={{
-            fontSize: 14, color: 'rgba(255,255,255,0.50)',
-            lineHeight: 1.65, maxWidth: 260, marginBottom: 28,
-          }}>
-            The personalised GCSE revision engine. Supporting Maths and Economics students through habit-based mastery.
-          </p>
-
-          {/* Social / action icons */}
-          <div style={{ display: 'flex', gap: 10 }}>
-            {/* Community icon */}
-            <a
-              href="#"
-              aria-label="Community"
-              style={{
-                width: 40, height: 40, borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.12)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'rgba(255,255,255,0.55)',
-                textDecoration: 'none',
-                transition: 'border-color 0.15s, color 0.15s, background 0.15s',
-              }}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = P;
-                el.style.color = P;
-                el.style.background = 'rgba(169,125,192,0.08)';
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = 'rgba(255,255,255,0.12)';
-                el.style.color = 'rgba(255,255,255,0.55)';
-                el.style.background = 'transparent';
-              }}
-            >
-              {/* People / community icon */}
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-                <circle cx="7" cy="6" r="3" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M1 16c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="13" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
-                <path d="M13 12c1.933 0 3.5 1.567 3.5 3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-              </svg>
-            </a>
-
-            {/* Book / resources icon */}
-            <a
-              href="#"
-              aria-label="Resources"
-              style={{
-                width: 40, height: 40, borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.12)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'rgba(255,255,255,0.55)',
-                textDecoration: 'none',
-                transition: 'border-color 0.15s, color 0.15s, background 0.15s',
-              }}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = P;
-                el.style.color = P;
-                el.style.background = 'rgba(169,125,192,0.08)';
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = 'rgba(255,255,255,0.12)';
-                el.style.color = 'rgba(255,255,255,0.55)';
-                el.style.background = 'transparent';
-              }}
-            >
-              {/* Open book icon */}
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-                <path d="M9 4v11M9 4C9 4 6 3 3 3v11c3 0 6 1 6 1M9 4c0 0 3-1 6-1v11c-3 0-6 1-6 1" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-              </svg>
-            </a>
-          </div>
-        </div>
-
-        {/* Product column */}
-        <div>
-          <h3 style={{
-            fontSize: 13, fontWeight: 700, color: '#fff',
-            letterSpacing: '0.01em', marginBottom: 20,
-          }}>
-            Product
-          </h3>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <FooterLink to="/daily5">Daily 5 Engine</FooterLink>
-            <FooterLink to="/pathways">Pathways</FooterLink>
-            <FooterLink to="/diagnostic">Diagnostic Test</FooterLink>
-            <FooterLink to="/for-parents">Parent Dashboard</FooterLink>
-          </ul>
-        </div>
-
-        {/* Hub column */}
-        <div>
-          <h3 style={{
-            fontSize: 13, fontWeight: 700, color: '#fff',
-            letterSpacing: '0.01em', marginBottom: 20,
-          }}>
-            Hub
-          </h3>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <FooterLink to="/tutors">Tutors API</FooterLink>
-            <FooterLink to="/success-stories">Success Stories</FooterLink>
-            <FooterLink to="/examiners-tip">Examiners Tip</FooterLink>
-            <FooterLink to="/pricing">Pricing</FooterLink>
-          </ul>
-        </div>
-      </div>
-
-      {/* ── Bottom bar ── */}
-      <div style={{
-        borderTop: '1px solid rgba(255,255,255,0.08)',
-        maxWidth: 1100,
-        margin: '0 auto',
-        padding: '20px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: 12,
-      }}>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>
-          © 2026 Achiever's Hub. Built with passion by teachers.
-        </p>
-        <div style={{ display: 'flex', gap: 24 }}>
-          {[
-            { label: 'Privacy Policy', to: '/privacy' },
-            { label: 'Terms of Service', to: '/terms' },
-          ].map(({ label, to }) => (
-            <Link
-              key={label}
-              to={to}
-              style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)'; }}
-            >
-              {label}
-            </Link>
+          {/* Link columns */}
+          {COLUMNS.map(col => (
+            <div key={col.heading}>
+              <h3 className="font-body text-xs font-bold uppercase tracking-wider mb-5"
+                  style={{ color: 'rgba(255,255,255,0.4)' }}>
+                {col.heading}
+              </h3>
+              <ul className="flex flex-col gap-3.5" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {col.links.map(l => (
+                  <FooterLink key={l.label} to={l.to} soon={'soon' in l && l.soon}>
+                    {l.label}
+                  </FooterLink>
+                ))}
+              </ul>
+            </div>
           ))}
         </div>
+
+        {/* Divider */}
+        <div className="mt-12 mb-6" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }} />
+
+        {/* Bottom bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="font-body text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            © {new Date().getFullYear()} Achievers' Hub. All rights reserved.
+          </p>
+          <p className="font-body text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            Built with purpose · GCSE Maths & Economics
+          </p>
+        </div>
       </div>
 
+      {/* Responsive: collapse to 2-col on tablet, 1-col on mobile */}
       <style>{`
-        @media (max-width: 768px) {
-          .footer-grid {
-            grid-template-columns: 1fr !important;
-            gap: 36px !important;
-          }
+        @media (max-width: 1024px) {
+          footer .grid { grid-template-columns: 2fr 1fr 1fr !important; }
+          footer .grid > div:nth-child(4),
+          footer .grid > div:nth-child(5) { margin-top: 8px; }
+        }
+        @media (max-width: 640px) {
+          footer .grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; }
+          footer .grid > div:first-child { grid-column: 1 / -1; }
         }
       `}</style>
     </footer>

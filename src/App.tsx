@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import PricingPage from './pages/PricingPage';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
 import ParentDashboard from './pages/dashboard/parent/ParentDashboard';
+import TutorDashboard  from './pages/dashboard/tutor/TutorDashboard';
 import AuthRouter from './pages/AuthRouter';
 import OnboardingPage from './pages/OnboardingPage';
 import { supabase } from './lib/supabase';
@@ -70,6 +71,14 @@ export default function App() {
         <Route path="/parent-dashboard/progress"  element={<ParentDashboard tab="progress" />} />
         <Route path="/parent-dashboard/spec"      element={<ParentDashboard tab="spec" />} />
         <Route path="/parent-dashboard/bookings"  element={<ParentDashboard tab="bookings" />} />
+
+        {/* Tutor dashboard */}
+        <Route path="/tutor-dashboard"            element={<TutorDashboard tab="overview" />} />
+        <Route path="/tutor-dashboard/students"   element={<TutorDashboard tab="students" />} />
+        <Route path="/tutor-dashboard/sessions"   element={<TutorDashboard tab="sessions" />} />
+        <Route path="/tutor-dashboard/analytics"  element={<TutorDashboard tab="analytics" />} />
+        <Route path="/tutor-dashboard/resources"  element={<TutorDashboard tab="resources" />} />
+        <Route path="/tutor-dashboard/profile"    element={<TutorDashboard tab="profile" />} />
       </Routes>
     </BrowserRouter>
   );
