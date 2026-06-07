@@ -87,7 +87,7 @@ export default function MindsetPopup() {
           <button onClick={dismiss}
             className="flex-1 py-3 rounded-2xl font-body font-bold text-sm text-white transition-all"
             style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)' }}>
-            I'm ready — let's go 🚀
+            I'm ready. Let's go 🚀
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
 
@@ -169,36 +170,102 @@ export default function DailyFiveTab() {
 
   if (phase === 'complete') {
     const pct = Math.round((score / questions.length) * 100);
+    const wrongTopics = questions
+      .filter((_, i) => !answers[i] && questions[i].topic_title)
+      .map(q => q.topic_title!)
+      .filter((t, i, a) => a.indexOf(t) === i);
+
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center max-w-lg mx-auto">
-        <div className="text-5xl mb-4">{pct >= 80 ? '🌟' : pct >= 60 ? '👏' : '💪'}</div>
-        <h1 className="font-display font-bold text-3xl text-gray-900 mb-2">Session complete!</h1>
-        <p className="font-body text-gray-500 mb-6">You scored {score}/{questions.length} today.</p>
-        <div className="w-full bg-white rounded-2xl p-6 border border-gray-100 mb-6" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-          <div className="flex justify-around">
-            {[
-              { label: 'Score', value: `${score}/${questions.length}` },
-              { label: 'Percentage', value: `${pct}%` },
-              { label: 'Streak', value: '🔥 +1' },
-            ].map(s => (
-              <div key={s.label} className="text-center">
-                <div className="font-display font-bold text-2xl text-gray-900">{s.value}</div>
-                <div className="font-body text-xs text-gray-400 mt-1">{s.label}</div>
+      <div className="flex flex-col gap-5 max-w-lg mx-auto py-6">
+        {/* Score header */}
+        <div className="text-center">
+          <div className="text-5xl mb-3">{pct >= 80 ? '🌟' : pct >= 60 ? '👏' : '💪'}</div>
+          <h1 className="font-display font-bold text-3xl text-gray-900 mb-1">Session complete!</h1>
+          <p className="font-body text-gray-500">You scored {score}/{questions.length} today.</p>
+        </div>
+
+        {/* Stats */}
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 grid grid-cols-3 gap-4 text-center"
+             style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
+          {[
+            { label: 'Score',      value: `${score}/${questions.length}` },
+            { label: 'Percentage', value: `${pct}%` },
+            { label: 'Streak',     value: '🔥 +1' },
+          ].map(s => (
+            <div key={s.label}>
+              <div className="font-display font-bold text-2xl text-gray-900">{s.value}</div>
+              <div className="font-body text-xs text-gray-400 mt-1">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Q-by-Q breakdown */}
+        <div>
+          <p className="font-body text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Question breakdown</p>
+          <div className="flex flex-col gap-2">
+            {questions.map((q, i) => (
+              <div key={q.id} className="bg-white rounded-xl px-4 py-3 border text-left"
+                   style={{ borderColor: answers[i] ? '#C8E49A' : '#FCA5A5',
+                            background: answers[i] ? '#F7FDF2' : '#FFF5F5' }}>
+                <div className="flex items-start gap-3">
+                  <span className="text-base mt-0.5 flex-shrink-0">{answers[i] ? '✅' : '❌'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-body text-xs font-semibold text-gray-700 leading-snug">{q.question}</p>
+                    {q.topic_title && (
+                      <p className="font-body text-[10px] text-gray-400 mt-0.5">Topic: {q.topic_title}</p>
+                    )}
+                  </div>
+                  <span className="font-mono text-xs font-bold flex-shrink-0" style={{ color: answers[i] ? '#4A8A14' : '#D85A30' }}>
+                    Q{i + 1}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         </div>
-        <div className="flex flex-col gap-3 w-full">
-          {questions.map((q, i) => (
-            <div key={q.id} className="bg-white rounded-xl px-4 py-3 border text-left flex items-start gap-3"
-                 style={{ borderColor: answers[i] ? '#C8E49A' : '#FCA5A5' }}>
-              <span className="text-sm mt-0.5">{answers[i] ? '✅' : '❌'}</span>
-              <div>
-                <p className="font-body text-xs font-semibold text-gray-700">{q.question}</p>
-                {q.answer && <p className="font-body text-xs text-gray-500 mt-0.5">Answer: {q.answer}</p>}
+
+        {/* Next steps */}
+        <div>
+          <p className="font-body text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">What to do next</p>
+          <div className="flex flex-col gap-2">
+            {wrongTopics.length > 0 && (
+              <Link to="/dashboard/topics"
+                className="bg-white rounded-2xl px-5 py-4 border border-orange-100 no-underline flex items-center gap-4 transition-all hover:border-orange-200"
+                style={{ boxShadow: '0 2px 8px rgba(186,117,23,0.06)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                     style={{ background: '#FAEEDA' }}>📚</div>
+                <div className="flex-1">
+                  <p className="font-body font-bold text-sm text-gray-900">Revise the topics you missed</p>
+                  <p className="font-body text-xs text-gray-400 mt-0.5">
+                    {wrongTopics.slice(0, 2).join(', ')}{wrongTopics.length > 2 ? ` + ${wrongTopics.length - 2} more` : ''}
+                  </p>
+                </div>
+                <span className="text-gray-400 text-sm">→</span>
+              </Link>
+            )}
+            <Link to="/dashboard/topics"
+              className="bg-white rounded-2xl px-5 py-4 border border-gray-100 no-underline flex items-center gap-4 transition-all hover:border-gray-200"
+              style={{ boxShadow: '0 2px 8px rgba(28,28,46,0.05)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                   style={{ background: 'var(--purple-faint)' }}>🗺️</div>
+              <div className="flex-1">
+                <p className="font-body font-bold text-sm text-gray-900">Go to Topic Hub</p>
+                <p className="font-body text-xs text-gray-400 mt-0.5">Browse study cards, videos and practice questions</p>
               </div>
-            </div>
-          ))}
+              <span className="text-gray-400 text-sm">→</span>
+            </Link>
+            <Link to="/dashboard/papers"
+              className="bg-white rounded-2xl px-5 py-4 border border-gray-100 no-underline flex items-center gap-4 transition-all hover:border-gray-200"
+              style={{ boxShadow: '0 2px 8px rgba(28,28,46,0.05)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                   style={{ background: '#EAF3DE' }}>📄</div>
+              <div className="flex-1">
+                <p className="font-body font-bold text-sm text-gray-900">Try a past paper</p>
+                <p className="font-body text-xs text-gray-400 mt-0.5">Put your skills to the test with a full paper</p>
+              </div>
+              <span className="text-gray-400 text-sm">→</span>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -207,80 +274,141 @@ export default function DailyFiveTab() {
   const q = questions[current];
   const qMeta = Q_LABELS[current] ?? Q_LABELS[0];
 
+  // Parse solution_steps — split on newlines or "Step N" patterns
+  const solutionSteps: string[] = q.solution_steps
+    ? q.solution_steps
+        .split(/\n|(?=Step \d)/i)
+        .map(s => s.trim())
+        .filter(Boolean)
+    : [];
+
   return (
-    <div className="max-w-xl mx-auto">
-      {/* Progress */}
-      <div className="flex items-center gap-2 mb-6">
-        {questions.map((_, i) => (
-          <div key={i} className="flex-1 h-1.5 rounded-full transition-all"
-               style={{ background: i < current ? '#78B828' : i === current ? 'var(--purple)' : '#e5e7eb' }} />
-        ))}
+    <div className="max-w-xl mx-auto py-2">
+
+      {/* Progress bar + counter */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex-1 flex items-center gap-1.5">
+          {questions.map((_, i) => (
+            <div key={i} className="flex-1 h-2 rounded-full transition-all"
+                 style={{ background: i < current ? '#78B828' : i === current ? 'var(--purple)' : '#e5e7eb' }} />
+          ))}
+        </div>
+        <span className="font-mono text-xs font-bold text-gray-400 flex-shrink-0">
+          {current + 1}/{questions.length}
+        </span>
       </div>
 
-      {/* Q label */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="inline-block font-mono text-xs font-bold px-3 py-1 rounded-lg"
-              style={{ background: qMeta.color, color: qMeta.text }}>Q{current + 1} — {qMeta.label}</span>
+      {/* Question type badge + topic */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <span className="font-body text-xs font-bold px-3 py-1.5 rounded-full"
+              style={{ background: qMeta.color, color: qMeta.text }}>
+          Q{current + 1} · {qMeta.label}
+        </span>
         {q.topic_title && (
           <span className="font-body text-xs text-gray-400">{q.topic_title}</span>
         )}
-      </div>
-
-      {/* Question */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 mb-5"
-           style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-        <p className="font-body text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Question</p>
-        <p className="font-display font-semibold text-lg text-gray-900 leading-snug">{q.question}</p>
         {q.marks && (
-          <p className="font-body text-xs text-gray-400 mt-3">[{q.marks} mark{q.marks !== 1 ? 's' : ''}]</p>
+          <span className="ml-auto font-body text-xs font-semibold px-2.5 py-1 rounded-lg"
+                style={{ background: '#f3f4f6', color: '#6b7280' }}>
+            {q.marks} mark{q.marks !== 1 ? 's' : ''}
+          </span>
         )}
       </div>
 
-      {/* Hints */}
+      {/* Question card — styled like an exam paper */}
+      <div className="rounded-2xl overflow-hidden mb-5"
+           style={{ border: '2px solid var(--purple-light)', boxShadow: '0 4px 20px rgba(153,112,166,0.12)' }}>
+        {/* Coloured top bar */}
+        <div className="h-1.5" style={{ background: 'linear-gradient(90deg, var(--purple-light), var(--purple))' }} />
+        <div className="bg-white px-6 py-5">
+          <p className="font-body text-[10px] font-bold uppercase tracking-widest mb-3"
+             style={{ color: 'var(--purple)' }}>Question</p>
+          <p className="font-body text-base text-gray-900 leading-relaxed">{q.question}</p>
+        </div>
+        {/* Working space indicator */}
+        <div className="px-6 py-3 border-t"
+             style={{ background: '#FAFAFE', borderColor: 'var(--purple-faint)' }}>
+          <p className="font-body text-xs text-gray-400 italic">Work it out, then reveal the answer below.</p>
+        </div>
+      </div>
+
+      {/* Hint (before reveal) */}
       {q.hints && !revealed && (
-        <details className="mb-4">
-          <summary className="font-body text-sm font-semibold cursor-pointer" style={{ color: 'var(--purple)' }}>
-            💡 Show hint
+        <details className="mb-4 group">
+          <summary className="flex items-center gap-2 font-body text-sm font-semibold cursor-pointer select-none list-none"
+                   style={{ color: 'var(--purple)' }}>
+            <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs flex-shrink-0"
+                  style={{ background: 'var(--purple-faint)' }}>💡</span>
+            Show hint
           </summary>
           <div className="mt-2 px-4 py-3 rounded-xl"
                style={{ background: 'var(--purple-faint)', border: '1px solid var(--purple-light)' }}>
-            <p className="font-body text-sm" style={{ color: 'var(--purple-dark)' }}>{q.hints}</p>
+            <p className="font-body text-sm leading-relaxed" style={{ color: 'var(--purple-dark)' }}>{q.hints}</p>
           </div>
         </details>
       )}
 
-      {/* Reveal answer */}
+      {/* Reveal / Answer section */}
       {!revealed ? (
         <button onClick={() => setRevealed(true)}
-          className="w-full btn-glow-purple py-3.5 text-sm font-semibold"
-          style={{ borderRadius: '14px' }}>
-          Show answer
+          className="w-full btn-glow-purple py-4 text-sm font-bold"
+          style={{ borderRadius: '16px' }}>
+          Reveal answer
         </button>
       ) : (
         <>
-          {/* Answer reveal */}
-          <div className="rounded-2xl px-5 py-4 mb-4"
-               style={{ background: '#EAF3DE', border: '1px solid #C8E49A' }}>
-            <p className="font-body text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#4A8A14' }}>Model answer</p>
-            <p className="font-body text-sm text-gray-800 leading-relaxed">{q.answer}</p>
-            {q.solution_steps && (
-              <div className="mt-3 pt-3 border-t border-green-200">
-                <p className="font-body text-xs font-bold uppercase tracking-wider mb-1" style={{ color: '#4A8A14' }}>Working</p>
-                <p className="font-body text-sm text-gray-700 whitespace-pre-line">{q.solution_steps}</p>
-              </div>
-            )}
+          {/* Model answer */}
+          <div className="rounded-2xl overflow-hidden mb-4"
+               style={{ border: '1.5px solid #C8E49A' }}>
+            <div className="px-5 py-3 flex items-center gap-2"
+                 style={{ background: '#EAF3DE' }}>
+              <span className="text-base">✅</span>
+              <p className="font-body text-xs font-bold uppercase tracking-wider" style={{ color: '#4A8A14' }}>
+                Model answer
+              </p>
+            </div>
+            <div className="bg-white px-5 py-4">
+              <p className="font-body text-sm text-gray-800 leading-relaxed">{q.answer}</p>
+            </div>
           </div>
+
+          {/* Step-by-step working */}
+          {solutionSteps.length > 0 && (
+            <div className="rounded-2xl overflow-hidden mb-4"
+                 style={{ border: '1.5px solid var(--purple-light)' }}>
+              <div className="px-5 py-3 flex items-center gap-2"
+                   style={{ background: 'var(--purple-faint)' }}>
+                <span className="text-base">📝</span>
+                <p className="font-body text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--purple-dark)' }}>
+                  Step-by-step working
+                </p>
+              </div>
+              <div className="bg-white px-5 py-4 flex flex-col gap-3">
+                {solutionSteps.map((step, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5"
+                          style={{ background: 'var(--purple)' }}>
+                      {i + 1}
+                    </span>
+                    <p className="font-body text-sm text-gray-700 leading-relaxed">
+                      {step.replace(/^step\s*\d+[:\s]*/i, '')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Self-mark */}
           <p className="font-body text-sm text-gray-500 text-center mb-3">How did you do?</p>
           <div className="flex gap-3">
             <button onClick={() => handleSelfMark(false)}
-              className="flex-1 py-3.5 rounded-2xl border-2 font-body font-bold text-sm transition-all"
+              className="flex-1 py-4 rounded-2xl border-2 font-body font-bold text-sm transition-all"
               style={{ borderColor: '#FCA5A5', background: '#FEF2F2', color: '#991B1B' }}>
               ❌ Got it wrong
             </button>
             <button onClick={() => handleSelfMark(true)}
-              className="flex-1 py-3.5 rounded-2xl border-2 font-body font-bold text-sm transition-all"
+              className="flex-1 py-4 rounded-2xl border-2 font-body font-bold text-sm transition-all"
               style={{ borderColor: '#C8E49A', background: '#EAF3DE', color: '#3B6D11' }}>
               ✅ Got it right
             </button>
