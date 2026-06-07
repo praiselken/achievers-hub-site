@@ -43,7 +43,7 @@ const COLUMNS = [
   {
     heading: 'Connect',
     links: [
-      { label: 'Find a Tutor',      to: '/find-a-tutor', soon: true },
+      { label: 'Find a Tutor',      to: '/find-a-tutor' },
       { label: 'Success Stories',   to: '/student' },
       { label: 'Blog',              to: '/blog', soon: true },
       { label: 'Contact Us',        to: '/contact', soon: true },
