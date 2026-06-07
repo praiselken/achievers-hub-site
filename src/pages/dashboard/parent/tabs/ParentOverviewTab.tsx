@@ -33,9 +33,12 @@ function StatCard({ icon, label, value, sub, accent }: {
 }
 
 export default function ParentOverviewTab() {
-  const [stats, setStats]     = useState<ChildStats>(DEFAULT);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats]       = useState<ChildStats>(DEFAULT);
+  const [loading, setLoading]   = useState(true);
   const [childLinked, setChildLinked] = useState(false);
+  const [codeInput, setCodeInput]     = useState('');
+  const [codeError, setCodeError]     = useState('');
+  const [linking, setLinking]         = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -83,6 +86,50 @@ export default function ParentOverviewTab() {
     load();
   }, []);
 
+  async function claimCode() {
+    if (!supabase || !codeInput.trim()) return;
+    setLinking(true);
+    setCodeError('');
+    const code = codeInput.trim().toUpperCase();
+
+    // Find the invite code
+    const { data: invite, error } = await supabase
+      .from('invite_codes')
+      .select('id, student_id, claimed, expires_at')
+      .eq('code', code)
+      .single();
+
+    if (error || !invite) {
+      setCodeError('Code not found. Please check and try again.');
+      setLinking(false);
+      return;
+    }
+    if (invite.claimed) {
+      setCodeError('This code has already been used.');
+      setLinking(false);
+      return;
+    }
+    if (new Date(invite.expires_at) < new Date()) {
+      setCodeError('This code has expired. Ask your child to generate a new one.');
+      setLinking(false);
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLinking(false); return; }
+
+    // Create the link and mark code as claimed
+    await Promise.all([
+      supabase.from('parent_child_links').insert({ parent_id: user.id, child_id: invite.student_id }),
+      supabase.from('invite_codes').update({ claimed: true }).eq('id', invite.id),
+    ]);
+
+    setLinking(false);
+    setChildLinked(true);
+    // Reload stats
+    window.location.reload();
+  }
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
@@ -107,9 +154,29 @@ export default function ParentOverviewTab() {
           <p className="font-body text-sm text-gray-500 max-w-sm mx-auto mb-6 leading-relaxed">
             Once your child signs up and shares their invite code, you'll be able to track their progress, streaks, and topic coverage here.
           </p>
-          <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl font-body text-sm font-semibold"
-               style={{ background: '#FAEEDA', color: '#7A4D0F' }}>
-            <span>⏳</span> Waiting for your child's invite code
+          <div className="flex flex-col gap-3 max-w-xs mx-auto w-full">
+            <div className="flex gap-2">
+              <input
+                value={codeInput}
+                onChange={e => { setCodeInput(e.target.value.toUpperCase()); setCodeError(''); }}
+                placeholder="Enter 6-digit code"
+                maxLength={6}
+                className="flex-1 font-mono font-bold text-center text-xl px-4 py-3 rounded-xl border outline-none tracking-widest uppercase"
+                style={{ borderColor: codeError ? '#FCA5A5' : '#FDE68A', background: '#FFFBF0' }}
+                onKeyDown={e => { if (e.key === 'Enter') claimCode(); }}
+              />
+              <button onClick={claimCode} disabled={linking || codeInput.length < 6}
+                className="font-body text-sm font-bold px-5 py-3 rounded-xl text-white transition-all"
+                style={{ background: '#D97706', opacity: (linking || codeInput.length < 6) ? 0.6 : 1 }}>
+                {linking ? '…' : 'Link'}
+              </button>
+            </div>
+            {codeError && (
+              <p className="font-body text-xs text-center" style={{ color: '#991B1B' }}>{codeError}</p>
+            )}
+            <p className="font-body text-xs text-center text-gray-400">
+              Your child can find their code in Settings on their dashboard.
+            </p>
           </div>
         </div>
 

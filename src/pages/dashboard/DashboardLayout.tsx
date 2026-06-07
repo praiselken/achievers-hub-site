@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 import MindsetPopup from '../../components/MindsetPopup';
 
-type Tab = 'home' | 'daily5' | 'topics' | 'papers' | 'spec';
+type Tab = 'home' | 'daily5' | 'topics' | 'papers' | 'spec' | 'settings';
 export type Subject = 'maths' | 'economics';
 
 // ── Subject context ──────────────────────────────────────────────────────────
@@ -33,6 +33,10 @@ const TABS: { key: Tab; label: string; path: string; icon: React.ReactNode }[] =
   {
     key: 'spec', label: 'Spec Mapper', path: '/dashboard/spec',
     icon: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="10" cy="10" r="8"/><path d="M10 2a15 15 0 010 16M2 10h16"/></svg>,
+  },
+  {
+    key: 'settings', label: 'Settings', path: '/dashboard/settings',
+    icon: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="10" cy="10" r="2.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42"/></svg>,
   },
 ];
 

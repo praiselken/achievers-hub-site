@@ -14,6 +14,7 @@ import ParentDashboard from './pages/dashboard/parent/ParentDashboard';
 import TutorDashboard    from './pages/dashboard/tutor/TutorDashboard';
 import FindATutorPage   from './pages/FindATutorPage';
 import AdminPage        from './pages/admin/AdminPage';
+import NotFoundPage    from './pages/NotFoundPage';
 import AuthRouter from './pages/AuthRouter';
 import OnboardingPage from './pages/OnboardingPage';
 import { supabase } from './lib/supabase';
@@ -67,7 +68,8 @@ export default function App() {
         <Route path="/dashboard/daily5" element={<StudentDashboard tab="daily5" />} />
         <Route path="/dashboard/topics" element={<StudentDashboard tab="topics" />} />
         <Route path="/dashboard/papers" element={<StudentDashboard tab="papers" />} />
-        <Route path="/dashboard/spec"   element={<StudentDashboard tab="spec" />} />
+        <Route path="/dashboard/spec"      element={<StudentDashboard tab="spec" />} />
+        <Route path="/dashboard/settings"  element={<StudentDashboard tab="settings" />} />
 
         {/* Parent dashboard */}
         <Route path="/parent-dashboard"           element={<ParentDashboard tab="overview" />} />
@@ -90,6 +92,9 @@ export default function App() {
         <Route path="/tutor-dashboard/analytics"  element={<TutorDashboard tab="analytics" />} />
         <Route path="/tutor-dashboard/resources"  element={<TutorDashboard tab="resources" />} />
         <Route path="/tutor-dashboard/profile"    element={<TutorDashboard tab="profile" />} />
+
+        {/* 404 */}
+        <Route path="*" element={<MarketingLayout><NotFoundPage /></MarketingLayout>} />
       </Routes>
     </BrowserRouter>
   );

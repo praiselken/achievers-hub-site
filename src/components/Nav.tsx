@@ -23,15 +23,24 @@ function UserIcon() {
 
 export default function Nav() {
   const { pathname } = useLocation();
-  const [open, setOpen]       = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [open, setOpen]           = useState(false);
+  const [dashPath, setDashPath]   = useState<string | null>(null);
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setLoggedIn(!!s));
+    async function resolveRole(userId: string) {
+      const { data } = await supabase!.from('profiles').select('role').eq('id', userId).single();
+      const role = data?.role ?? 'student';
+      setDashPath(role === 'parent' ? '/parent-dashboard' : role === 'tutor' ? '/tutor-dashboard' : '/dashboard');
+    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session?.user) resolveRole(session.user.id);
+      else setDashPath(null);
+    });
     return () => subscription.unsubscribe();
   }, []);
+
+  const loggedIn = dashPath !== null;
 
   const isActive = (path: string) =>
     pathname === path || (pathname === '/' && path === '/student');
@@ -92,7 +101,7 @@ export default function Nav() {
           {/* Desktop right — auth buttons */}
           <div className="hidden lg:flex items-center gap-2 ml-auto">
             {loggedIn ? (
-              <Link to="/dashboard"
+              <Link to={dashPath ?? '/dashboard'}
                 className="btn-glow-purple text-sm py-1.5 px-4 no-underline">
                 My Dashboard
               </Link>
@@ -149,7 +158,7 @@ export default function Nav() {
             ))}
             <div className="flex flex-col gap-2 mt-3">
               {loggedIn ? (
-                <Link to="/dashboard" onClick={() => setOpen(false)}
+                <Link to={dashPath ?? '/dashboard'} onClick={() => setOpen(false)}
                   className="btn-glow-purple text-center text-[15px] no-underline">
                   My Dashboard
                 </Link>
