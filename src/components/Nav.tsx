@@ -6,8 +6,8 @@ const NAV_LINKS = [
   { label: 'Students',     path: '/student' },
   { label: 'Parents',      path: '/parent' },
   { label: 'Tutors',       path: '/tutor' },
+  { label: 'Pricing',      path: '/pricing'                  },
   { label: 'Find a Tutor', path: '/find-a-tutor', soon: true },
-  { label: 'Pricing',      path: '/pricing',      soon: true },
   { label: 'Shop',         path: '/shop',         soon: true },
 ];
 

@@ -24,12 +24,16 @@ export default function HomeTab() {
   const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
   const [totalTopics, setTotalTopics] = useState(0);
+  const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
     async function load() {
       if (!supabase) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
+
+      const profileRes = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
+      if (profileRes.data?.display_name) setDisplayName(profileRes.data.display_name);
 
       const [streakRes, diagnosticRes, topicsRes, sessionsRes, papersRes, totalRes] = await Promise.all([
         supabase.from('streaks').select('*').eq('user_id', user.id).single(),
@@ -74,7 +78,9 @@ export default function HomeTab() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="font-display font-bold text-gray-900 text-2xl md:text-3xl">{greeting} 👋</h1>
+        <h1 className="font-display font-bold text-gray-900 text-2xl md:text-3xl">
+          {greeting}{displayName ? `, ${displayName}` : ''} 👋
+        </h1>
         <p className="font-body text-gray-500 mt-1 text-sm">Here's where you are today.</p>
       </div>
 

@@ -41,7 +41,7 @@ function AuthForm({
     setError('');
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/auth` },
     });
   }
 
@@ -52,7 +52,7 @@ function AuthForm({
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { setError(error.message); return; }
-      navigate('/dashboard');
+      navigate('/auth');
     } finally {
       setLoading(false);
     }
@@ -175,13 +175,14 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
       if (signUpError) { setError(signUpError.message); return; }
 
       if (data.user) {
-        // save role — works immediately if email confirmation is disabled, or after confirm
-        await supabase.from('profiles').upsert({ id: data.user.id, role });
+        await supabase.from('profiles').upsert({ id: data.user.id, role, onboarded: false });
       }
 
+      // Save role hint so onboarding page knows which avatar set to show
+      localStorage.setItem('signup_role', role);
+
       if (data.session) {
-        // email confirmation disabled — go straight in
-        navigate('/dashboard');
+        navigate('/onboarding');
       } else {
         setSuccess('Account created! Check your email to confirm, then sign in.');
       }
@@ -225,7 +226,7 @@ function SignupForm({ role, onBack, onSwitchToLogin }: { role: Role; onBack: () 
           await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-              redirectTo: `${window.location.origin}/dashboard`,
+              redirectTo: `${window.location.origin}/auth`,
               queryParams: { access_type: 'offline', prompt: 'consent' },
             },
           });

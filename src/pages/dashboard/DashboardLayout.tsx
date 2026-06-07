@@ -43,18 +43,26 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, activeTab }: DashboardLayoutProps) {
   const navigate = useNavigate();
-  const [user, setUser]       = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [subject, setSubject] = useState<Subject>('maths');
+  const [user, setUser]               = useState<User | null>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [avatar, setAvatar]           = useState('🎓');
+  const [loading, setLoading]         = useState(true);
+  const [subject, setSubject]         = useState<Subject>('maths');
 
   useEffect(() => {
     if (!supabase) { navigate('/login'); return; }
 
-    // onAuthStateChange fires once on mount with the current session (INITIAL_SESSION),
-    // then again on any sign-in / sign-out — more reliable than a one-shot getSession()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
         setUser(session.user);
+        const { data: profile } = await supabase!
+          .from('profiles')
+          .select('display_name, avatar, subjects')
+          .eq('id', session.user.id)
+          .single();
+        if (profile?.display_name) setDisplayName(profile.display_name);
+        if (profile?.avatar)       setAvatar(profile.avatar);
+        if (profile?.subjects?.[0]) setSubject(profile.subjects[0] as Subject);
         setLoading(false);
       } else {
         navigate('/login');
@@ -76,8 +84,8 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
     );
   }
 
-  const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'ST';
-  const email    = user?.email ?? '';
+  const email = user?.email ?? '';
+  const nameOrEmail = displayName || email.split('@')[0];
 
   return (
     <SubjectContext.Provider value={{ subject, setSubject }}>
@@ -135,12 +143,12 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
           {/* User */}
           <div className="px-4 py-4 border-t border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                   style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)' }}>
-                {initials}
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-lg flex-shrink-0"
+                   style={{ background: 'var(--purple-faint)', border: '1.5px solid var(--purple-light)' }}>
+                {avatar}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-body text-xs font-semibold text-gray-900 truncate">{email}</p>
+                <p className="font-body text-xs font-semibold text-gray-900 truncate">{nameOrEmail}</p>
                 <p className="font-body text-[10px] text-gray-400">Student</p>
               </div>
               <button
@@ -177,9 +185,9 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
             </div>
             <button
               onClick={async () => { await supabase?.auth.signOut(); navigate('/login'); }}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-              style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)' }}>
-              {initials}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
+              style={{ background: 'var(--purple-faint)', border: '1.5px solid var(--purple-light)' }}>
+              {avatar}
             </button>
           </div>
 

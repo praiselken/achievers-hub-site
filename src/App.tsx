@@ -8,8 +8,11 @@ import ParentPage from './pages/ParentPage';
 import TutorPage from './pages/TutorPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import PricingPage from './pages/PricingPage';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
 import ParentDashboard from './pages/dashboard/parent/ParentDashboard';
+import AuthRouter from './pages/AuthRouter';
+import OnboardingPage from './pages/OnboardingPage';
 import { supabase } from './lib/supabase';
 import './index.css';
 
@@ -49,7 +52,10 @@ export default function App() {
         <Route path="/parent"   element={<MarketingLayout><ParentPage /></MarketingLayout>} />
         <Route path="/tutor"    element={<MarketingLayout><TutorPage /></MarketingLayout>} />
         <Route path="/signup"   element={<MarketingLayout><SignUpPage /></MarketingLayout>} />
-        <Route path="/login"    element={<LoginPage />} />
+        <Route path="/pricing"  element={<MarketingLayout><PricingPage /></MarketingLayout>} />
+        <Route path="/login"       element={<LoginPage />} />
+        <Route path="/auth"        element={<AuthRouter />} />
+        <Route path="/onboarding"  element={<OnboardingPage />} />
         <Route path="/overview" element={<MarketingLayout><HomePage /></MarketingLayout>} />
 
         {/* Student dashboard */}
