@@ -8,18 +8,18 @@ interface Topic {
   name: string;
   exam_board: string | null;
   description: string | null;
-  command_word: string | null;
-  steps: string | null;
+  command: string | null;
+  key_points: string | null;   // stored as newline-separated text, converted to array on save
   exam_tip: string | null;
-  practice_question: string | null;
-  practice_answer: string | null;
+  practice_q: string | null;
+  practice_a: string | null;
   video_url: string | null;
 }
 
 const EMPTY: Omit<Topic, 'id'> = {
   subject: 'maths', area: '', name: '', exam_board: null,
-  description: null, command_word: null, steps: null,
-  exam_tip: null, practice_question: null, practice_answer: null, video_url: null,
+  description: null, command: null, key_points: null,
+  exam_tip: null, practice_q: null, practice_a: null, video_url: null,
 };
 
 export default function AdminTopicsTab() {
@@ -45,7 +45,12 @@ export default function AdminTopicsTab() {
   function openEdit(t: Topic) {
     setEditing(t);
     const { id: _id, ...rest } = t;
-    setForm(rest);
+    // Convert array back to newline text for the textarea
+    const kp = (t as unknown as { key_points: string[] | string | null }).key_points;
+    setForm({
+      ...rest,
+      key_points: Array.isArray(kp) ? kp.join('\n') : (kp ?? null),
+    });
     setShowForm(true);
   }
 
@@ -58,10 +63,17 @@ export default function AdminTopicsTab() {
   async function save() {
     if (!supabase) return;
     setSaving(true);
+    // Convert newline-separated key_points text → string array for the DB
+    const payload = {
+      ...form,
+      key_points: form.key_points
+        ? form.key_points.split('\n').map(s => s.replace(/^[-•\d.]+\s*/, '').trim()).filter(Boolean)
+        : null,
+    };
     if (editing) {
-      await supabase.from('topics').update(form).eq('id', editing.id);
+      await supabase.from('topics').update(payload).eq('id', editing.id);
     } else {
-      await supabase.from('topics').insert(form);
+      await supabase.from('topics').insert(payload);
     }
     setSaving(false);
     setShowForm(false);
@@ -143,7 +155,7 @@ export default function AdminTopicsTab() {
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5 flex-wrap">
                       {t.description && <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: 'rgba(74,138,20,0.2)', color: '#86efac' }}>desc</span>}
-                      {t.steps && <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: 'rgba(74,138,20,0.2)', color: '#86efac' }}>steps</span>}
+                      {t.key_points && <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: 'rgba(74,138,20,0.2)', color: '#86efac' }}>steps</span>}
                       {t.video_url && <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: 'rgba(74,138,20,0.2)', color: '#86efac' }}>video</span>}
                     </div>
                   </td>
@@ -201,7 +213,7 @@ export default function AdminTopicsTab() {
               { label: 'Area / Strand *', key: 'area', placeholder: 'e.g. Algebra' },
               { label: 'Topic name *', key: 'name', placeholder: 'e.g. Solving linear equations' },
               { label: 'Exam board (leave blank for all)', key: 'exam_board', placeholder: 'AQA | Edexcel | OCR' },
-              { label: 'Command word', key: 'command_word', placeholder: 'e.g. Solve, Calculate, Show that…' },
+              { label: 'Command word', key: 'command', placeholder: 'e.g. Solve, Calculate, Show that…' },
               { label: 'Video URL', key: 'video_url', placeholder: 'https://…' },
             ].map(({ label, key, placeholder }) => (
               <AdminField key={key} label={label}>
@@ -213,10 +225,10 @@ export default function AdminTopicsTab() {
 
             {[
               { label: 'Description', key: 'description', placeholder: 'Explain what this topic covers…', rows: 3 },
-              { label: 'Steps (one per line)', key: 'steps', placeholder: 'Step 1: …\nStep 2: …', rows: 4 },
+              { label: 'Steps (one per line)', key: 'key_points', placeholder: 'Step 1: …\nStep 2: …', rows: 4 },
               { label: 'Exam tip', key: 'exam_tip', placeholder: 'Common mistake or examiner tip…', rows: 2 },
-              { label: 'Practice question', key: 'practice_question', placeholder: 'A short practice question…', rows: 2 },
-              { label: 'Practice answer', key: 'practice_answer', placeholder: 'Model answer…', rows: 2 },
+              { label: 'Practice question', key: 'practice_q', placeholder: 'A short practice question…', rows: 2 },
+              { label: 'Practice answer', key: 'practice_a', placeholder: 'Model answer…', rows: 2 },
             ].map(({ label, key, placeholder, rows }) => (
               <AdminField key={key} label={label}>
                 <textarea value={(form[key as keyof typeof form] as string) ?? ''} placeholder={placeholder} rows={rows}
