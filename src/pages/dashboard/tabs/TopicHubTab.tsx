@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
+import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 
 type Status = 'not_started' | 'in_progress' | 'covered';
 
@@ -223,6 +224,11 @@ export default function TopicHubTab() {
     await supabase.from('topic_progress')
       .upsert({ user_id: user.id, topic_id: topicId, status }, { onConflict: 'user_id,topic_id' });
     setTopics(prev => prev.map(t => t.id === topicId ? { ...t, status } : t));
+
+    if (status === 'covered') {
+      await awardXp(user.id, 'topic_covered', topicId, 15);
+      await checkAndAwardAchievements(user.id);
+    }
   }
 
   const filtered = topics.filter(t => {

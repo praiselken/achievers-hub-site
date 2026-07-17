@@ -69,6 +69,7 @@ export default function App() {
         <Route path="/dashboard/topics" element={<StudentDashboard tab="topics" />} />
         <Route path="/dashboard/papers" element={<StudentDashboard tab="papers" />} />
         <Route path="/dashboard/spec"      element={<StudentDashboard tab="spec" />} />
+        <Route path="/dashboard/achievements" element={<StudentDashboard tab="achievements" />} />
         <Route path="/dashboard/settings"  element={<StudentDashboard tab="settings" />} />
 
         {/* Parent dashboard */}

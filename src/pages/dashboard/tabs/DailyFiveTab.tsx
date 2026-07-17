@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
+import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 
 type Phase = 'intro' | 'question' | 'feedback' | 'complete';
 
@@ -81,10 +82,16 @@ export default function DailyFiveTab() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const score = finalAnswers.filter(Boolean).length;
-    await supabase.from('daily_sessions').insert({
+    const { data: session } = await supabase.from('daily_sessions').insert({
       user_id: user.id, subject, score, total: questions.length,
       questions: questions.map((q, i) => ({ id: q.id, correct: finalAnswers[i] })),
-    });
+    }).select('id').single();
+
+    if (session) {
+      await awardXp(user.id, 'daily5', session.id, 10);
+      if (score > 0) await awardXp(user.id, 'daily5_correct', session.id, score * 2);
+    }
+
     const today = new Date().toISOString().slice(0, 10);
     const { data: streak } = await supabase.from('streaks').select('*').eq('user_id', user.id).single();
     if (!streak) {
@@ -99,6 +106,8 @@ export default function DailyFiveTab() {
         last_active: today,
       }).eq('user_id', user.id);
     }
+
+    await checkAndAwardAchievements(user.id);
   }
 
   function handleSelfMark(correct: boolean) {

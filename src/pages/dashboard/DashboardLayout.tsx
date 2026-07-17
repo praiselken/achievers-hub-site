@@ -3,8 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 import MindsetPopup from '../../components/MindsetPopup';
+import { useSubjects } from '../../lib/useSubjects';
+import { getUserStats, levelProgress } from '../../lib/xp';
 
-type Tab = 'home' | 'daily5' | 'topics' | 'papers' | 'spec' | 'settings';
+type Tab = 'home' | 'daily5' | 'topics' | 'papers' | 'spec' | 'achievements' | 'settings';
 export type Subject = 'maths' | 'economics';
 
 // ── Subject context ──────────────────────────────────────────────────────────
@@ -35,6 +37,10 @@ const TABS: { key: Tab; label: string; path: string; icon: React.ReactNode }[] =
     icon: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="10" cy="10" r="8"/><path d="M10 2a15 15 0 010 16M2 10h16"/></svg>,
   },
   {
+    key: 'achievements', label: 'Achievements', path: '/dashboard/achievements',
+    icon: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="10" cy="7" r="4"/><path d="M7 10.5L6 18l4-2 4 2-1-7.5"/></svg>,
+  },
+  {
     key: 'settings', label: 'Settings', path: '/dashboard/settings',
     icon: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="10" cy="10" r="2.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42"/></svg>,
   },
@@ -52,6 +58,9 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
   const [avatar, setAvatar]           = useState('🎓');
   const [loading, setLoading]         = useState(true);
   const [subject, setSubject]         = useState<Subject>('maths');
+  const [xpTotal, setXpTotal]         = useState(0);
+  const [level, setLevel]             = useState(1);
+  const { activeSubjects } = useSubjects();
 
   useEffect(() => {
     if (!supabase) { navigate('/login'); return; }
@@ -67,6 +76,9 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
         if (profile?.display_name) setDisplayName(profile.display_name);
         if (profile?.avatar)       setAvatar(profile.avatar);
         if (profile?.subjects?.[0]) setSubject(profile.subjects[0] as Subject);
+        const stats = await getUserStats(session.user.id);
+        setXpTotal(stats.xpTotal);
+        setLevel(stats.level);
         setLoading(false);
       } else {
         navigate('/login');
@@ -112,13 +124,13 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="font-body text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Subject</p>
             <div className="flex gap-1.5">
-              {(['maths', 'economics'] as Subject[]).map(s => (
-                <button key={s} onClick={() => setSubject(s)}
+              {activeSubjects.map(s => (
+                <button key={s.slug} onClick={() => setSubject(s.slug as Subject)}
                   className="flex-1 py-1.5 rounded-lg font-body font-semibold text-xs capitalize transition-all"
-                  style={subject === s
+                  style={subject === s.slug
                     ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1.5px solid var(--purple-light)' }
                     : { background: 'transparent', color: '#9ca3af', border: '1.5px solid #f3f4f6' }}>
-                  {s === 'maths' ? '📐 Maths' : '📊 Econ'}
+                  {s.icon} {s.name.replace(/^GCSE\s+/, '')}
                 </button>
               ))}
             </div>
@@ -146,14 +158,14 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
 
           {/* User */}
           <div className="px-4 py-4 border-t border-gray-100">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-2.5">
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-lg flex-shrink-0"
                    style={{ background: 'var(--purple-faint)', border: '1.5px solid var(--purple-light)' }}>
                 {avatar}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-body text-xs font-semibold text-gray-900 truncate">{nameOrEmail}</p>
-                <p className="font-body text-[10px] text-gray-400">Student</p>
+                <p className="font-body text-[10px] text-gray-400">Student · Level {level}</p>
               </div>
               <button
                 onClick={async () => { await supabase?.auth.signOut(); navigate('/login'); }}
@@ -163,6 +175,11 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
                   <path d="M13 3h4v14h-4M9 14l4-4-4-4M13 10H4"/>
                 </svg>
               </button>
+            </div>
+            <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden" title={`${xpTotal} XP`}>
+              <div className="h-full rounded-full transition-all"
+                   style={{ width: `${levelProgress(xpTotal, level).pct}%`,
+                            background: 'linear-gradient(90deg, var(--purple-light), var(--purple))' }} />
             </div>
           </div>
         </aside>
@@ -177,13 +194,13 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
             </Link>
             {/* Mobile subject switcher */}
             <div className="flex gap-1.5">
-              {(['maths', 'economics'] as Subject[]).map(s => (
-                <button key={s} onClick={() => setSubject(s)}
+              {activeSubjects.map(s => (
+                <button key={s.slug} onClick={() => setSubject(s.slug as Subject)}
                   className="px-2.5 py-1 rounded-lg font-body font-semibold text-xs capitalize transition-all"
-                  style={subject === s
+                  style={subject === s.slug
                     ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1.5px solid var(--purple-light)' }
                     : { background: 'transparent', color: '#9ca3af', border: '1.5px solid #f3f4f6' }}>
-                  {s === 'maths' ? '📐' : '📊'}
+                  {s.icon}
                 </button>
               ))}
             </div>

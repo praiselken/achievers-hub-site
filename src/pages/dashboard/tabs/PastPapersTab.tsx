@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
+import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 
 interface Paper {
   id: string;
@@ -202,6 +203,10 @@ export default function PastPapersTab() {
       await supabase.from('past_paper_logs').insert({ user_id: user.id, paper_id: paper.id, score, max_score: max, notes });
     }
     setLogs(prev => ({ ...prev, [paper.id]: { paper_id: paper.id, score, max_score: max, notes, logged_at: new Date().toISOString() } }));
+
+    await awardXp(user.id, 'paper_logged', paper.id, 20);
+    if ((score / max) * 100 >= 80) await awardXp(user.id, 'paper_high_score', paper.id, 10);
+    await checkAndAwardAchievements(user.id);
   }
 
   const filtered = papers.filter(p =>
