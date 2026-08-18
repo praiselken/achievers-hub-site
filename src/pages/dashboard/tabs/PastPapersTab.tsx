@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
 import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_PAST_PAPERS, DEMO_PAPER_LOGS } from '../../../lib/demoData';
 
 interface Paper {
   id: string;
@@ -176,6 +178,12 @@ export default function PastPapersTab() {
 
   useEffect(() => {
     async function load() {
+      if (isDemoMode()) {
+        setPapers(DEMO_PAST_PAPERS);
+        setLogs({ ...DEMO_PAPER_LOGS });
+        setLoading(false);
+        return;
+      }
       if (!supabase) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
@@ -193,6 +201,10 @@ export default function PastPapersTab() {
   }, []);
 
   async function handleSave(paper: Paper, score: number, max: number, notes: string) {
+    if (isDemoMode()) {
+      setLogs(prev => ({ ...prev, [paper.id]: { paper_id: paper.id, score, max_score: max, logged_at: new Date().toISOString() } }));
+      return;
+    }
     if (!supabase) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;

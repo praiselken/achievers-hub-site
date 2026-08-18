@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_PROFILE, DEMO_TOPICS } from '../../../lib/demoData';
 
 type Status = 'not_started' | 'in_progress' | 'covered';
 
@@ -56,6 +58,16 @@ export default function SpecMapperTab() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      if (isDemoMode()) {
+        const demoTopics = DEMO_TOPICS.filter(t => t.subject === subject);
+        setExamBoard(DEMO_PROFILE.exam_board);
+        const prog: Record<string, Status> = {};
+        for (const t of demoTopics) prog[t.id] = t.status;
+        setTopics(demoTopics.map(t => ({ id: t.id, area: t.area, name: t.name, exam_board: t.exam_board })));
+        setProgress(prog);
+        setLoading(false);
+        return;
+      }
       if (!supabase) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }

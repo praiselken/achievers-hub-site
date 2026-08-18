@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..800;1,14..32,400..700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -261,3 +262,120 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--purple-light); border-radius: 3px; }
+/* ════════════════════════════════════════════════════════════════
+   Client redesign (Aug 2026) — marketing design system
+   Ported from achievers-hub-github-2026-08-10 (Developer Handoff 17.x)
+   Scoped under .mkt so dashboards keep the existing look.
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  --mkt-background: #fcfbfe;
+  --font-inter: Inter, Aptos, "Segoe UI", Arial, sans-serif;
+
+  --color-primary-50: #f4eef7;
+  --color-primary-100: #e6d7ec;
+  --color-primary-200: #cbb0d8;
+  --color-primary-300: #a67fbe;
+  --color-primary-400: #7d54a0;
+  --color-primary-500: #5e3a6e;
+  --color-primary-600: #4e3059;
+  --color-primary-700: #3f2648;
+  --color-primary-800: #301c37;
+  --color-primary-900: #221327;
+
+  --color-accent-50: #fff6ec;
+  --color-accent-100: #ffe8cd;
+  --color-accent-200: #ffce9b;
+  --color-accent-300: #ffb567;
+  --color-accent-400: #ff9f3f;
+  --color-accent-500: #f2861a;
+  --color-accent-600: #d66c0d;
+  --color-accent-700: #ad530c;
+
+  --color-success-50: #f6f9ea;
+  --color-success-100: #e9f1cd;
+  --color-success-300: #c1d477;
+  --color-success-400: #9dbb3a;
+  --color-success-500: #829e2e;
+  --color-success-600: #667c23;
+
+  --color-ink-900: #1f2937;
+  --color-ink-700: #374151;
+  --color-ink-600: #4b5563;
+  --color-ink-500: #6b7280;
+  --color-ink-300: #9ca3af;
+  --color-border: #e5e7eb;
+
+  --feature-daily-bg: #fff4d8; --feature-daily-accent: #f4b400; --feature-daily-strong: #9a6800;
+  --feature-topic-bg: #f3eeff; --feature-topic-accent: #7a4dff; --feature-topic-strong: #5b30c9;
+  --feature-past-bg: #eaf3ff; --feature-past-accent: #3b82f6; --feature-past-strong: #1d5fbf;
+  --feature-ai-bg: #f1e8ff; --feature-ai-accent: #8b5cf6; --feature-ai-strong: #6d3ec6;
+  --feature-grow-bg: #eaf8ec; --feature-grow-accent: #5fae62; --feature-grow-strong: #3f7d44;
+  --feature-progress-bg: #e8f8f6; --feature-progress-accent: #14b8a6; --feature-progress-strong: #0f8278;
+  --feature-parent-bg: #fff1e8; --feature-parent-accent: #f97316; --feature-parent-strong: #b94c08;
+  --feature-tutor-bg: #eef7f2; --feature-tutor-accent: #2f8f6b; --feature-tutor-strong: #246b51;
+
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+  --shadow-soft-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+  --shadow-nav: 0 4px 20px rgba(0, 0, 0, 0.04);
+
+  --motion-ease: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Surface colours go through :where() so a Tailwind bg-/text- utility on the same
+   element (e.g. the dark footer) still wins — utilities and .mkt tie on
+   specificity, and .mkt is emitted after @tailwind utilities. */
+:where(.mkt) {
+  background: var(--mkt-background);
+  color: var(--color-ink-900);
+}
+
+.mkt {
+  font-family: var(--font-inter);
+  line-height: 1.6;
+  letter-spacing: 0.005em;
+}
+.mkt h1, .mkt h2, .mkt h3, .mkt h4,
+.mkt .font-display {
+  font-family: var(--font-inter);
+}
+.mkt a { text-underline-offset: 0.2em; }
+
+.feature-daily { --feature-bg: var(--feature-daily-bg); --feature-accent: var(--feature-daily-accent); --feature-strong: var(--feature-daily-strong); }
+.feature-topic { --feature-bg: var(--feature-topic-bg); --feature-accent: var(--feature-topic-accent); --feature-strong: var(--feature-topic-strong); }
+.feature-past { --feature-bg: var(--feature-past-bg); --feature-accent: var(--feature-past-accent); --feature-strong: var(--feature-past-strong); }
+.feature-ai { --feature-bg: var(--feature-ai-bg); --feature-accent: var(--feature-ai-accent); --feature-strong: var(--feature-ai-strong); }
+.feature-grow { --feature-bg: var(--feature-grow-bg); --feature-accent: var(--feature-grow-accent); --feature-strong: var(--feature-grow-strong); }
+.feature-progress { --feature-bg: var(--feature-progress-bg); --feature-accent: var(--feature-progress-accent); --feature-strong: var(--feature-progress-strong); }
+.feature-parent { --feature-bg: var(--feature-parent-bg); --feature-accent: var(--feature-parent-accent); --feature-strong: var(--feature-parent-strong); }
+.feature-tutor { --feature-bg: var(--feature-tutor-bg); --feature-accent: var(--feature-tutor-accent); --feature-strong: var(--feature-tutor-strong); }
+.feature-tinted-surface { background: var(--feature-bg); }
+.feature-accent-text { color: var(--feature-strong); }
+.feature-accent-bg { background: color-mix(in srgb, var(--feature-accent) 13%, white); color: var(--feature-strong); }
+.feature-accent-border { border-color: color-mix(in srgb, var(--feature-accent) 25%, white); }
+
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-0.4deg); }
+}
+@keyframes gentle-float-reverse {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(7px) rotate(0.4deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-copy { animation: hero-rise 700ms var(--motion-ease) both; }
+  .hero-visual { animation: hero-rise 800ms 100ms var(--motion-ease) both; }
+  .hero-float { animation: gentle-float 5.5s ease-in-out infinite; }
+  .hero-float-delayed { animation: gentle-float-reverse 6.5s 400ms ease-in-out infinite; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mkt *, .mkt *::before, .mkt *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

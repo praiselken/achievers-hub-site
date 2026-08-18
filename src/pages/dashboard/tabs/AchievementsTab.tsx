@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { checkAndAwardAchievements, type Achievement } from '../../../lib/xp';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_ACHIEVEMENTS, DEMO_DAILY5_COUNT, getDemoMetrics } from '../../../lib/demoData';
 
 interface Metrics {
   streak_days: number;
@@ -22,6 +24,20 @@ export default function AchievementsTab() {
 
   useEffect(() => {
     async function load() {
+      if (isDemoMode()) {
+        const metrics = getDemoMetrics();
+        setAchievements(DEMO_ACHIEVEMENTS as Achievement[]);
+        setUnlocked(metrics.unlocked);
+        setMetrics({
+          streak_days: metrics.streakDays,
+          daily5_count: DEMO_DAILY5_COUNT,
+          topics_covered: metrics.topicsCovered,
+          papers_logged: metrics.papersLogged,
+          paper_avg_score: metrics.paperAvgScore,
+        });
+        setLoading(false);
+        return;
+      }
       if (!supabase) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }

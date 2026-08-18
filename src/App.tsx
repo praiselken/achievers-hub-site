@@ -3,9 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
-import StudentPage from './pages/StudentPage';
-import ParentPage from './pages/ParentPage';
-import TutorPage from './pages/TutorPage';
+import ContentPage from './pages/ContentPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import PricingPage from './pages/PricingPage';
@@ -14,11 +12,18 @@ import ParentDashboard from './pages/dashboard/parent/ParentDashboard';
 import TutorDashboard    from './pages/dashboard/tutor/TutorDashboard';
 import FindATutorPage   from './pages/FindATutorPage';
 import AdminPage        from './pages/admin/AdminPage';
-import NotFoundPage    from './pages/NotFoundPage';
 import AuthRouter from './pages/AuthRouter';
 import OnboardingPage from './pages/OnboardingPage';
 import { supabase } from './lib/supabase';
+import { enterDemoMode } from './lib/demoMode';
 import './index.css';
+
+function DemoEntry() {
+  // Runs synchronously during render so the flag is set before <Navigate>'s
+  // own effect fires — sessionStorage writes are idempotent, safe to redo.
+  enterDemoMode();
+  return <Navigate to="/dashboard" replace />;
+}
 
 function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -50,15 +55,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Marketing pages — have Nav + Footer */}
-        <Route path="/" element={<MarketingLayout><Navigate to="/student" replace /></MarketingLayout>} />
-        <Route path="/student"  element={<MarketingLayout><StudentPage /></MarketingLayout>} />
-        <Route path="/parent"   element={<MarketingLayout><ParentPage /></MarketingLayout>} />
-        <Route path="/tutor"    element={<MarketingLayout><TutorPage /></MarketingLayout>} />
+        {/* Marketing pages — have Nav + Footer (client redesign, Aug 2026) */}
+        <Route path="/" element={<MarketingLayout><HomePage /></MarketingLayout>} />
+        {/* Old singular marketing routes → redesign's content pages */}
+        <Route path="/student"  element={<Navigate to="/students" replace />} />
+        <Route path="/parent"   element={<Navigate to="/parents" replace />} />
+        <Route path="/tutor"    element={<Navigate to="/tutors" replace />} />
         <Route path="/signup"   element={<MarketingLayout><SignUpPage /></MarketingLayout>} />
         <Route path="/pricing"        element={<MarketingLayout><PricingPage /></MarketingLayout>} />
         <Route path="/find-a-tutor"  element={<MarketingLayout><FindATutorPage /></MarketingLayout>} />
         <Route path="/login"       element={<LoginPage />} />
+        <Route path="/demo"        element={<DemoEntry />} />
         <Route path="/auth"        element={<AuthRouter />} />
         <Route path="/onboarding"  element={<OnboardingPage />} />
         <Route path="/overview" element={<MarketingLayout><HomePage /></MarketingLayout>} />
@@ -94,8 +101,9 @@ export default function App() {
         <Route path="/tutor-dashboard/resources"  element={<TutorDashboard tab="resources" />} />
         <Route path="/tutor-dashboard/profile"    element={<TutorDashboard tab="profile" />} />
 
-        {/* 404 */}
-        <Route path="*" element={<MarketingLayout><NotFoundPage /></MarketingLayout>} />
+        {/* Content-driven public pages (features/*, subjects/*, students, parents,
+            tutors, how-it-works, faq, legal, …) with 404 fallback */}
+        <Route path="*" element={<MarketingLayout><ContentPage /></MarketingLayout>} />
       </Routes>
     </BrowserRouter>
   );

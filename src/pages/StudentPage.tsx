@@ -108,6 +108,10 @@ export default function StudentPage() {
                    className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] hover:border-green-300 transition-colors no-underline">
                   See Daily 5
                 </a>
+                <Link to="/demo"
+                   className="font-body font-medium text-gray-700 border border-gray-200 bg-white rounded-xl px-6 py-3.5 text-[15px] hover:border-purple-300 transition-colors no-underline">
+                  View live demo →
+                </Link>
               </div>
 
               {/* Social proof */}

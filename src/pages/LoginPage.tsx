@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import ReviewsCarousel from '../components/ReviewsCarousel';
+import { enterDemoMode } from '../lib/demoMode';
+
+const DEMO_USERNAME = 'student1';
+const DEMO_PASSWORD = 'achievershub';
 
 type Mode = 'login' | 'signup-role' | 'signup-form';
 type Role = 'student' | 'parent' | 'tutor';
@@ -47,8 +51,16 @@ function AuthForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(''); setSuccess('');
+
+    if (email.trim().toLowerCase() === DEMO_USERNAME && password === DEMO_PASSWORD) {
+      enterDemoMode();
+      navigate('/dashboard');
+      return;
+    }
+
     if (!supabase) { setError('Supabase is not configured yet.'); return; }
-    setError(''); setSuccess(''); setLoading(true);
+    setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { setError(error.message); return; }
@@ -85,7 +97,7 @@ function AuthForm({
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
           <label className="font-body text-xs font-semibold text-gray-600 mb-1 block">Email</label>
-          <input type="email" required placeholder="you@example.com"
+          <input type="text" required placeholder="you@example.com"
             value={email} onChange={e => setEmail(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 font-body text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
             style={{ background: '#fafafa' }}
@@ -119,6 +131,11 @@ function AuthForm({
         <button onClick={onSwitchToSignup} className="font-semibold hover:underline" style={{ color: 'var(--purple)' }}>
           Sign up
         </button>
+      </p>
+      <p className="font-body text-sm text-gray-400 text-center mt-2">
+        <Link to="/demo" className="font-semibold hover:underline" style={{ color: 'var(--purple)' }}>
+          Or view a live demo →
+        </Link>
       </p>
     </>
   );

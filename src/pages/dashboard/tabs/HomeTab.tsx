@@ -4,6 +4,8 @@ import { supabase } from '../../../lib/supabase';
 import { useSubjects, type SubjectRow } from '../../../lib/useSubjects';
 import { useSubject } from '../DashboardLayout';
 import { checkAndAwardAchievements } from '../../../lib/xp';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_PROFILE, getDemoMetrics, getDemoSubjectProgress } from '../../../lib/demoData';
 
 interface GlobalStats {
   streak: number;
@@ -37,6 +39,21 @@ export default function HomeTab() {
 
   useEffect(() => {
     async function load() {
+      if (isDemoMode()) {
+        setDisplayName(DEMO_PROFILE.display_name);
+        const metrics = getDemoMetrics();
+        setStats({
+          streak: metrics.streakDays,
+          longestStreak: metrics.longestStreak,
+          dailyDoneToday: false,
+          avgMastery: metrics.avgMastery,
+          papersDone: metrics.papersLogged,
+          achievementCount: metrics.unlockedCount,
+        });
+        setSubjectProgress(activeSubjects.map(s => ({ ...s, ...getDemoSubjectProgress(s.slug) })));
+        setLoading(false);
+        return;
+      }
       if (!supabase || activeSubjects.length === 0) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
@@ -289,7 +306,7 @@ export default function HomeTab() {
           <div className="rounded-2xl p-5 border" style={{ background: '#FAFAFA', borderColor: '#F0F0F0' }}>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-lg">🤖</span>
-              <h2 className="font-body font-bold text-gray-500 text-sm">AI Tutor</h2>
+              <h2 className="font-body font-bold text-gray-500 text-sm">Ask Archi</h2>
               <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-gray-400" style={{ background: '#EEE' }}>Coming soon</span>
             </div>
             <p className="font-body text-xs text-gray-400">Ask for explanations, hints and practice questions.</p>

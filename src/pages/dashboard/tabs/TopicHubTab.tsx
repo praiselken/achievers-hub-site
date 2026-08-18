@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
 import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_TOPICS } from '../../../lib/demoData';
 
 type Status = 'not_started' | 'in_progress' | 'covered';
 
@@ -192,6 +194,11 @@ export default function TopicHubTab() {
   useEffect(() => {
     async function load() {
       setLoading(true);
+      if (isDemoMode()) {
+        setTopics(DEMO_TOPICS.filter(t => t.subject === subject));
+        setLoading(false);
+        return;
+      }
       if (!supabase) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
@@ -218,6 +225,7 @@ export default function TopicHubTab() {
   }, [subject]);
 
   async function handleMark(topicId: string, status: Status) {
+    if (isDemoMode()) { setTopics(prev => prev.map(t => t.id === topicId ? { ...t, status } : t)); return; }
     if (!supabase) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;

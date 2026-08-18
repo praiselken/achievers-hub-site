@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabase';
+import { isDemoMode } from './demoMode';
 
 export interface SubjectRow {
   slug: string;
@@ -24,7 +25,7 @@ export function useSubjects() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      if (!supabase) { setLoading(false); return; }
+      if (!supabase || isDemoMode()) { setLoading(false); return; }
       const { data } = await supabase
         .from('subjects')
         .select('slug, name, icon, color, exam_boards, active, coming_soon, sort_order')

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_PROFILE } from '../../../lib/demoData';
 
 const STUDENT_AVATARS = ['🎓','📚','✏️','🔭','🧪','🧮','💡','⭐','🏆','🎯','🦁','🐯','🦊','🐺','🦅','🚀','⚡','🌟','🔥','💎'];
 const EXAM_BOARDS = ['AQA', 'Edexcel', 'OCR'];
@@ -22,6 +24,15 @@ export default function SettingsTab() {
 
   useEffect(() => {
     async function load() {
+      if (isDemoMode()) {
+        setDisplayName(DEMO_PROFILE.display_name);
+        setAvatar(DEMO_PROFILE.avatar);
+        setSubjects([...DEMO_PROFILE.subjects]);
+        setExamBoard(DEMO_PROFILE.exam_board);
+        setYearGroup(DEMO_PROFILE.year_group);
+        setLoading(false);
+        return;
+      }
       if (!supabase) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
@@ -47,6 +58,11 @@ export default function SettingsTab() {
   }, []);
 
   async function save() {
+    if (isDemoMode()) {
+      setSaving(true);
+      setTimeout(() => { setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2500); }, 300);
+      return;
+    }
     if (!supabase) return;
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
@@ -64,12 +80,16 @@ export default function SettingsTab() {
   }
 
   async function generateCode() {
+    const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+    if (isDemoMode()) {
+      setCodeLoading(true);
+      setTimeout(() => { setInviteCode(code); setCodeLoading(false); }, 300);
+      return;
+    }
     if (!supabase) return;
     setCodeLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setCodeLoading(false); return; }
-    // Generate a random 6-char uppercase code
-    const code = Math.random().toString(36).slice(2, 8).toUpperCase();
     await supabase.from('invite_codes').insert({
       code, student_id: user.id,
     });

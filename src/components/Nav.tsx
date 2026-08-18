@@ -1,183 +1,104 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { ChevronDown, Menu, X } from 'lucide-react';
+import { Logo } from './marketing/Logo';
+import { Button } from './marketing/Button';
+import { Container } from './marketing/Container';
 
-const NAV_LINKS = [
-  { label: 'Students',     path: '/student' },
-  { label: 'Parents',      path: '/parent' },
-  { label: 'Tutors',       path: '/tutor' },
-  { label: 'Pricing',      path: '/pricing'                  },
-  { label: 'Find a Tutor', path: '/find-a-tutor' },
-  { label: 'Shop',         path: '/shop',         soon: true },
+const features = [
+  { href: '/features/daily-5', label: 'Daily 5', description: 'Five focused daily questions' },
+  { href: '/features/topic-hub', label: 'Topic Hub', description: 'Lessons, cards and practice' },
+  { href: '/features/past-paper-hub', label: 'Past Papers & QLA', description: 'Turn marks into priorities' },
+  { href: '/features/ai-tutor', label: 'Archi: AI Tutor', description: 'Hint-first learning support' },
+  { href: '/features/think-speak-grow', label: 'Think, Speak, Grow', description: 'Prepare for each session' },
 ];
 
-function UserIcon() {
+const subjects = [
+  { href: '/subjects/gcse-maths', label: 'GCSE Maths', description: 'Methods, reasoning and past papers' },
+  { href: '/subjects/gcse-economics', label: 'GCSE Economics', description: 'Knowledge, application and analysis' },
+];
+
+const families = [
+  { href: '/students', label: 'For Students', description: 'Know what to revise next' },
+  { href: '/parents', label: 'For Parents', description: 'Understand progress clearly' },
+];
+
+function DesktopMenu({ label, items }: { label: string; items: typeof features }) {
   return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"
-         strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-      <circle cx="10" cy="7" r="3.5"/>
-      <path d="M2 18a8 8 0 0116 0"/>
-    </svg>
+    <details className="group relative">
+      <summary className="flex cursor-pointer list-none items-center gap-1 py-3 text-sm font-bold text-[var(--color-ink-700)] transition-colors hover:text-[var(--color-primary-600)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-primary-500)]">
+        {label}<ChevronDown size={15} className="transition group-open:rotate-180" aria-hidden="true" />
+      </summary>
+      <div className="absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
+        {items.map((item) => (
+          <Link key={item.href} to={item.href} className="block rounded-xl px-4 py-3 transition hover:bg-[var(--color-primary-50)] focus-visible:bg-[var(--color-primary-50)] focus-visible:outline-none">
+            <span className="block text-sm font-extrabold text-[var(--color-ink-900)]">{item.label}</span>
+            <span className="mt-0.5 block text-xs text-[var(--color-ink-500)]">{item.description}</span>
+          </Link>
+        ))}
+      </div>
+    </details>
   );
 }
 
-export default function Nav() {
-  const { pathname } = useLocation();
-  const [open, setOpen]           = useState(false);
-  const [dashPath, setDashPath]   = useState<string | null>(null);
+export default function Nav({ transparent = false }: { transparent?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(!transparent);
+  const location = useLocation();
 
   useEffect(() => {
-    if (!supabase) return;
-    async function resolveRole(userId: string) {
-      const { data } = await supabase!.from('profiles').select('role').eq('id', userId).single();
-      const role = data?.role ?? 'student';
-      setDashPath(role === 'parent' ? '/parent-dashboard' : role === 'tutor' ? '/tutor-dashboard' : '/dashboard');
-    }
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session?.user) resolveRole(session.user.id);
-      else setDashPath(null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+    if (!transparent) return;
+    function handleScroll() { setScrolled(window.scrollY > 40); }
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [transparent]);
 
-  const loggedIn = dashPath !== null;
-
-  const isActive = (path: string) =>
-    pathname === path || (pathname === '/' && path === '/student');
+  // Close the mobile menu and any open dropdown on navigation.
+  useEffect(() => {
+    setOpen(false);
+    document.querySelectorAll<HTMLDetailsElement>('header details[open]').forEach((el) => { el.open = false; });
+  }, [location.pathname]);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center px-4 pt-3">
-      <nav className="w-full max-w-6xl rounded-2xl"
-           style={{
-             background: 'rgba(255,255,255,0.62)',
-             backdropFilter: 'blur(28px)',
-             WebkitBackdropFilter: 'blur(28px)',
-             border: '1px solid rgba(255,255,255,0.75)',
-             boxShadow: '0 4px 32px rgba(28,28,46,0.10), 0 1px 0 rgba(255,255,255,0.6) inset',
-           }}>
-
-        <div className="px-4 h-[52px] flex items-center gap-1">
-
-          {/* Logo */}
-          <Link to="/" className="flex items-center mr-3 no-underline shrink-0">
-            <img src="/Logo-final.jpeg" alt="Achievers' Hub" className="h-8 w-auto object-contain" />
+    <div className="mkt">
+      <header className={`${transparent ? 'fixed' : 'sticky'} inset-x-0 top-0 z-50 transition-all duration-300 ease-out ${scrolled || open ? 'bg-white/95 shadow-[var(--shadow-nav)] backdrop-blur-[12px]' : 'bg-transparent'}`}>
+        <Container className="flex h-[72px] items-center justify-between sm:h-20 lg:h-[84px]">
+          <Link to="/" aria-label="Achievers Hub home">
+            <Logo tagline="GCSE Maths & Economics" taglineClassName="hidden xl:block" />
           </Link>
 
-          {/* Desktop links */}
-          <div className="hidden lg:flex items-center gap-0 flex-1">
-            {NAV_LINKS.map((l) => (
-              l.soon ? (
-                <span key={l.label}
-                  className="font-body text-sm font-medium px-3 py-1.5 rounded-xl text-gray-400 cursor-default select-none flex items-center gap-1 whitespace-nowrap">
-                  {l.label}
-                  <span className="text-[8px] font-bold bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded uppercase tracking-wide">
-                    Soon
-                  </span>
-                </span>
-              ) : (
-                <Link key={l.path} to={l.path}
-                  className="font-body text-sm font-medium px-3 py-1.5 rounded-xl transition-all no-underline whitespace-nowrap"
-                  style={isActive(l.path)
-                    ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)' }
-                    : { color: '#4b5563' }}
-                  onMouseEnter={e => {
-                    if (!isActive(l.path)) {
-                      (e.currentTarget as HTMLElement).style.background = 'var(--purple-faint)';
-                      (e.currentTarget as HTMLElement).style.color = 'var(--purple-dark)';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!isActive(l.path)) {
-                      (e.currentTarget as HTMLElement).style.background = 'transparent';
-                      (e.currentTarget as HTMLElement).style.color = '#4b5563';
-                    }
-                  }}>
-                  {l.label}
-                </Link>
-              )
-            ))}
+          <nav className="hidden items-center gap-5 lg:flex" aria-label="Primary navigation">
+            <Link to="/how-it-works" className="py-3 text-sm font-bold text-[var(--color-ink-700)] hover:text-[var(--color-primary-600)]">How It Works</Link>
+            <DesktopMenu label="Features" items={features} />
+            <DesktopMenu label="Subjects" items={subjects} />
+            <DesktopMenu label="Students & Parents" items={families} />
+            <Link to="/tutors" className="py-3 text-sm font-bold text-[var(--color-ink-700)] hover:text-[var(--color-primary-600)]">Tutors</Link>
+            <Link to="/pricing" className="py-3 text-sm font-bold text-[var(--color-ink-700)] hover:text-[var(--color-primary-600)]">Pricing</Link>
+          </nav>
+
+          <div className="hidden items-center gap-4 lg:flex">
+            <Link to="/login" className="text-sm font-bold text-[var(--color-ink-700)] hover:text-[var(--color-primary-600)]">Sign In</Link>
+            <Button href="/signup?plan=free" variant="accent" size="md" className="whitespace-nowrap transition-transform duration-200 hover:-translate-y-0.5">Start Learning Free</Button>
           </div>
 
-          {/* Desktop right — auth buttons */}
-          <div className="hidden lg:flex items-center gap-2 ml-auto">
-            {loggedIn ? (
-              <Link to={dashPath ?? '/dashboard'}
-                className="btn-glow-purple text-sm py-1.5 px-4 no-underline">
-                My Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link to="/login"
-                  className="flex items-center gap-1.5 font-body text-sm font-medium px-3.5 py-1.5 rounded-xl border transition-all no-underline"
-                  style={{ borderColor: '#e5e7eb', color: '#4b5563' }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--purple-light)';
-                    (e.currentTarget as HTMLElement).style.color = 'var(--purple-dark)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = '#e5e7eb';
-                    (e.currentTarget as HTMLElement).style.color = '#4b5563';
-                  }}>
-                  <UserIcon /> Login
-                </Link>
-                <Link to="/signup"
-                  className="btn-glow-purple text-sm py-1.5 px-4 no-underline whitespace-nowrap">
-                  Start Free
-                </Link>
-              </>
-            )}
-          </div>
+          <button className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-[var(--color-ink-900)] lg:hidden" onClick={() => setOpen((value) => !value)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open}>{open ? <X size={24} /> : <Menu size={24} />}</button>
+        </Container>
+      </header>
 
-          {/* Burger */}
-          <button onClick={() => setOpen(o => !o)}
-            className="lg:hidden flex flex-col gap-1.5 p-2 ml-auto"
-            aria-label="Toggle menu">
-            <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-transform duration-200 ${open ? 'translate-y-2 rotate-45' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-opacity duration-200 ${open ? 'opacity-0' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-transform duration-200 ${open ? '-translate-y-2 -rotate-45' : ''}`} />
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        <div className={`mobile-menu ${open ? 'open' : ''} px-4`}>
-          <div className="py-3 flex flex-col gap-1 border-t border-gray-100/80">
-            {NAV_LINKS.map((l) => (
-              l.soon ? (
-                <span key={l.label}
-                  className="flex items-center gap-2 font-body text-base font-medium text-gray-400 py-2.5 border-b border-gray-100 cursor-default">
-                  {l.label}
-                  <span className="text-[9px] font-bold bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded uppercase tracking-wide">Soon</span>
-                </span>
-              ) : (
-                <Link key={l.path} to={l.path} onClick={() => setOpen(false)}
-                  className="font-body text-base font-medium text-gray-700 py-2.5 border-b border-gray-100 no-underline"
-                  style={isActive(l.path) ? { color: 'var(--purple-dark)' } : {}}>
-                  {l.label}
-                </Link>
-              )
-            ))}
-            <div className="flex flex-col gap-2 mt-3">
-              {loggedIn ? (
-                <Link to={dashPath ?? '/dashboard'} onClick={() => setOpen(false)}
-                  className="btn-glow-purple text-center text-[15px] no-underline">
-                  My Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link to="/signup" onClick={() => setOpen(false)}
-                    className="btn-glow-purple text-center text-[15px] no-underline">
-                    Start Free
-                  </Link>
-                  <Link to="/login" onClick={() => setOpen(false)}
-                    className="flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-600 no-underline">
-                    <UserIcon /> Log in
-                  </Link>
-                </>
-              )}
-            </div>
+      {open && (
+        <div className="fixed inset-x-0 bottom-0 top-[72px] z-40 overflow-y-auto bg-white sm:top-20 lg:hidden">
+          <div className="px-6 py-7">
+            <nav aria-label="Mobile navigation" className="space-y-7">
+              <div className="grid grid-cols-2 gap-2">
+                {[{ href: '/', label: 'Home' }, { href: '/how-it-works', label: 'How It Works' }, { href: '/tutors', label: 'For Tutors' }, { href: '/pricing', label: 'Pricing' }].map((item) => <Link key={item.href} to={item.href} onClick={() => setOpen(false)} className="rounded-xl bg-slate-50 px-4 py-3 font-display font-extrabold text-[var(--color-ink-900)]">{item.label}</Link>)}
+              </div>
+              {[{ title: 'Features', items: features }, { title: 'Subjects', items: subjects }, { title: 'Students & Parents', items: families }].map((group) => <section key={group.title}><h2 className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--color-primary-600)]">{group.title}</h2><div className="mt-2 divide-y divide-slate-100">{group.items.map((item) => <Link key={item.href} to={item.href} onClick={() => setOpen(false)} className="flex items-center justify-between py-3"><span><span className="block font-bold text-[var(--color-ink-900)]">{item.label}</span><span className="mt-0.5 block text-xs text-[var(--color-ink-500)]">{item.description}</span></span><span aria-hidden="true">→</span></Link>)}</div></section>)}
+            </nav>
+            <div className="mt-8 grid gap-3 border-t border-slate-200 pt-6"><Button href="/login" variant="outline" size="lg" className="w-full">Sign In</Button><Button href="/signup?plan=free" variant="accent" size="lg" className="w-full">Start Learning Free</Button><p className="text-center text-xs leading-5 text-[var(--color-ink-500)]">Free Starter has no time limit and needs no payment details.</p></div>
           </div>
         </div>
-      </nav>
+      )}
     </div>
   );
 }
