@@ -248,8 +248,25 @@ export default function DailyFiveTab() {
             <p className="mt-4 max-w-xl text-lg leading-8 text-white/70">
               You scored {score} out of {questions.length} in {subject}. Your answers have refined what the Hub recommends next.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/dashboard/topics" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--color-accent-400)] px-6 font-bold text-[var(--color-ink-900)]">
+            {/* Spec: Daily 5 results → Think. Speak. Grow. → recommended action.
+                Always optional, never streak-pressured, dismissible with Not now. */}
+            <div className="mt-8 rounded-2xl border border-white/15 bg-white/10 p-5">
+              <p className="text-xs font-extrabold uppercase tracking-[.14em] text-[var(--color-accent-300)]">Take one minute to reflect</p>
+              <p className="mt-2 max-w-lg leading-7 text-white/75">
+                Think about how you approached today&apos;s questions and choose one useful next step.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link to="/dashboard/tsg" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--color-accent-400)] px-6 font-bold text-[var(--color-ink-900)]">
+                  Start Think. Speak. Grow. <ArrowRight size={18} />
+                </Link>
+                <Link to="/dashboard" className="inline-flex min-h-12 items-center rounded-xl border border-white/20 px-6 font-bold hover:bg-white/5">
+                  Not now
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/dashboard/topics" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/20 px-6 font-bold hover:bg-white/5">
                 {wrongTopics.length > 0 ? 'Revise the topics you missed' : 'Practise your next topic'} <ArrowRight size={18} />
               </Link>
               <Link to="/dashboard/papers" className="inline-flex min-h-12 items-center rounded-xl border border-white/20 px-6 font-bold hover:bg-white/5">

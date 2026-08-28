@@ -6,8 +6,9 @@ import PastPapersTab from './tabs/PastPapersTab';
 import SpecMapperTab from './tabs/SpecMapperTab';
 import AchievementsTab from './tabs/AchievementsTab';
 import SettingsTab  from './tabs/SettingsTab';
+import ThinkSpeakGrowTab from './tabs/ThinkSpeakGrowTab';
 
-type Tab = 'home' | 'daily5' | 'topics' | 'papers' | 'spec' | 'achievements' | 'settings';
+type Tab = 'home' | 'daily5' | 'topics' | 'papers' | 'spec' | 'achievements' | 'tsg' | 'settings';
 
 const CONTENT: Record<Tab, React.ReactNode> = {
   home:         <HomeTab />,
@@ -16,6 +17,7 @@ const CONTENT: Record<Tab, React.ReactNode> = {
   papers:       <PastPapersTab />,
   spec:         <SpecMapperTab />,
   achievements: <AchievementsTab />,
+  tsg:          <ThinkSpeakGrowTab />,
   settings:     <SettingsTab />,
 };
 

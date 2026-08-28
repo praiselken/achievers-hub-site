@@ -16,7 +16,7 @@ import { Logo } from '../marketing/Logo';
 import { levelProgress } from '../../lib/xp';
 
 export type DashTab =
-  | 'home' | 'daily5' | 'topics' | 'papers' | 'spec' | 'achievements' | 'settings';
+  | 'home' | 'daily5' | 'topics' | 'papers' | 'spec' | 'achievements' | 'tsg' | 'settings';
 
 type NavItem = {
   icon: LucideIcon | null;
@@ -34,7 +34,7 @@ export const NAV_ITEMS: NavItem[] = [
   { icon: Star, label: 'Daily 5', tab: 'daily5', path: '/dashboard/daily5' },
   { icon: Dumbbell, label: 'Practice', tab: 'topics', path: '/dashboard/topics' },
   { icon: BarChart3, label: 'Progress', tab: 'spec', path: '/dashboard/spec' },
-  { icon: Sprout, label: 'Think. Speak. Grow.', tab: null, path: null },
+  { icon: Sprout, label: 'Think. Speak. Grow.', tab: 'tsg', path: '/dashboard/tsg' },
   { icon: null, label: 'Ask Archi', tab: null, path: null, archi: true },
   { icon: FileText, label: 'Past papers', tab: 'papers', path: '/dashboard/papers' },
   { icon: Medal, label: 'Achievements', tab: 'achievements', path: '/dashboard/achievements' },
