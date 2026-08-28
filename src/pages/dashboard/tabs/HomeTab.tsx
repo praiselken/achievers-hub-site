@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, BarChart3, BookOpen, FileText, Sparkles, Sprout } from 'lucide-react';
+import { ArchiAvatar } from '../../../components/marketing/ArchiAvatar';
+import { GROW_ACTIONS, todaysReflection } from '../../../lib/tsg';
 import { supabase } from '../../../lib/supabase';
 import { useSubjects, type SubjectRow } from '../../../lib/useSubjects';
 import { useSubject } from '../DashboardLayout';
 import { checkAndAwardAchievements } from '../../../lib/xp';
 import { isDemoMode } from '../../../lib/demoMode';
-import { DEMO_PROFILE, getDemoMetrics, getDemoSubjectProgress } from '../../../lib/demoData';
+import { getDemoMetrics, getDemoSubjectProgress } from '../../../lib/demoData';
 
 interface GlobalStats {
   streak: number;
@@ -35,12 +38,10 @@ export default function HomeTab() {
   const [stats, setStats] = useState<GlobalStats>(DEFAULT_STATS);
   const [subjectProgress, setSubjectProgress] = useState<SubjectProgress[]>([]);
   const [loading, setLoading] = useState(true);
-  const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
     async function load() {
       if (isDemoMode()) {
-        setDisplayName(DEMO_PROFILE.display_name);
         const metrics = getDemoMetrics();
         setStats({
           streak: metrics.streakDays,
@@ -57,9 +58,6 @@ export default function HomeTab() {
       if (!supabase || activeSubjects.length === 0) { setLoading(false); return; }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
-
-      const profileRes = await supabase.from('profiles').select('display_name').eq('id', user.id).single();
-      if (profileRes.data?.display_name) setDisplayName(profileRes.data.display_name);
 
       await checkAndAwardAchievements(user.id);
 
@@ -118,8 +116,7 @@ export default function HomeTab() {
     load();
   }, [subject, activeSubjects.length]);
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
   const overallPct = subjectProgress.length
     ? Math.round(subjectProgress.reduce((a, s) => a + s.pct, 0) / subjectProgress.length)
     : 0;
@@ -132,194 +129,198 @@ export default function HomeTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <p className="font-body text-sm text-gray-400">Loading your dashboard…</p>
+        <p className="text-sm text-[var(--color-ink-500)]">Loading your dashboard…</p>
       </div>
     );
   }
 
+  // The four dashboard states defined in the client's Think. Speak. Grow. brief.
+  const reflection = todaysReflection();
+  const nextStep = !stats.dailyDoneToday
+    ? {
+        eyebrow: 'Your next step',
+        title: 'Complete today’s Daily 5.',
+        copy: 'Five personalised questions, then a clear recommendation for what to do next.',
+        cta: { label: 'Start Daily 5', href: '/dashboard/daily5' },
+        tone: 'daily' as const,
+      }
+    : !reflection
+      ? {
+          eyebrow: 'Think. Speak. Grow.',
+          title: 'Reflect on today’s learning and choose what to do next.',
+          copy: 'One minute, entirely optional, and never counted against you.',
+          cta: { label: 'Start Think. Speak. Grow.', href: '/dashboard/tsg' },
+          tone: 'grow' as const,
+        }
+      : !reflection.actionCompleted
+        ? {
+            eyebrow: 'Today’s growth action',
+            title: GROW_ACTIONS.find((a) => a.id === reflection.action)?.label ?? 'Your next step is saved.',
+            copy: 'You chose this after today’s reflection.',
+            cta: { label: 'Do this now', href: '/dashboard/tsg' },
+            tone: 'grow' as const,
+          }
+        : {
+            eyebrow: 'You followed through',
+            title: 'You reviewed the feedback and tried again independently.',
+            copy: 'That is today’s Think. Speak. Grow. complete.',
+            cta: { label: 'Open My Growth Journey', href: '/dashboard/tsg' },
+            tone: 'progress' as const,
+          };
+
+  const tiles: { label: string; value: string; note: string; href?: string }[] = [
+    { label: 'Streak', value: String(stats.streak), note: `day${stats.streak === 1 ? '' : 's'} · best ${stats.longestStreak}` },
+    { label: 'Average mastery', value: stats.avgMastery !== null ? `${stats.avgMastery}%` : '—', note: 'across topics practised' },
+    { label: 'Past papers', value: String(stats.papersDone), note: 'logged so far', href: '/dashboard/papers' },
+    { label: 'Achievements', value: String(stats.achievementCount), note: 'unlocked', href: '/dashboard/achievements' },
+  ];
+
+  const tools = [
+    { label: 'Daily 5', copy: 'Five questions for this subject', href: '/dashboard/daily5', tone: 'daily', icon: Sparkles },
+    { label: 'Practice', copy: 'Knowledge cards, lessons and questions', href: '/dashboard/topics', tone: 'topic', icon: BookOpen },
+    { label: 'Past papers', copy: 'Turn marks into topic priorities', href: '/dashboard/papers', tone: 'past', icon: FileText },
+    { label: 'Progress', copy: 'See what to revise next', href: '/dashboard/spec', tone: 'progress', icon: BarChart3 },
+    { label: 'Think. Speak. Grow.', copy: 'Reflect, choose and act', href: '/dashboard/tsg', tone: 'grow', icon: Sprout },
+  ] as const;
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Banner */}
-      <div className="rounded-2xl p-6 md:p-7"
-           style={{ background: 'linear-gradient(135deg, var(--purple-dark) 0%, #6B4A80 100%)' }}>
-        <h1 className="font-display font-bold text-white text-2xl md:text-3xl">
-          {greeting}{displayName ? `, ${displayName}` : ''} 👋
-        </h1>
-        <p className="font-body text-sm mt-1" style={{ color: '#E4CFEE' }}>
-          {stats.streak > 0
-            ? `You're on a ${stats.streak}-day streak — keep it going.`
-            : "Ready to build your streak today?"}
-        </p>
-      </div>
+    <div className="flex flex-col gap-5">
 
-      {/* Stat row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-gray-100" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">🔥</span>
-            <span className="font-body text-xs font-semibold text-gray-400 uppercase tracking-wider">Streak</span>
-          </div>
-          <div className="font-display font-bold text-3xl text-gray-900">{stats.streak}</div>
-          <div className="font-body text-xs text-gray-400 mt-1">day{stats.streak !== 1 ? 's' : ''} · best: {stats.longestStreak}</div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-5 border border-gray-100" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-          <div className="font-body text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Avg mastery</div>
-          <div className="font-display font-bold text-3xl text-gray-900">
-            {stats.avgMastery !== null ? `${stats.avgMastery}%` : '—'}
-          </div>
-          <div className="font-body text-xs text-gray-400 mt-1">across all topics practised</div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-5 border border-gray-100" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-          <div className="font-body text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Daily 5</div>
-          <div className="font-display font-bold text-lg" style={{ color: stats.dailyDoneToday ? '#4A8A14' : 'var(--purple-dark)' }}>
-            {stats.dailyDoneToday ? 'Done today' : 'Not yet'}
-          </div>
-          <div className="font-body text-xs text-gray-400 mt-1">{stats.papersDone} paper{stats.papersDone !== 1 ? 's' : ''} logged</div>
-        </div>
-
-        <Link to="/dashboard/achievements" className="bg-white rounded-2xl p-5 border border-gray-100 no-underline hover-lift transition-all" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-          <div className="font-body text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Achievements</div>
-          <div className="font-display font-bold text-3xl text-gray-900">{stats.achievementCount}</div>
-          <div className="font-body text-xs text-gray-400 mt-1">unlocked</div>
-        </Link>
-      </div>
-
-      {/* Daily 5 CTA */}
-      {!stats.dailyDoneToday ? (
-        <div className="rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center gap-5"
-             style={{ background: 'linear-gradient(135deg, var(--purple-faint) 0%, #EDE0F4 100%)', border: '1px solid var(--purple-light)' }}>
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: 'white' }}>⚡</div>
-          <div className="flex-1">
-            <h3 className="font-display font-bold text-lg" style={{ color: 'var(--purple-dark)' }}>Your Daily 5 is ready</h3>
-            <p className="font-body text-sm mt-0.5" style={{ color: 'var(--purple)' }}>
-              5 targeted questions. 15 minutes. Builds your streak.
-            </p>
-          </div>
-          <Link to="/dashboard/daily5" className="btn-glow-purple text-sm no-underline px-5 py-3 whitespace-nowrap" style={{ borderRadius: '12px' }}>
-            Start Daily 5 →
+      {/* Your next step */}
+      <section className={`feature-${nextStep.tone} overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[var(--shadow-soft-lg)]`}>
+        <div className="feature-tinted-surface px-6 py-6 sm:px-9 sm:py-8">
+          <p className="text-xs font-extrabold uppercase tracking-[.14em] feature-accent-text">{nextStep.eyebrow}</p>
+          <h1 className="mt-2 max-w-2xl font-display text-2xl font-extrabold leading-snug text-[var(--color-ink-900)] sm:text-3xl">
+            {nextStep.title}
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--color-ink-600)]">{nextStep.copy}</p>
+          <Link
+            to={nextStep.cta.href}
+            className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--color-primary-600)] px-6 font-bold text-white transition hover:bg-[var(--color-primary-700)]"
+          >
+            {nextStep.cta.label} <ArrowRight size={18} />
           </Link>
         </div>
-      ) : (
-        <div className="rounded-2xl p-6 flex items-center gap-5" style={{ background: '#EAF3DE', border: '1px solid #C8E49A' }}>
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 bg-white">✅</div>
-          <div>
-            <h3 className="font-display font-bold text-lg text-green-800">Daily 5 complete!</h3>
-            <p className="font-body text-sm text-green-700 mt-0.5">Come back tomorrow to keep your streak going.</p>
-          </div>
-        </div>
-      )}
+      </section>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+      {/* Evidence tiles */}
+      <section className="grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">
+        {tiles.map((t) => {
+          const inner = (
+            <>
+              <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[var(--color-ink-500)]">{t.label}</p>
+              <p className="mt-2 font-display text-3xl font-extrabold tabular-nums text-[var(--color-ink-900)]">{t.value}</p>
+              <p className="mt-1 text-xs leading-5 text-[var(--color-ink-500)]">{t.note}</p>
+            </>
+          );
+          return t.href ? (
+            <Link key={t.label} to={t.href} className="bg-white p-5 transition hover:bg-[var(--color-primary-50)]">{inner}</Link>
+          ) : (
+            <div key={t.label} className="bg-white p-5">{inner}</div>
+          );
+        })}
+      </section>
+
+      <div className="grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
+        <div className="flex flex-col gap-5">
+
           {/* Continue where you left off */}
-          <div>
-            <h2 className="font-body font-bold text-gray-700 text-sm uppercase tracking-wider mb-3">Continue where you left off</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {subjectProgress.map(s => (
-                <button key={s.slug} onClick={() => goToSubject(s.slug)}
-                  className="bg-white rounded-2xl p-5 border border-gray-100 text-left hover-lift transition-all"
-                  style={{ boxShadow: '0 2px 8px rgba(28,28,46,0.05)' }}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                         style={{ background: `${s.color}22` }}>{s.icon}</div>
-                    <div>
-                      <div className="font-body font-bold text-gray-900 text-sm">{s.name}</div>
-                      <div className="font-body text-xs text-gray-400">{s.coveredTopics} of {s.totalTopics} topics covered</div>
-                    </div>
+          <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[var(--shadow-soft)] sm:p-7">
+            <h2 className="font-display text-lg font-extrabold text-[var(--color-ink-900)]">Continue where you left off</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {subjectProgress.map((s) => (
+                <button
+                  key={s.slug}
+                  type="button"
+                  onClick={() => goToSubject(s.slug)}
+                  className="rounded-2xl border border-slate-200 p-5 text-left transition hover:border-[var(--color-primary-200)] hover:bg-[var(--color-primary-50)]/40"
+                >
+                  <p className="text-sm font-extrabold text-[var(--color-ink-900)]">{s.name}</p>
+                  <p className="mt-0.5 text-xs text-[var(--color-ink-500)]">
+                    {s.coveredTopics} of {s.totalTopics} topics covered
+                  </p>
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-full rounded-full bg-[var(--color-primary-500)]" style={{ width: `${s.pct}%` }} />
                   </div>
-                  <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: s.color ?? 'var(--purple)' }} />
-                  </div>
-                  <div className="font-body text-xs text-gray-400 mt-2">{s.pct}% complete</div>
+                  <p className="mt-2 text-xs font-bold tabular-nums text-[var(--color-ink-500)]">{s.pct}% complete</p>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Today's Plan */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-100" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-            <h2 className="font-body font-bold text-gray-900 mb-4">Today's Plan</h2>
-            <div className="flex flex-col gap-3">
-              {[
-                { label: 'Complete your Daily 5', done: stats.dailyDoneToday, link: '/dashboard/daily5' },
-                { label: 'Review a topic in Practice', done: subjectProgress.some(s => s.coveredTopics > 0), link: '/dashboard/topics' },
-                { label: 'Log a past paper score', done: stats.papersDone > 0, link: '/dashboard/papers' },
-                { label: 'Check your Spec Mapper', done: false, link: '/dashboard/spec' },
-              ].map(item => (
-                <Link key={item.label} to={item.link} className="flex items-center gap-3 no-underline group">
-                  <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
-                       style={{ borderColor: item.done ? '#78B828' : 'var(--purple-light)', background: item.done ? '#78B828' : 'white' }}>
-                    {item.done && <svg viewBox="0 0 12 12" className="w-3 h-3" fill="white"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                  </div>
-                  <span className={`font-body text-sm ${item.done ? 'line-through text-gray-400' : 'text-gray-700 group-hover:text-purple-700'}`}>
-                    {item.label}
+          {/* Learning tools */}
+          <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[var(--shadow-soft)] sm:p-7">
+            <h2 className="font-display text-lg font-extrabold text-[var(--color-ink-900)]">Your learning tools</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {tools.map((t) => (
+                <Link
+                  key={t.label}
+                  to={t.href}
+                  className={`feature-${t.tone} feature-tinted-surface feature-accent-border flex flex-col rounded-2xl border p-5 transition hover:-translate-y-0.5`}
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/70 feature-accent-text">
+                    <t.icon size={19} />
                   </span>
+                  <p className="mt-4 text-sm font-extrabold text-[var(--color-ink-900)]">{t.label}</p>
+                  <p className="mt-1 text-xs leading-5 text-[var(--color-ink-600)]">{t.copy}</p>
                 </Link>
               ))}
             </div>
-          </div>
+          </section>
+        </div>
 
-          {/* Progress Overview */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-100" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-            <h2 className="font-body font-bold text-gray-900 mb-4">Your Progress Overview</h2>
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="relative w-28 h-28 flex-shrink-0">
-                <svg viewBox="0 0 100 100" className="w-28 h-28 -rotate-90">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#F3F0F8" strokeWidth="10" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="var(--purple)" strokeWidth="10"
-                          strokeDasharray={`${2 * Math.PI * 42}`}
-                          strokeDashoffset={`${2 * Math.PI * 42 * (1 - overallPct / 100)}`}
-                          strokeLinecap="round" />
+        <div className="flex flex-col gap-5">
+
+          {/* Syllabus progress */}
+          <section className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[var(--shadow-soft)]">
+            <h2 className="font-display text-lg font-extrabold text-[var(--color-ink-900)]">Syllabus progress</h2>
+            <div className="mt-5 flex items-center gap-5">
+              <div className="relative h-24 w-24 shrink-0">
+                <svg viewBox="0 0 100 100" className="h-24 w-24 -rotate-90">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="var(--color-primary-50)" strokeWidth="10" />
+                  <circle
+                    cx="50" cy="50" r="42" fill="none" stroke="var(--color-primary-500)" strokeWidth="10"
+                    strokeDasharray={`${2 * Math.PI * 42}`}
+                    strokeDashoffset={`${2 * Math.PI * 42 * (1 - overallPct / 100)}`}
+                    strokeLinecap="round"
+                  />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-display font-bold text-xl text-gray-900">{overallPct}%</span>
+                  <span className="font-display text-xl font-extrabold tabular-nums text-[var(--color-ink-900)]">{overallPct}%</span>
                 </div>
               </div>
-              <div className="flex-1 w-full flex flex-col gap-3">
-                {subjectProgress.map(s => (
+              <div className="flex-1 space-y-3">
+                {subjectProgress.map((s) => (
                   <div key={s.slug}>
-                    <div className="flex justify-between font-body text-xs text-gray-500 mb-1">
-                      <span>{s.name}</span>
-                      <span>{s.pct}%</span>
+                    <div className="flex justify-between text-xs font-semibold text-[var(--color-ink-500)]">
+                      <span>{s.name.replace(/^GCSE\s+/, '')}</span>
+                      <span className="tabular-nums">{s.pct}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: s.color ?? 'var(--purple)' }} />
+                    <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-[var(--color-primary-400)]" style={{ width: `${s.pct}%` }} />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </div>
+            <p className="mt-5 text-xs leading-5 text-[var(--color-ink-500)]">
+              Progress reflects a pattern of results over time, not any single answer.
+            </p>
+          </section>
 
-        {/* Right column */}
-        <div className="flex flex-col gap-6">
-          <div className="bg-white rounded-2xl p-5 border border-gray-100" style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-            <h2 className="font-body font-bold text-gray-900 text-sm mb-3">Recent Notifications</h2>
-            <p className="font-body text-xs text-gray-400">You'll see achievement unlocks and reminders here soon.</p>
-          </div>
-
-          <div className="rounded-2xl p-5 border" style={{ background: '#FAFAFA', borderColor: '#F0F0F0' }}>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">🤖</span>
-              <h2 className="font-body font-bold text-gray-500 text-sm">Ask Archi</h2>
-              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-gray-400" style={{ background: '#EEE' }}>Coming soon</span>
+          {/* Ask Archi — not built yet */}
+          <section className="rounded-[1.75rem] border border-dashed border-slate-200 bg-white p-6">
+            <div className="flex items-center gap-2">
+              <ArchiAvatar size={22} />
+              <h2 className="text-sm font-extrabold text-[var(--color-ink-700)]">Ask Archi</h2>
+              <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-ink-500)]">
+                Coming soon
+              </span>
             </div>
-            <p className="font-body text-xs text-gray-400">Ask for explanations, hints and practice questions.</p>
-          </div>
-
-          <div className="rounded-2xl p-5 border" style={{ background: '#FAFAFA', borderColor: '#F0F0F0' }}>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">🌱</span>
-              <h2 className="font-body font-bold text-gray-500 text-sm">Think. Speak. Grow.</h2>
-              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-gray-400" style={{ background: '#EEE' }}>Coming soon</span>
-            </div>
-            <p className="font-body text-xs text-gray-400">Daily reflections to build your mindset.</p>
-          </div>
+            <p className="mt-2 text-xs leading-5 text-[var(--color-ink-500)]">
+              Step-by-step help that starts with a hint, so you keep the thinking.
+            </p>
+          </section>
         </div>
       </div>
     </div>
