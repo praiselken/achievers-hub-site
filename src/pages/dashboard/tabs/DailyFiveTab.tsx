@@ -21,6 +21,7 @@ import { useSubject } from '../DashboardLayout';
 import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 import { isDemoMode } from '../../../lib/demoMode';
 import { DEMO_DAILY_QUESTIONS } from '../../../lib/demoData';
+import { Workbook } from '../../../components/workbook/Workbook';
 
 type Phase = 'intro' | 'question' | 'complete';
 
@@ -56,8 +57,7 @@ export default function DailyFiveTab() {
   const [alreadyDone, setAlreadyDone] = useState(false);
   const [loading, setLoading]       = useState(true);
   const [hintOpen, setHintOpen]     = useState(false);
-  const [workingOpen, setWorkingOpen] = useState(false);
-  const [working, setWorking]       = useState('');
+  const [workbookOpen, setWorkbookOpen] = useState(false);
   const [flagged, setFlagged]       = useState<string[]>([]);
 
   useEffect(() => {
@@ -105,8 +105,7 @@ export default function DailyFiveTab() {
     setCurrent(next);
     setRevealed(false);
     setHintOpen(false);
-    setWorkingOpen(false);
-    setWorking('');
+    setWorkbookOpen(false);
   }
 
   function startSession() {
@@ -374,13 +373,29 @@ export default function DailyFiveTab() {
 
           <div className="min-h-[410px] bg-[#fcfcfd] p-5 sm:p-8">
             {!revealed ? (
-              <div className="flex min-h-56 max-w-2xl flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white p-8 text-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-primary-50)] text-[var(--color-primary-600)]"><PenLine size={22} /></span>
-                <p className="mt-4 font-display text-lg font-extrabold text-[var(--color-ink-900)]">Work it out first</p>
-                <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--color-ink-500)]">
-                  Use the working space if it helps. Reveal the answer when you&apos;re ready to check.
-                </p>
-              </div>
+              workbookOpen ? (
+                <Workbook
+                  open
+                  onClose={() => setWorkbookOpen(false)}
+                  storageKey={`daily5:${q.id}`}
+                  title={q.topic_title ? `Daily 5 — ${q.topic_title}` : 'Daily 5'}
+                />
+              ) : (
+                <div className="flex min-h-56 max-w-2xl flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white p-8 text-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-primary-50)] text-[var(--color-primary-600)]"><PenLine size={22} /></span>
+                  <p className="mt-4 font-display text-lg font-extrabold text-[var(--color-ink-900)]">Work it out first</p>
+                  <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--color-ink-500)]">
+                    Open the workbook for squared paper, a ruler, a protractor and a compass.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setWorkbookOpen(true)}
+                    className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--color-primary-200)] bg-white px-5 text-sm font-bold text-[var(--color-primary-700)] transition hover:bg-[var(--color-primary-50)]"
+                  >
+                    <PenLine size={16} /> Open workbook
+                  </button>
+                </div>
+              )
             ) : (
               <div className="max-w-3xl space-y-4">
                 <div className="overflow-hidden rounded-2xl border border-[var(--color-success-300)]">
@@ -431,21 +446,6 @@ export default function DailyFiveTab() {
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-
-            {workingOpen && (
-              <div className="mt-5 max-w-4xl rounded-2xl border border-dashed border-[var(--color-primary-200)] bg-white p-4">
-                <label htmlFor="working-notes" className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[var(--color-primary-600)]">
-                  <PenLine size={15} />Working notes
-                </label>
-                <textarea
-                  id="working-notes"
-                  value={working}
-                  onChange={(event) => setWorking(event.target.value)}
-                  placeholder="Your rough working stays here while you answer…"
-                  className="mt-2 min-h-24 w-full resize-y bg-transparent leading-7 outline-none placeholder:text-slate-300"
-                />
               </div>
             )}
 
@@ -503,7 +503,7 @@ export default function DailyFiveTab() {
             <p className="px-2 text-xs font-extrabold uppercase tracking-[.14em] text-[var(--color-ink-500)]">Question tools</p>
             <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-1">
               <ToolButton icon={<Lightbulb size={18} />} label="Show a hint" disabled={!q.hints} active={hintOpen} onClick={() => setHintOpen((value) => !value)} />
-              <ToolButton icon={<PenLine size={18} />} label="Working space" active={workingOpen} onClick={() => setWorkingOpen((value) => !value)} />
+              <ToolButton icon={<PenLine size={18} />} label="Workbook" active={workbookOpen} onClick={() => setWorkbookOpen(true)} />
               <ToolButton icon={<Calculator size={18} />} label="Calculator" note="Allowed" onClick={() => undefined} />
               <ToolButton icon={<BookOpen size={18} />} label="Formula sheet" onClick={() => undefined} />
             </div>

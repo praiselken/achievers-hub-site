@@ -1,3 +1,4 @@
+import { Workbook } from '../../../components/workbook/Workbook';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
@@ -32,14 +33,27 @@ const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string; 
   covered:     { label: 'Covered',     color: '#4A8A14', bg: '#EAF3DE',  border: '#C8E49A' },
 };
 
-function PracticeQuestion({ q, a }: { q: string; a: string }) {
+function PracticeQuestion({ q, a, storageKey, topicTitle }: { q: string; a: string; storageKey: string; topicTitle: string }) {
   const [show, setShow] = useState(false);
+  const [workbookOpen, setWorkbookOpen] = useState(false);
   return (
     <div className="rounded-xl border border-gray-100 overflow-hidden">
       <div className="px-4 py-3 bg-gray-50">
         <p className="font-body text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Practice question</p>
         <p className="font-body text-sm text-gray-800">{q}</p>
       </div>
+      <button onClick={() => setWorkbookOpen(true)}
+        className="w-full px-4 py-2.5 font-body text-sm font-semibold text-left border-t border-gray-100 hover:bg-gray-50 transition-colors"
+        style={{ color: 'var(--purple)' }}>
+        ✏️ Open workbook — ruler, protractor & compass
+      </button>
+      <Workbook
+        open={workbookOpen}
+        onClose={() => setWorkbookOpen(false)}
+        storageKey={storageKey}
+        title={`Practice — ${topicTitle}`}
+        height={440}
+      />
       {show ? (
         <div className="px-4 py-3" style={{ background: '#EAF3DE' }}>
           <p className="font-body text-xs font-bold uppercase tracking-wider mb-1" style={{ color: '#4A8A14' }}>Model answer</p>
@@ -144,7 +158,7 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
           {/* Practice question */}
           {topic.practice_q && (
             <div className="px-5 py-3">
-              <PracticeQuestion q={topic.practice_q} a={topic.practice_a ?? ''} />
+              <PracticeQuestion q={topic.practice_q} a={topic.practice_a ?? ''} storageKey={`practice:${topic.id}`} topicTitle={topic.name} />
             </div>
           )}
 
