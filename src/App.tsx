@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -17,6 +18,10 @@ import OnboardingPage from './pages/OnboardingPage';
 import { supabase } from './lib/supabase';
 import { enterDemoMode } from './lib/demoMode';
 import './index.css';
+
+/** Roles a person may choose for themselves during signup. Admin is not one. */
+const SELF_ASSIGNABLE_ROLES = ['student', 'parent', 'tutor'] as const;
+type SelfAssignableRole = (typeof SELF_ASSIGNABLE_ROLES)[number];
 
 function DemoEntry() {
   // Runs synchronously during render so the flag is set before <Navigate>'s
@@ -42,17 +47,25 @@ export default function App() {
     const { data: { subscription } } = client.auth.onAuthStateChange(async (_event, session) => {
       if (!session?.user) return;
       const pendingRole = localStorage.getItem('pending_role');
+      // Always clear it, so a stale or tampered value can't persist across sign-ins.
+      localStorage.removeItem('pending_role');
       if (!pendingRole) return;
+      // localStorage is fully user-controlled, so treat this as untrusted input:
+      // only ever self-assign a role a person is allowed to pick at signup.
+      // Privileged roles (admin) must be granted server-side, never from here.
+      const role = SELF_ASSIGNABLE_ROLES.includes(pendingRole as SelfAssignableRole)
+        ? pendingRole
+        : 'student';
       const { data: existing } = await client.from('profiles').select('id').eq('id', session.user.id).single();
       if (!existing) {
-        await client.from('profiles').insert({ id: session.user.id, role: pendingRole });
+        await client.from('profiles').insert({ id: session.user.id, role });
       }
-      localStorage.removeItem('pending_role');
     });
     return () => subscription.unsubscribe();
   }, []);
 
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <Routes>
         {/* Marketing pages — have Nav + Footer (client redesign, Aug 2026) */}
@@ -107,5 +120,6 @@ export default function App() {
         <Route path="*" element={<MarketingLayout><ContentPage /></MarketingLayout>} />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }

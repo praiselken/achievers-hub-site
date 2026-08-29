@@ -1,3 +1,4 @@
+import RequireRole from '../RequireRole';
 import TutorDashboardLayout, { type TutorTab } from './TutorDashboardLayout';
 import TutorOverviewTab   from './tabs/TutorOverviewTab';
 import TutorStudentsTab   from './tabs/TutorStudentsTab';
@@ -19,8 +20,10 @@ const TAB_CONTENT: Record<TutorTab, React.ReactNode> = {
 
 export default function TutorDashboard({ tab }: Props) {
   return (
-    <TutorDashboardLayout activeTab={tab}>
-      {TAB_CONTENT[tab]}
-    </TutorDashboardLayout>
+    <RequireRole allow={['tutor', 'admin']}>
+      <TutorDashboardLayout activeTab={tab}>
+        {TAB_CONTENT[tab]}
+      </TutorDashboardLayout>
+    </RequireRole>
   );
 }

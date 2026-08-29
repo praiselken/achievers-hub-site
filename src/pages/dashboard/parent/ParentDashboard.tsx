@@ -1,3 +1,4 @@
+import RequireRole from '../RequireRole';
 import ParentDashboardLayout, { type ParentTab } from './ParentDashboardLayout';
 import ParentOverviewTab  from './tabs/ParentOverviewTab';
 import ParentProgressTab  from './tabs/ParentProgressTab';
@@ -13,8 +14,10 @@ export default function ParentDashboard({ tab }: { tab: ParentTab }) {
   }[tab];
 
   return (
-    <ParentDashboardLayout activeTab={tab}>
-      {content}
-    </ParentDashboardLayout>
+    <RequireRole allow={['parent', 'admin']}>
+      <ParentDashboardLayout activeTab={tab}>
+        {content}
+      </ParentDashboardLayout>
+    </RequireRole>
   );
 }
