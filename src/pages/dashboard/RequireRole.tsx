@@ -29,7 +29,13 @@ export default function RequireRole({ allow, children }: { allow: Role[]; childr
         .from('profiles').select('role').eq('id', user.id).single();
       if (cancelled) return;
 
-      const role = (profile?.role ?? 'student') as Role;
+      // A profile row is only written when signup went through the role picker,
+      // so an existing or OAuth-returning account can legitimately have none.
+      // Treating that as "student" would lock a real parent out of their own
+      // dashboard, so send them to finish setting up instead of guessing.
+      if (!profile?.role) { navigate('/onboarding', { replace: true }); return; }
+
+      const role = profile.role as Role;
       if (allow.includes(role)) { setState('ok'); return; }
 
       navigate(
