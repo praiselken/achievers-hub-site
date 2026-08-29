@@ -16,6 +16,21 @@ export function FeatureIllustration({
   feature: FeatureIllustrationTone;
   className?: string;
 }) {
+  // Archi has one canonical depiction across the app — the book character used
+  // in the hero, the sidebar and the avatar. The sprite sheet's AI cell is a
+  // different robot entirely, so the AI tile uses the real Archi art instead.
+  if (feature === 'ai') {
+    return (
+      <div className={`relative aspect-square overflow-hidden ${className}`} aria-hidden="true">
+        <img
+          src="/images/archie-book-avatar-v3.png"
+          alt=""
+          className="h-full w-full object-contain"
+        />
+      </div>
+    );
+  }
+
   const [column, row] = cells[feature];
 
   return (
