@@ -108,25 +108,25 @@ export default function SettingsTab() {
     setSubjects(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   }
 
-  if (loading) return <p className="font-body text-sm text-gray-400 py-8 text-center">Loading…</p>;
+  if (loading) return <p className="text-sm text-[var(--color-ink-300)] py-8 text-center">Loading…</p>;
 
   return (
     <div className="flex flex-col gap-6 max-w-xl">
       <div>
-        <h1 className="font-display font-bold text-2xl text-gray-900">Settings</h1>
-        <p className="font-body text-sm text-gray-500 mt-0.5">Update your profile and account details.</p>
+        <h1 className="font-display font-bold text-2xl text-[var(--color-ink-900)]">Settings</h1>
+        <p className="text-sm text-[var(--color-ink-500)] mt-0.5">Update your profile and account details.</p>
       </div>
 
       {/* Avatar */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100"
-           style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-        <p className="font-body text-sm font-bold text-gray-700 mb-3">Your avatar</p>
+      <div className="bg-white rounded-2xl p-6 border border-slate-200"
+           style={{ boxShadow: 'var(--shadow-soft)' }}>
+        <p className="text-sm font-bold text-[var(--color-ink-700)] mb-3">Your avatar</p>
         <div className="flex flex-wrap gap-2">
           {STUDENT_AVATARS.map(e => (
             <button key={e} onClick={() => setAvatar(e)}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all"
               style={avatar === e
-                ? { background: 'var(--purple-faint)', border: '2px solid var(--purple)' }
+                ? { background: 'var(--color-primary-50)', border: '2px solid var(--color-primary-500)' }
                 : { background: '#F9FAFB', border: '2px solid transparent' }}>
               {e}
             </button>
@@ -135,30 +135,30 @@ export default function SettingsTab() {
       </div>
 
       {/* Basic info */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col gap-4"
-           style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
-        <p className="font-body text-sm font-bold text-gray-700">Your details</p>
+      <div className="bg-white rounded-2xl p-6 border border-slate-200 flex flex-col gap-4"
+           style={{ boxShadow: 'var(--shadow-soft)' }}>
+        <p className="text-sm font-bold text-[var(--color-ink-700)]">Your details</p>
 
         <div className="flex flex-col gap-1.5">
-          <label className="font-body text-xs font-semibold text-gray-500">Display name</label>
+          <label className="text-xs font-semibold text-[var(--color-ink-500)]">Display name</label>
           <input value={displayName} onChange={e => setDisplayName(e.target.value)}
-            className="font-body text-sm px-4 py-2.5 rounded-xl border border-gray-200 outline-none"
-            style={{ '--tw-ring-color': 'var(--purple-light)' } as React.CSSProperties}
-            onFocus={e => (e.currentTarget.style.borderColor = 'var(--purple-light)')}
-            onBlur={e => (e.currentTarget.style.borderColor = '#e5e7eb')}
+            className="text-sm px-4 py-2.5 rounded-xl border border-slate-200 outline-none"
+            style={{ '--tw-ring-color': 'var(--color-primary-200)' } as React.CSSProperties}
+            onFocus={e => (e.currentTarget.style.borderColor = 'var(--color-primary-200)')}
+            onBlur={e => (e.currentTarget.style.borderColor = 'var(--color-border)')}
             placeholder="Your name" />
         </div>
 
         <div className="flex gap-3">
           <div className="flex flex-col gap-1.5 flex-1">
-            <label className="font-body text-xs font-semibold text-gray-500">Year group</label>
+            <label className="text-xs font-semibold text-[var(--color-ink-500)]">Year group</label>
             <div className="flex gap-2">
               {YEAR_GROUPS.map(y => (
                 <button key={y} onClick={() => setYearGroup(y)}
-                  className="flex-1 py-2 rounded-xl font-body font-semibold text-sm transition-all"
+                  className="flex-1 py-2 rounded-xl font-semibold text-sm transition-all"
                   style={yearGroup === y
-                    ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1.5px solid var(--purple-light)' }
-                    : { background: '#F9FAFB', color: '#6b7280', border: '1.5px solid #e5e7eb' }}>
+                    ? { background: 'var(--color-primary-50)', color: 'var(--color-primary-700)', border: '1.5px solid var(--color-primary-200)' }
+                    : { background: '#F9FAFB', color: 'var(--color-ink-500)', border: '1.5px solid var(--color-border)' }}>
                   Yr {y}
                 </button>
               ))}
@@ -167,14 +167,14 @@ export default function SettingsTab() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="font-body text-xs font-semibold text-gray-500">Exam board</label>
+          <label className="text-xs font-semibold text-[var(--color-ink-500)]">Exam board</label>
           <div className="flex gap-2">
             {EXAM_BOARDS.map(b => (
               <button key={b} onClick={() => setExamBoard(b)}
-                className="flex-1 py-2 rounded-xl font-body font-semibold text-sm transition-all"
+                className="flex-1 py-2 rounded-xl font-semibold text-sm transition-all"
                 style={examBoard === b
-                  ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1.5px solid var(--purple-light)' }
-                  : { background: '#F9FAFB', color: '#6b7280', border: '1.5px solid #e5e7eb' }}>
+                  ? { background: 'var(--color-primary-50)', color: 'var(--color-primary-700)', border: '1.5px solid var(--color-primary-200)' }
+                  : { background: '#F9FAFB', color: 'var(--color-ink-500)', border: '1.5px solid var(--color-border)' }}>
                 {b}
               </button>
             ))}
@@ -182,14 +182,14 @@ export default function SettingsTab() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="font-body text-xs font-semibold text-gray-500">Subjects</label>
+          <label className="text-xs font-semibold text-[var(--color-ink-500)]">Subjects</label>
           <div className="flex gap-2">
             {(['maths', 'economics'] as const).map(s => (
               <button key={s} onClick={() => toggleSubject(s)}
-                className="flex-1 py-2 rounded-xl font-body font-semibold text-sm capitalize transition-all"
+                className="flex-1 py-2 rounded-xl font-semibold text-sm capitalize transition-all"
                 style={subjects.includes(s)
-                  ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1.5px solid var(--purple-light)' }
-                  : { background: '#F9FAFB', color: '#6b7280', border: '1.5px solid #e5e7eb' }}>
+                  ? { background: 'var(--color-primary-50)', color: 'var(--color-primary-700)', border: '1.5px solid var(--color-primary-200)' }
+                  : { background: '#F9FAFB', color: 'var(--color-ink-500)', border: '1.5px solid var(--color-border)' }}>
                 {s === 'maths' ? '📐 Maths' : '📊 Economics'}
               </button>
             ))}
@@ -199,20 +199,20 @@ export default function SettingsTab() {
 
       {/* Save */}
       <button onClick={save} disabled={saving}
-        className="font-body font-bold text-sm py-4 rounded-2xl text-white transition-all"
-        style={{ background: saved ? '#4A8A14' : 'linear-gradient(135deg, var(--purple-light), var(--purple))', opacity: saving ? 0.7 : 1 }}>
+        className="font-bold text-sm py-4 rounded-2xl text-white transition-all"
+        style={{ background: saved ? 'var(--color-success-600)' : 'linear-gradient(135deg, var(--color-primary-200), var(--color-primary-500))', opacity: saving ? 0.7 : 1 }}>
         {saved ? '✅ Saved!' : saving ? 'Saving…' : 'Save changes'}
       </button>
 
       {/* Parent linking — invite code */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100"
-           style={{ boxShadow: '0 2px 12px rgba(28,28,46,0.06)' }}>
+      <div className="bg-white rounded-2xl p-6 border border-slate-200"
+           style={{ boxShadow: 'var(--shadow-soft)' }}>
         <div className="flex items-start gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-               style={{ background: '#FAEEDA' }}>👨‍👩‍👧</div>
+               style={{ background: 'var(--feature-daily-bg)' }}>👨‍👩‍👧</div>
           <div>
-            <p className="font-body font-bold text-gray-900 text-sm">Link a parent account</p>
-            <p className="font-body text-xs text-gray-400 mt-0.5 leading-relaxed">
+            <p className="font-bold text-[var(--color-ink-900)] text-sm">Link a parent account</p>
+            <p className="text-xs text-[var(--color-ink-300)] mt-0.5 leading-relaxed">
               Share this code with your parent so they can track your progress.
             </p>
           </div>
@@ -221,23 +221,23 @@ export default function SettingsTab() {
         {inviteCode ? (
           <div className="flex items-center gap-3">
             <div className="flex-1 flex items-center justify-center py-3 rounded-xl font-mono font-bold text-xl tracking-[0.2em]"
-                 style={{ background: '#FAEEDA', color: '#7A4D0F', border: '1.5px dashed #F0C88A' }}>
+                 style={{ background: 'var(--feature-daily-bg)', color: '#7A4D0F', border: '1.5px dashed var(--color-accent-200)' }}>
               {inviteCode}
             </div>
             <button onClick={copyCode}
-              className="font-body text-sm font-bold px-4 py-3 rounded-xl transition-all whitespace-nowrap"
-              style={{ background: codeCopied ? '#EAF3DE' : 'var(--purple-faint)', color: codeCopied ? '#4A8A14' : 'var(--purple-dark)', border: `1.5px solid ${codeCopied ? '#C8E49A' : 'var(--purple-light)'}` }}>
+              className="text-sm font-bold px-4 py-3 rounded-xl transition-all whitespace-nowrap"
+              style={{ background: codeCopied ? 'var(--color-success-50)' : 'var(--color-primary-50)', color: codeCopied ? 'var(--color-success-600)' : 'var(--color-primary-700)', border: `1.5px solid ${codeCopied ? 'var(--color-success-300)' : 'var(--color-primary-200)'}` }}>
               {codeCopied ? '✅ Copied!' : 'Copy code'}
             </button>
           </div>
         ) : (
           <button onClick={generateCode} disabled={codeLoading}
-            className="w-full font-body text-sm font-bold py-3 rounded-xl transition-all"
-            style={{ background: '#FAEEDA', color: '#7A4D0F', border: '1.5px solid #F0C88A', opacity: codeLoading ? 0.7 : 1 }}>
+            className="w-full text-sm font-bold py-3 rounded-xl transition-all"
+            style={{ background: 'var(--feature-daily-bg)', color: '#7A4D0F', border: '1.5px solid var(--color-accent-200)', opacity: codeLoading ? 0.7 : 1 }}>
             {codeLoading ? 'Generating…' : 'Generate invite code'}
           </button>
         )}
-        <p className="font-body text-xs text-gray-400 mt-3 text-center">Code expires after 7 days</p>
+        <p className="text-xs text-[var(--color-ink-300)] mt-3 text-center">Code expires after 7 days</p>
       </div>
     </div>
   );

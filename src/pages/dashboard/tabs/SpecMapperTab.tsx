@@ -15,9 +15,9 @@ interface Topic {
 }
 
 const STATUS_STYLE: Record<Status, { bg: string; border: string; label: string; text: string }> = {
-  not_started: { bg: '#f3f4f6', border: '#e5e7eb', label: 'Not started', text: '#6b7280' },
-  in_progress: { bg: '#FAEEDA', border: '#F0C88A', label: 'In progress',  text: '#BA7517' },
-  covered:     { bg: '#EAF3DE', border: '#C8E49A', label: 'Covered',      text: '#4A8A14' },
+  not_started: { bg: 'var(--color-primary-50)', border: 'var(--color-border)', label: 'Not started', text: 'var(--color-ink-500)' },
+  in_progress: { bg: 'var(--feature-daily-bg)', border: 'var(--color-accent-200)', label: 'In progress',  text: 'var(--feature-daily-strong)' },
+  covered:     { bg: 'var(--color-success-50)', border: 'var(--color-success-300)', label: 'Covered',      text: 'var(--color-success-600)' },
 };
 
 // Canonical strand order — topics are sorted within these groups
@@ -112,22 +112,22 @@ export default function SpecMapperTab() {
     <div className="flex flex-col gap-5">
       <div className="flex flex-col sm:flex-row sm:items-end gap-3">
         <div className="flex-1">
-          <h1 className="font-display font-bold text-2xl text-gray-900">Spec Mapper</h1>
-          <p className="font-body text-sm text-gray-500 mt-0.5 capitalize">
+          <h1 className="font-display font-bold text-2xl text-[var(--color-ink-900)]">Spec Mapper</h1>
+          <p className="text-sm text-[var(--color-ink-500)] mt-0.5 capitalize">
             {subject} · see every topic on the spec and how much you've covered.
           </p>
         </div>
         {/* Exam board filter — only show if topics have board data */}
         {hasExamBoardData && (
           <div className="flex items-center gap-2">
-            <span className="font-body text-xs font-semibold text-gray-400">Board:</span>
+            <span className="text-xs font-semibold text-[var(--color-ink-300)]">Board:</span>
             <div className="flex gap-1.5">
               {['all', ...availableBoards].map(b => (
                 <button key={b} onClick={() => setBoardFilter(b)}
-                  className="px-3 py-1.5 rounded-lg font-body font-semibold text-xs transition-all capitalize"
+                  className="px-3 py-1.5 rounded-lg font-semibold text-xs transition-all capitalize"
                   style={boardFilter === b
-                    ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1.5px solid var(--purple-light)' }
-                    : { background: '#f9fafb', color: '#6b7280', border: '1.5px solid #e5e7eb' }}>
+                    ? { background: 'var(--color-primary-50)', color: 'var(--color-primary-700)', border: '1.5px solid var(--color-primary-200)' }
+                    : { background: '#fbfafc', color: 'var(--color-ink-500)', border: '1.5px solid var(--color-border)' }}>
                   {b === 'all' ? 'All' : b}
                 </button>
               ))}
@@ -135,8 +135,8 @@ export default function SpecMapperTab() {
           </div>
         )}
         {examBoard && (
-          <span className="font-body text-xs px-2.5 py-1.5 rounded-lg font-semibold"
-                style={{ background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1px solid var(--purple-light)' }}>
+          <span className="text-xs px-2.5 py-1.5 rounded-lg font-semibold"
+                style={{ background: 'var(--color-primary-50)', color: 'var(--color-primary-700)', border: '1px solid var(--color-primary-200)' }}>
             {examBoard}
           </span>
         )}
@@ -145,28 +145,28 @@ export default function SpecMapperTab() {
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Covered',     value: covered,                              color: '#4A8A14', bg: '#EAF3DE' },
-          { label: 'In progress', value: inProgress,                           color: '#BA7517', bg: '#FAEEDA' },
-          { label: 'Not started', value: visibleTopics.length - covered - inProgress, color: '#6b7280', bg: '#f9fafb' },
+          { label: 'Covered',     value: covered,                              color: 'var(--color-success-600)', bg: 'var(--color-success-50)' },
+          { label: 'In progress', value: inProgress,                           color: 'var(--feature-daily-strong)', bg: 'var(--feature-daily-bg)' },
+          { label: 'Not started', value: visibleTopics.length - covered - inProgress, color: 'var(--color-ink-500)', bg: '#fbfafc' },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-2xl p-4 border border-gray-100 text-center">
+          <div key={s.label} className="bg-white rounded-2xl p-4 border border-slate-200 text-center">
             <div className="font-display font-bold text-2xl" style={{ color: s.color }}>{s.value}</div>
-            <div className="font-body text-xs text-gray-500 mt-0.5">{s.label}</div>
+            <div className="text-xs text-[var(--color-ink-500)] mt-0.5">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Progress bar */}
-      <div className="bg-white rounded-2xl p-5 border border-gray-100">
+      <div className="bg-white rounded-2xl p-5 border border-slate-200">
         <div className="flex justify-between items-center mb-2">
-          <span className="font-body text-sm font-semibold text-gray-700">Overall coverage</span>
-          <span className="font-display font-bold text-lg" style={{ color: 'var(--purple-dark)' }}>{pct}%</span>
+          <span className="text-sm font-semibold text-[var(--color-ink-700)]">Overall coverage</span>
+          <span className="font-display font-bold text-lg" style={{ color: 'var(--color-primary-700)' }}>{pct}%</span>
         </div>
-        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all"
-               style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--purple-light), var(--purple))' }} />
+               style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--color-primary-200), var(--color-primary-500))' }} />
         </div>
-        <p className="font-body text-xs text-gray-400 mt-2">{covered} of {visibleTopics.length} topics covered</p>
+        <p className="text-xs text-[var(--color-ink-300)] mt-2">{covered} of {visibleTopics.length} topics covered</p>
       </div>
 
       {/* Legend */}
@@ -174,33 +174,33 @@ export default function SpecMapperTab() {
         {Object.entries(STATUS_STYLE).map(([k, v]) => (
           <div key={k} className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-sm border" style={{ background: v.bg, borderColor: v.border }} />
-            <span className="font-body text-xs text-gray-500">{v.label}</span>
+            <span className="text-xs text-[var(--color-ink-500)]">{v.label}</span>
           </div>
         ))}
       </div>
 
       {/* Spec grid by strand */}
       {loading ? (
-        <p className="font-body text-sm text-gray-400 text-center py-8">Loading…</p>
+        <p className="text-sm text-[var(--color-ink-300)] text-center py-8">Loading…</p>
       ) : visibleTopics.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-3xl mb-3">📋</p>
-          <p className="font-body text-sm text-gray-500">No topics found for this subject yet.</p>
+          <p className="text-sm text-[var(--color-ink-500)]">No topics found for this subject yet.</p>
         </div>
       ) : (
         areas.map(area => {
           const areaTopics = visibleTopics.filter(t => t.area === area);
           const areaCovered = areaTopics.filter(t => (progress[t.id] ?? 'not_started') === 'covered').length;
           return (
-            <div key={area} className="bg-white rounded-2xl p-5 border border-gray-100">
+            <div key={area} className="bg-white rounded-2xl p-5 border border-slate-200">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-body font-bold text-gray-900 text-sm">{area}</h2>
-                <span className="font-body text-xs text-gray-400">{areaCovered}/{areaTopics.length}</span>
+                <h2 className="font-bold text-[var(--color-ink-900)] text-sm">{area}</h2>
+                <span className="text-xs text-[var(--color-ink-300)]">{areaCovered}/{areaTopics.length}</span>
               </div>
-              <div className="h-1 bg-gray-100 rounded-full overflow-hidden mb-4">
+              <div className="h-1 bg-slate-100 rounded-full overflow-hidden mb-4">
                 <div className="h-full rounded-full transition-all"
                      style={{ width: `${areaTopics.length ? (areaCovered / areaTopics.length) * 100 : 0}%`,
-                              background: 'var(--purple)' }} />
+                              background: 'var(--color-primary-500)' }} />
               </div>
               <div className="flex flex-wrap gap-2">
                 {areaTopics.map(t => {
@@ -209,7 +209,7 @@ export default function SpecMapperTab() {
                   return (
                     <button key={t.id} onClick={() => navigate('/dashboard/topics')}
                       title={`${t.name} — ${s.label}`}
-                      className="px-3 py-1.5 rounded-lg border font-body text-xs font-medium transition-all hover:opacity-80"
+                      className="px-3 py-1.5 rounded-lg border text-xs font-medium transition-all hover:opacity-80"
                       style={{ background: s.bg, borderColor: s.border, color: s.text }}>
                       {t.name}
                     </button>

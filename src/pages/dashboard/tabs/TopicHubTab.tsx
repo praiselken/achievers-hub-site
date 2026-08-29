@@ -28,23 +28,23 @@ interface Topic {
 }
 
 const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string; border: string }> = {
-  not_started: { label: 'Not started', color: '#9ca3af', bg: '#f9fafb',  border: '#e5e7eb' },
-  in_progress: { label: 'In progress', color: '#BA7517', bg: '#FAEEDA',  border: '#F0C88A' },
-  covered:     { label: 'Covered',     color: '#4A8A14', bg: '#EAF3DE',  border: '#C8E49A' },
+  not_started: { label: 'Not started', color: 'var(--color-ink-300)', bg: '#fbfafc',  border: 'var(--color-border)' },
+  in_progress: { label: 'In progress', color: 'var(--feature-daily-strong)', bg: 'var(--feature-daily-bg)',  border: 'var(--color-accent-200)' },
+  covered:     { label: 'Covered',     color: 'var(--color-success-600)', bg: 'var(--color-success-50)',  border: 'var(--color-success-300)' },
 };
 
 function PracticeQuestion({ q, a, storageKey, topicTitle }: { q: string; a: string; storageKey: string; topicTitle: string }) {
   const [show, setShow] = useState(false);
   const [workbookOpen, setWorkbookOpen] = useState(false);
   return (
-    <div className="rounded-xl border border-gray-100 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50">
-        <p className="font-body text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Practice question</p>
-        <p className="font-body text-sm text-gray-800">{q}</p>
+    <div className="rounded-xl border border-slate-200 overflow-hidden">
+      <div className="px-4 py-3 bg-slate-50">
+        <p className="text-xs font-bold text-[var(--color-ink-500)] uppercase tracking-wider mb-1">Practice question</p>
+        <p className="text-sm text-[var(--color-ink-700)]">{q}</p>
       </div>
       <button onClick={() => setWorkbookOpen(true)}
-        className="w-full px-4 py-2.5 font-body text-sm font-semibold text-left border-t border-gray-100 hover:bg-gray-50 transition-colors"
-        style={{ color: 'var(--purple)' }}>
+        className="w-full px-4 py-2.5 text-sm font-semibold text-left border-t border-slate-200 hover:bg-slate-50 transition-colors"
+        style={{ color: 'var(--color-primary-500)' }}>
         ✏️ Open workbook — ruler, protractor & compass
       </button>
       <Workbook
@@ -55,14 +55,14 @@ function PracticeQuestion({ q, a, storageKey, topicTitle }: { q: string; a: stri
         height={440}
       />
       {show ? (
-        <div className="px-4 py-3" style={{ background: '#EAF3DE' }}>
-          <p className="font-body text-xs font-bold uppercase tracking-wider mb-1" style={{ color: '#4A8A14' }}>Model answer</p>
-          <p className="font-body text-sm" style={{ color: '#3B6D11' }}>{a}</p>
+        <div className="px-4 py-3" style={{ background: 'var(--color-success-50)' }}>
+          <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--color-success-600)' }}>Model answer</p>
+          <p className="text-sm" style={{ color: 'var(--color-success-600)' }}>{a}</p>
         </div>
       ) : (
         <button onClick={() => setShow(true)}
-          className="w-full px-4 py-2.5 font-body text-sm font-semibold text-left hover:bg-gray-50 transition-colors"
-          style={{ color: 'var(--purple)' }}>
+          className="w-full px-4 py-2.5 text-sm font-semibold text-left hover:bg-slate-50 transition-colors"
+          style={{ color: 'var(--color-primary-500)' }}>
           Show model answer →
         </button>
       )}
@@ -75,35 +75,35 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
   const cfg = STATUS_CONFIG[topic.status];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all"
-         style={{ boxShadow: '0 2px 8px rgba(28,28,46,0.05)' }}>
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all"
+         style={{ boxShadow: 'var(--shadow-soft)' }}>
 
       {/* Card header — always visible */}
       <button onClick={() => setOpen(o => !o)}
         className="w-full flex items-center gap-4 px-5 py-4 text-left">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-0.5">
-            <span className="font-body font-bold text-gray-900 text-sm">{topic.name}</span>
+            <span className="font-bold text-[var(--color-ink-900)] text-sm">{topic.name}</span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
               {cfg.label}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-body text-xs text-gray-400">{topic.area}</span>
+            <span className="text-xs text-[var(--color-ink-300)]">{topic.area}</span>
             {topic.command && (
               <>
                 <span className="text-gray-200">·</span>
-                <span className="font-body text-xs font-semibold" style={{ color: 'var(--purple)' }}>{topic.command}</span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--color-primary-500)' }}>{topic.command}</span>
               </>
             )}
           </div>
         </div>
         {topic.attempts > 0 && (
-          <span className="font-mono text-xs font-bold text-gray-400 flex-shrink-0">{Math.round(topic.score_avg)}%</span>
+          <span className="font-mono text-xs font-bold text-[var(--color-ink-300)] flex-shrink-0">{Math.round(topic.score_avg)}%</span>
         )}
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-             className="w-4 h-4 text-gray-300 flex-shrink-0 transition-transform"
+             className="w-4 h-4 text-[var(--color-ink-300)] flex-shrink-0 transition-transform"
              style={{ transform: open ? 'rotate(180deg)' : 'none' }}>
           <path d="M5 8l5 5 5-5"/>
         </svg>
@@ -111,30 +111,30 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
 
       {/* Expanded study card content */}
       {open && (
-        <div className="border-t border-gray-50">
+        <div className="border-t border-slate-100">
 
           {/* Description / rule */}
           {topic.description && (
             <div className="px-5 pt-4 pb-2">
-              <p className="font-body text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">
                 {topic.card_format === 'definition' ? 'Definition' : 'The rule'}
               </p>
-              <p className="font-body text-sm text-gray-700 leading-relaxed">{topic.description}</p>
+              <p className="text-sm text-[var(--color-ink-700)] leading-relaxed">{topic.description}</p>
             </div>
           )}
 
           {/* Key points / steps */}
           {topic.key_points && topic.key_points.length > 0 && (
             <div className="px-5 py-3">
-              <p className="font-body text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink-300)] mb-2">
                 {topic.card_format === 'worked_example' ? 'How to do it' : 'Key points'}
               </p>
               <ol className="flex flex-col gap-2">
                 {topic.key_points.map((pt, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5"
-                          style={{ background: 'var(--purple)' }}>{i + 1}</span>
-                    <span className="font-body text-sm text-gray-700">{pt}</span>
+                          style={{ background: 'var(--color-primary-500)' }}>{i + 1}</span>
+                    <span className="text-sm text-[var(--color-ink-700)]">{pt}</span>
                   </li>
                 ))}
               </ol>
@@ -144,14 +144,14 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
           {/* Exam tip */}
           {topic.exam_tip && (
             <div className="mx-5 my-3 rounded-xl px-4 py-3"
-                 style={{ background: 'var(--purple-faint)', border: '1px solid var(--purple-light)' }}>
+                 style={{ background: 'var(--color-primary-50)', border: '1px solid var(--color-primary-200)' }}>
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="text-sm">💡</span>
-                <p className="font-body text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--purple)' }}>
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary-500)' }}>
                   Exam tip
                 </p>
               </div>
-              <p className="font-body text-sm leading-relaxed" style={{ color: 'var(--purple-dark)' }}>{topic.exam_tip}</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-primary-700)' }}>{topic.exam_tip}</p>
             </div>
           )}
 
@@ -166,11 +166,11 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
           {topic.video_url && (
             <div className="px-5 pb-4">
               <a href={topic.video_url} target="_blank" rel="noopener noreferrer"
-                 className="flex items-center gap-2 font-body text-sm font-semibold no-underline"
-                 style={{ color: 'var(--purple)' }}>
+                 className="flex items-center gap-2 text-sm font-semibold no-underline"
+                 style={{ color: 'var(--color-primary-500)' }}>
                 <span className="w-7 h-7 rounded-lg flex items-center justify-center"
-                      style={{ background: 'var(--purple-faint)' }}>
-                  <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5" style={{ color: 'var(--purple)' }}>
+                      style={{ background: 'var(--color-primary-50)' }}>
+                  <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5" style={{ color: 'var(--color-primary-500)' }}>
                     <path d="M4 3.5l9 4.5-9 4.5V3.5z"/>
                   </svg>
                 </span>
@@ -180,14 +180,14 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
           )}
 
           {/* Mark as */}
-          <div className="px-5 py-4 border-t border-gray-50 flex items-center gap-2 flex-wrap">
-            <span className="font-body text-xs text-gray-400">Mark as:</span>
+          <div className="px-5 py-4 border-t border-slate-100 flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-[var(--color-ink-300)]">Mark as:</span>
             {(['not_started', 'in_progress', 'covered'] as Status[]).map(s => (
               <button key={s} onClick={() => onMark(topic.id, s)}
                 className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all border"
                 style={topic.status === s
                   ? { background: STATUS_CONFIG[s].bg, color: STATUS_CONFIG[s].color, borderColor: STATUS_CONFIG[s].border }
-                  : { borderColor: '#e5e7eb', color: '#9ca3af', background: 'transparent' }}>
+                  : { borderColor: 'var(--color-border)', color: 'var(--color-ink-300)', background: 'transparent' }}>
                 {STATUS_CONFIG[s].label}
               </button>
             ))}
@@ -269,21 +269,21 @@ export default function TopicHubTab() {
 
       {/* Header */}
       <div>
-        <h1 className="font-display font-bold text-2xl text-gray-900">Topic Hub</h1>
-        <p className="font-body text-sm text-gray-500 mt-0.5 capitalize">
+        <h1 className="font-display font-bold text-2xl text-[var(--color-ink-900)]">Topic Hub</h1>
+        <p className="text-sm text-[var(--color-ink-500)] mt-0.5 capitalize">
           {subject} · {covered}/{topics.length} topics covered
         </p>
       </div>
 
       {/* Progress bar */}
-      <div className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-4"
-           style={{ boxShadow: '0 2px 8px rgba(28,28,46,0.05)' }}>
-        <div className="flex-1 h-2.5 rounded-full bg-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 flex items-center gap-4"
+           style={{ boxShadow: 'var(--shadow-soft)' }}>
+        <div className="flex-1 h-2.5 rounded-full bg-slate-100 overflow-hidden">
           <div className="h-full rounded-full transition-all"
                style={{ width: `${topics.length ? (covered / topics.length) * 100 : 0}%`,
-                        background: 'linear-gradient(90deg, var(--purple-light), var(--purple))' }} />
+                        background: 'linear-gradient(90deg, var(--color-primary-200), var(--color-primary-500))' }} />
         </div>
-        <span className="font-body text-sm font-bold flex-shrink-0" style={{ color: 'var(--purple-dark)' }}>
+        <span className="text-sm font-bold flex-shrink-0" style={{ color: 'var(--color-primary-700)' }}>
           {topics.length ? Math.round((covered / topics.length) * 100) : 0}%
         </span>
       </div>
@@ -292,22 +292,22 @@ export default function TopicHubTab() {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-               className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+               className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-300)]">
             <circle cx="9" cy="9" r="6"/><path d="M15 15l-3-3"/>
           </svg>
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search topics…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 font-body text-sm bg-white outline-none"
-            onFocus={e => e.currentTarget.style.borderColor = 'var(--purple)'}
-            onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'} />
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white outline-none"
+            onFocus={e => e.currentTarget.style.borderColor = 'var(--color-primary-500)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border)'} />
         </div>
         <div className="flex gap-1.5">
           {(['all', 'not_started', 'in_progress', 'covered'] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className="px-3 py-2 rounded-xl font-body text-xs font-semibold transition-all capitalize whitespace-nowrap"
+              className="px-3 py-2 rounded-xl text-xs font-semibold transition-all capitalize whitespace-nowrap"
               style={filter === f
-                ? { background: 'var(--purple-faint)', color: 'var(--purple-dark)', border: '1.5px solid var(--purple-light)' }
-                : { background: 'white', color: '#9ca3af', border: '1.5px solid #e5e7eb' }}>
+                ? { background: 'var(--color-primary-50)', color: 'var(--color-primary-700)', border: '1.5px solid var(--color-primary-200)' }
+                : { background: 'white', color: 'var(--color-ink-300)', border: '1.5px solid var(--color-border)' }}>
               {f === 'all' ? 'All' : f === 'not_started' ? 'Not started' : f === 'in_progress' ? 'In progress' : 'Covered'}
             </button>
           ))}
@@ -316,11 +316,11 @@ export default function TopicHubTab() {
 
       {/* Topics by area */}
       {loading ? (
-        <p className="font-body text-sm text-gray-400 text-center py-12">Loading topics…</p>
+        <p className="text-sm text-[var(--color-ink-300)] text-center py-12">Loading topics…</p>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-3xl mb-3">🔍</p>
-          <p className="font-body text-sm text-gray-500">No topics match your search.</p>
+          <p className="text-sm text-[var(--color-ink-500)]">No topics match your search.</p>
         </div>
       ) : (
         areas.map(area => {
@@ -330,8 +330,8 @@ export default function TopicHubTab() {
           return (
             <div key={area}>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="font-body font-bold text-sm text-gray-500 uppercase tracking-wider">{area}</h2>
-                <span className="font-body text-xs text-gray-400">{areaCovered}/{areaTopics.length}</span>
+                <h2 className="font-bold text-sm text-[var(--color-ink-500)] uppercase tracking-wider">{area}</h2>
+                <span className="text-xs text-[var(--color-ink-300)]">{areaCovered}/{areaTopics.length}</span>
               </div>
               <div className="flex flex-col gap-2">
                 {areaTopics.map(t => (

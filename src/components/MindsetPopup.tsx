@@ -53,30 +53,30 @@ export default function MindsetPopup() {
 
         {/* Header */}
         <div className="px-7 pt-7 pb-5"
-             style={{ background: 'linear-gradient(135deg, var(--purple-faint) 0%, #EDE0F4 100%)' }}>
+             style={{ background: 'linear-gradient(135deg, var(--color-primary-50) 0%, #EDE0F4 100%)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="text-xl">✨</span>
-              <span className="font-body text-xs font-bold uppercase tracking-wider"
-                    style={{ color: 'var(--purple)' }}>Today's mindset</span>
+              <span className="text-xs font-bold uppercase tracking-wider"
+                    style={{ color: 'var(--color-primary-500)' }}>Today's mindset</span>
             </div>
-            <span className="font-body text-xs text-gray-400">
+            <span className="text-xs text-[var(--color-ink-300)]">
               {prompt.month_theme}
             </span>
           </div>
           <p className="font-display font-bold text-lg leading-snug"
-             style={{ color: 'var(--purple-dark)' }}>
+             style={{ color: 'var(--color-primary-700)' }}>
             "{prompt.confession}"
           </p>
         </div>
 
         {/* Reflection */}
         {prompt.reflection && (
-          <div className="px-7 py-5 border-b border-gray-100">
-            <p className="font-body text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+          <div className="px-7 py-5 border-b border-slate-200">
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink-300)] mb-2">
               Today's reflection
             </p>
-            <p className="font-body text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-[var(--color-ink-700)] leading-relaxed">
               {prompt.reflection}
             </p>
           </div>
@@ -85,7 +85,7 @@ export default function MindsetPopup() {
         {/* Actions */}
         <div className="px-7 py-5 flex gap-3">
           <button onClick={dismiss}
-            className="flex-1 py-3 rounded-2xl font-body font-bold text-sm text-white transition-all"
+            className="flex-1 py-3 rounded-2xl font-bold text-sm text-white transition-all"
             style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)' }}>
             I'm ready. Let's go 🚀
           </button>
