@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, BarChart3, BookOpen, FileText, Sparkles, Sprout } from 'lucide-react';
 import { ArchiAvatar } from '../../../components/marketing/ArchiAvatar';
 import { GROW_ACTIONS, todaysReflection } from '../../../lib/tsg';
+import { loadGrades } from '../../../lib/grades';
 import { supabase } from '../../../lib/supabase';
 import { useSubjects, type SubjectRow } from '../../../lib/useSubjects';
 import { useSubject } from '../DashboardLayout';
@@ -117,6 +118,7 @@ export default function HomeTab() {
   }, [subject, activeSubjects.length]);
 
 
+  const grades = loadGrades(subject);
   const overallPct = subjectProgress.length
     ? Math.round(subjectProgress.reduce((a, s) => a + s.pct, 0) / subjectProgress.length)
     : 0;
@@ -200,6 +202,56 @@ export default function HomeTab() {
           >
             {nextStep.cta.label} <ArrowRight size={18} />
           </Link>
+        </div>
+      </section>
+
+      {/* Grades — working, target and the topic picture between them.
+          Pathway tiers stay internal and are deliberately not shown here. */}
+      <section className="grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:grid-cols-[1fr_1fr_1.4fr]">
+        <div className="bg-white p-5">
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[var(--color-ink-500)]">Working grade</p>
+          {grades.working !== null ? (
+            <p className="mt-2 font-display text-3xl font-extrabold tabular-nums text-[var(--color-ink-900)]">{grades.working}</p>
+          ) : (
+            <p className="mt-2 font-display text-xl font-extrabold text-[var(--color-ink-300)]">Not set</p>
+          )}
+          <p className="mt-1 text-xs leading-5 text-[var(--color-ink-500)]">What you are working at now</p>
+        </div>
+
+        <div className="bg-white p-5">
+          <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[var(--color-ink-500)]">Target grade</p>
+          {grades.target !== null ? (
+            <p className="mt-2 font-display text-3xl font-extrabold tabular-nums text-[var(--color-primary-600)]">{grades.target}</p>
+          ) : (
+            <p className="mt-2 font-display text-xl font-extrabold text-[var(--color-ink-300)]">Not set</p>
+          )}
+          <p className="mt-1 text-xs leading-5 text-[var(--color-ink-500)]">What you are aiming for</p>
+        </div>
+
+        <div className="bg-white p-5">
+          {grades.working === null || grades.target === null ? (
+            <>
+              <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[var(--color-ink-500)]">Set your grades</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--color-ink-500)]">
+                Add your working and target grade so your Daily 5 and recommendations match where you are.
+              </p>
+              <Link to="/dashboard/settings" className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-primary-600)] hover:underline">
+                Set them now <ArrowRight size={15} />
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[var(--color-ink-500)]">Topic progress</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--color-ink-700)]">
+                {grades.target > grades.working
+                  ? `You are ${grades.target - grades.working} grade${grades.target - grades.working === 1 ? '' : 's'} from your target. Topic coverage is at ${overallPct}%.`
+                  : `You are working at your target grade. Topic coverage is at ${overallPct}%.`}
+              </p>
+              <Link to="/dashboard/settings" className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-primary-600)] hover:underline">
+                Update grades <ArrowRight size={15} />
+              </Link>
+            </>
+          )}
         </div>
       </section>
 

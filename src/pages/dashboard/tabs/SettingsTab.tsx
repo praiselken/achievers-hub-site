@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { isDemoMode } from '../../../lib/demoMode';
+import { useSubject } from '../DashboardLayout';
+import { GradeSelector } from '../../../components/dashboard/GradeSelector';
+import { loadGrades, saveGrades, type Grades } from '../../../lib/grades';
 import { DEMO_PROFILE } from '../../../lib/demoData';
 
 const STUDENT_AVATARS = ['🎓','📚','✏️','🔭','🧪','🧮','💡','⭐','🏆','🎯','🦁','🐯','🦊','🐺','🦅','🚀','⚡','🌟','🔥','💎'];
@@ -11,6 +14,8 @@ export default function SettingsTab() {
   const [displayName, setDisplayName] = useState('');
   const [avatar, setAvatar]           = useState('🎓');
   const [subjects, setSubjects]       = useState<string[]>([]);
+  const { subject } = useSubject();
+  const [grades, setGrades]           = useState<Grades>({ working: null, target: null });
   const [examBoard, setExamBoard]     = useState('');
   const [yearGroup, setYearGroup]     = useState<number | null>(null);
   const [saving, setSaving]           = useState(false);
@@ -108,7 +113,16 @@ export default function SettingsTab() {
     setSubjects(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   }
 
+  // Hooks must run on every render, so this has to stay above the early
+  // return below — otherwise the hook order changes once loading finishes.
+  useEffect(() => { setGrades(loadGrades(subject)); }, [subject]);
+
   if (loading) return <p className="text-sm text-[var(--color-ink-300)] py-8 text-center">Loading…</p>;
+
+  function updateGrades(next: Grades) {
+    setGrades(next);
+    saveGrades(subject, next);
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-xl">
@@ -132,6 +146,19 @@ export default function SettingsTab() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Grades — the student-facing replacement for the internal pathway tiers */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200"
+           style={{ boxShadow: 'var(--shadow-soft)' }}>
+        <p className="text-sm font-bold text-[var(--color-ink-700)] mb-4">
+          Your grades in {subject === 'economics' ? 'Economics' : 'Maths'}
+        </p>
+        <GradeSelector
+          grades={grades}
+          onChange={updateGrades}
+          subjectLabel={subject === 'economics' ? 'Economics' : 'Maths'}
+        />
       </div>
 
       {/* Basic info */}
