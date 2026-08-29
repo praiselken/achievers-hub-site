@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Medal,
   Settings,
+  ShieldCheck,
   Sprout,
   Star,
 } from 'lucide-react';
@@ -56,6 +57,7 @@ export function Sidebar({
   level,
   xpTotal,
   avatar,
+  isAdmin = false,
 }: {
   activeTab: DashTab;
   fullName: string;
@@ -64,6 +66,8 @@ export function Sidebar({
   xpTotal: number;
   /** Emoji the student picked in Settings; falls back to initials when unset. */
   avatar?: string;
+  /** Only true for profiles.role === 'admin'; reveals the admin link. */
+  isAdmin?: boolean;
 }) {
   const initials =
     fullName
@@ -122,6 +126,15 @@ export function Sidebar({
       </nav>
 
       <div className="p-3 pt-5">
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className="mb-2 flex min-h-11 items-center gap-3 rounded-xl border border-[var(--color-accent-400)]/40 bg-[var(--color-accent-400)]/10 px-3.5 py-2.5 text-[13px] font-semibold text-[var(--color-accent-300)] transition hover:bg-[var(--color-accent-400)]/20"
+          >
+            <ShieldCheck size={18} aria-hidden="true" />
+            Admin panel
+          </Link>
+        )}
         <Link
           to="/dashboard/settings"
           aria-current={activeTab === 'settings' ? 'page' : undefined}

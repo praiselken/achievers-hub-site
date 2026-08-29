@@ -32,6 +32,7 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
   const [subject, setSubject]         = useState<Subject>('maths');
   const [xpTotal, setXpTotal]         = useState(0);
   const [level, setLevel]             = useState(1);
+  const [isAdmin, setIsAdmin]         = useState(false);
   const { activeSubjects } = useSubjects();
   const demo = isDemoMode();
 
@@ -53,12 +54,13 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
         setUser(session.user);
         const { data: profile } = await supabase!
           .from('profiles')
-          .select('display_name, avatar, subjects')
+          .select('display_name, avatar, subjects, role')
           .eq('id', session.user.id)
           .single();
         if (profile?.display_name) setDisplayName(profile.display_name);
         if (profile?.avatar)       setAvatar(profile.avatar);
         if (profile?.subjects?.[0]) setSubject(profile.subjects[0] as Subject);
+        setIsAdmin(profile?.role === 'admin');
         const stats = await getUserStats(session.user.id);
         setXpTotal(stats.xpTotal);
         setLevel(stats.level);
@@ -107,6 +109,7 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
           level={level}
           xpTotal={xpTotal}
           avatar={avatar}
+          isAdmin={isAdmin}
         />
 
         <div className="min-w-0 flex-1">
