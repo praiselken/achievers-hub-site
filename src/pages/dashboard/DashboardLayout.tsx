@@ -41,6 +41,9 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
       setDisplayName(DEMO_PROFILE.display_name);
       setAvatar(DEMO_PROFILE.avatar);
       setSubject(DEMO_PROFILE.subjects[0] as Subject);
+      // AdminGuard admits demo sessions, so surface the link too — otherwise
+      // the admin panel is reachable only by typing the URL.
+      setIsAdmin(true);
       setXpTotal(DEMO_STATS.xpTotal);
       setLevel(DEMO_STATS.level);
       setLoading(false);
