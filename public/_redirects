@@ -1,1 +1,6 @@
+# Payment endpoints. Must stay above the SPA catch-all, or /api/* would be
+# served index.html and the checkout would silently return a page of HTML.
+/api/*   /.netlify/functions/:splat   200
+
+# Single-page app: every other path is handled by the router.
 /*    /index.html   200

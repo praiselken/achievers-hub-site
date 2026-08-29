@@ -1,0 +1,17 @@
+# Netlify build and function configuration.
+#
+# NOTE: adding this file makes it, rather than the Netlify UI, the source of
+# truth for the build settings below. They are written to match what the site
+# was already deploying with — if the UI has since been changed, change it here.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  # Functions 2.0: .mts entry points, Web Request/Response, bundled with esbuild.
+  node_bundler = "esbuild"
+
+# /api/* is the front door for the payment functions (see public/_redirects for
+# the rewrite that gets them there, which must stay above the SPA catch-all).

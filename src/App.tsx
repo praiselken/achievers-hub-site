@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
+import ScrollToTop from './components/ScrollToTop';
+import { DemoJourneyBar } from './components/demo/DemoJourneyBar';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -8,6 +10,9 @@ import ContentPage from './pages/ContentPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import PricingPage from './pages/PricingPage';
+import CheckoutPage from './pages/CheckoutPage';
+import DemoPaymentPage from './pages/demo/DemoPaymentPage';
+import DemoPortalPage from './pages/demo/DemoPortalPage';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
 import ParentDashboard from './pages/dashboard/parent/ParentDashboard';
 import TutorDashboard    from './pages/dashboard/tutor/TutorDashboard';
@@ -34,6 +39,8 @@ function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Nav />
+      {/* Renders only in demo mode, and only on the journey's own pages. */}
+      <DemoJourneyBar />
       {children}
       <Footer />
     </>
@@ -67,6 +74,7 @@ export default function App() {
   return (
     <ErrorBoundary>
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Marketing pages — have Nav + Footer (client redesign, Aug 2026) */}
         <Route path="/" element={<MarketingLayout><HomePage /></MarketingLayout>} />
@@ -76,9 +84,14 @@ export default function App() {
         <Route path="/tutor"    element={<Navigate to="/tutors" replace />} />
         <Route path="/signup"   element={<MarketingLayout><SignUpPage /></MarketingLayout>} />
         <Route path="/pricing"        element={<MarketingLayout><PricingPage /></MarketingLayout>} />
+        <Route path="/checkout"       element={<MarketingLayout><CheckoutPage /></MarketingLayout>} />
         <Route path="/find-a-tutor"  element={<MarketingLayout><FindATutorPage /></MarketingLayout>} />
         <Route path="/login"       element={<LoginPage />} />
         <Route path="/demo"        element={<DemoEntry />} />
+        {/* Stand-ins for Stripe's own pages, so the client can walk the paid
+            journey before it is switched on. Both redirect out of demo mode. */}
+        <Route path="/demo/payment"        element={<MarketingLayout><DemoPaymentPage /></MarketingLayout>} />
+        <Route path="/demo/billing-portal" element={<MarketingLayout><DemoPortalPage /></MarketingLayout>} />
         <Route path="/auth"        element={<AuthRouter />} />
         <Route path="/onboarding"  element={<OnboardingPage />} />
         <Route path="/overview" element={<MarketingLayout><HomePage /></MarketingLayout>} />

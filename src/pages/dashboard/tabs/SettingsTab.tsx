@@ -5,6 +5,7 @@ import { useSubject } from '../DashboardLayout';
 import { GradeSelector } from '../../../components/dashboard/GradeSelector';
 import { loadGrades, saveGrades, type Grades } from '../../../lib/grades';
 import { DEMO_PROFILE } from '../../../lib/demoData';
+import { MembershipPanel } from '../../../components/dashboard/MembershipPanel';
 
 const STUDENT_AVATARS = ['🎓','📚','✏️','🔭','🧪','🧮','💡','⭐','🏆','🎯','🦁','🐯','🦊','🐺','🦅','🚀','⚡','🌟','🔥','💎'];
 const EXAM_BOARDS = ['AQA', 'Edexcel', 'OCR'];
@@ -130,6 +131,9 @@ export default function SettingsTab() {
         <h1 className="font-display font-bold text-2xl text-[var(--color-ink-900)]">Settings</h1>
         <p className="text-sm text-[var(--color-ink-500)] mt-0.5">Update your profile and account details.</p>
       </div>
+
+      {/* Membership — plan, renewal date, and the route in and out of paying */}
+      <MembershipPanel />
 
       {/* Avatar */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200"

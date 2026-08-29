@@ -1,3 +1,5 @@
+import { clearDemoBilling } from './demoBilling';
+
 const KEY = 'ah_demo_mode';
 
 export function isDemoMode(): boolean {
@@ -31,4 +33,7 @@ function seedDemoGrades() {
 
 export function exitDemoMode() {
   sessionStorage.removeItem(KEY);
+  // The demonstration's payment journey goes with it, so a real sign-in never
+  // inherits a pretend membership.
+  clearDemoBilling();
 }

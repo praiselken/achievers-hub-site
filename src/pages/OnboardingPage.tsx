@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { takeCheckoutIntent } from '../lib/billing';
 
 // ── Avatar options by role ────────────────────────────────────────────────────
 
@@ -374,6 +375,15 @@ export default function OnboardingPage() {
     });
 
     localStorage.removeItem('signup_role');
+
+    // Someone who chose a paid plan before signing up was sent here first so
+    // their account exists. Now that it does, take them on to pay.
+    const intent = takeCheckoutIntent();
+    if (intent) {
+      navigate(`/checkout?plan=${intent.planId}&seats=${intent.seats}`);
+      return;
+    }
+
     navigate(DASHBOARD_BY_ROLE[profile.role]);
   }
 

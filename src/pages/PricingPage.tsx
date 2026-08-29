@@ -2,9 +2,13 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Minus } from 'lucide-react';
 import { Container } from '../components/marketing/Container';
 import { PricingCards } from '../components/marketing/PricingCards';
+import { paymentsAvailable } from '../lib/billing';
+import { formatPence, PLANS } from '../lib/plans';
+
+const tutorPlan = PLANS.tutor;
 
 const tutorRows = [
-  ['Monthly price', 'Free', '£39.99'],
+  ['Monthly price', 'Free', formatPence(PLANS.tutor.basePence)],
   ['Active students', '1', 'Up to 25'],
   ['Who invites', 'Student invites tutor', 'Tutor can invite students'],
   ['Progress summary', 'Included', 'Included'],
@@ -50,7 +54,7 @@ export default function PricingPage() {
               <div className="grid grid-cols-[1.35fr_.8fr_.8fr] border-b border-slate-200 bg-[var(--color-primary-50)]">
                 <div className="p-5"><span className="sr-only">Feature</span></div>
                 <div className="p-5 text-center"><p className="text-sm font-extrabold text-[var(--color-ink-900)]">Linked Tutor View</p><p className="mt-1 text-xs text-[var(--color-ink-500)]">Free</p></div>
-                <div className="bg-white/60 p-5 text-center"><p className="text-sm font-extrabold text-[var(--color-primary-700)]">Tutor Membership</p><p className="mt-1 text-xs text-[var(--color-ink-500)]">£39.99 per month</p></div>
+                <div className="bg-white/60 p-5 text-center"><p className="text-sm font-extrabold text-[var(--color-primary-700)]">{tutorPlan.name}</p><p className="mt-1 text-xs text-[var(--color-ink-500)]">{formatPence(tutorPlan.basePence)} {tutorPlan.suffix}</p></div>
               </div>
               {tutorRows.map(([feature, free, paid]) => (
                 <div key={feature} className="grid grid-cols-[1.35fr_.8fr_.8fr] border-b border-slate-100 last:border-0">
@@ -65,7 +69,12 @@ export default function PricingPage() {
           <div className="mx-auto mt-8 max-w-2xl rounded-3xl bg-[var(--color-primary-900)] p-7 text-center text-white sm:p-9">
             <h3 className="font-display text-2xl font-extrabold">Supporting more than one student?</h3>
             <p className="mt-3 leading-7 text-white/70">Bring up to 25 students into one dashboard, with detailed reports, homework, attendance, bookings, files and tutor-management tools.</p>
-            <Link to="/signup?role=tutor" className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-accent-500)] px-6 py-3 font-bold text-white hover:bg-[var(--color-accent-600)]">Explore Tutor Membership <ArrowRight size={17} /></Link>
+            <Link
+              to={paymentsAvailable() ? '/checkout?plan=tutor' : '/signup?role=tutor'}
+              className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-accent-500)] px-6 py-3 font-bold text-white hover:bg-[var(--color-accent-600)]"
+            >
+              {paymentsAvailable() ? `Choose ${tutorPlan.name}` : 'Explore Tutor Membership'} <ArrowRight size={17} />
+            </Link>
           </div>
         </Container>
       </section>

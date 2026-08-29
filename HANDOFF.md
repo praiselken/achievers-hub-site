@@ -19,9 +19,9 @@ and there is a Drive folder of mark schemes still to load.
 
 Nothing else on this list matters until that is resolved.
 
-## 2. Two migrations written but never run
+## 2. Three migrations written but never run
 
-Both in `supabase/migrations/`, neither applied (no working database to apply
+All in `supabase/migrations/`, none applied (no working database to apply
 them to).
 
 - **`0001_restrict_self_assigned_roles.sql` — security, run before opening signups.**
@@ -37,6 +37,11 @@ them to).
   read-only access for a linked parent. Until it runs, grades live in
   `localStorage` via `src/lib/grades.ts`, so they don't follow a student
   between devices.
+
+- **`0003_add_subscriptions.sql`** — the `subscriptions` table behind the payment
+  gateway, plus `stripe_events` for webhook idempotency. Until it runs, every
+  account reads as Free Starter, which is the safe direction to fail in: the app
+  works, nothing is unlocked that shouldn't be, and no one can be charged.
 
 **Row-level security in general is unverified.** Client-side queries are correctly
 scoped by user id, but client-side scoping is not protection. Before real students
@@ -68,19 +73,36 @@ dashboard home rebuilt.
   `src/index.css`. Any surface outside `MarketingLayout` must opt in explicitly —
   this is why the login page and admin panel didn't match until they were wrapped.
 - **Demo mode** is a `sessionStorage` flag (`src/lib/demoMode.ts`). `/demo` enters
-  it. Every tab, and now the admin panel, reads demo data and **writes nothing**
-  to Supabase in demo. Seeded grades live in `enterDemoMode()`.
+  it. Every tab, the admin panel, and now the whole payment journey read demo
+  data and **write nothing** to Supabase in demo. Seeded grades live in
+  `enterDemoMode()`; the payment journey lives in `src/lib/demoBilling.ts` and is
+  cleared by `exitDemoMode()` so a real sign-in cannot inherit a pretend
+  membership. Demo mode is also the only thing that opens the paid buttons while
+  `VITE_PAYMENTS_ENABLED` is unset.
 - **Archi** has one canonical depiction: `archie-book-avatar-v3.png`. The sprite
   sheet's `ai` cell is a different robot and is deliberately unreachable —
   `FeatureIllustration` returns the real art before the sprite lookup.
+- **`netlify.toml` now exists**, so it — not the Netlify UI — is the source of
+  truth for the build command, publish directory and functions directory. It was
+  written to match what the site was already deploying with. `npm run dev` alone
+  does not serve `/api/*`; use `npx netlify dev` when working on payments.
 - **Pathway tiers stay internal.** Never show Numeracy/Foundation/… next to a GCSE
   grade. `PATHWAYS` only renders in `StudentPage.tsx`, which is no longer routed.
 
 ## 5. Not built, and why
 
-- **Subscriptions / payments** — no Stripe integration exists. Blocked on the
-  client supplying an account since the first feedback round. The Stripe mentions
-  in `publicContent.ts` are legal copy, not integration.
+- **Subscriptions / payments** — **built, switched off.** Stripe hosted Checkout
+  and billing portal via Netlify Functions, with the webhook as the only writer of
+  entitlement. It stays dark until `VITE_PAYMENTS_ENABLED=true` and the Stripe
+  keys are set, because the account is the client's to open — so today the paid
+  buttons still route to the no-card trial and to signup, exactly as before.
+  The whole journey — pricing, checkout, payment, membership, cancelling, plus
+  the trial expiring and a failed renewal — is walkable today via `/demo`, for
+  client review before anything is switched on. Full setup steps, the client
+  walkthrough, the test-card run and the open commercial questions are in
+  `docs/PAYMENTS.md`. Note the seven-day trial is deliberately *not* a Stripe
+  trial: the copy promises no card and no automatic charge, so it is app-side and
+  works today without Stripe.
 - **Microsoft and Apple sign-in** are wired but need enabling in Supabase
   (Authentication → Providers). Microsoft needs a free Azure app registration.
   **Apple needs a paid Apple Developer Program membership, $99/year.**
@@ -95,8 +117,10 @@ dashboard home rebuilt.
 ## 6. Client situation
 
 - **Delivery date is 31 August.** The platform side is achievable if Supabase is
-  restored. Anything commercial is not, and that is blocked on the client.
-  Worth pinning down in writing what "delivery" covers.
+  restored. The commercial side is now *code-complete* but cannot be switched on
+  without a Stripe account in the client's name, plus a legal review of the
+  Subscription Terms before real money moves — both theirs to do, neither
+  instant. Worth pinning down in writing what "delivery" covers.
 - **Admin panel** — the client asked for it specifically. It exists: add/edit/delete
   for questions, topics, past papers and mindset prompts, plus user role changes.
   Reachable at `/admin` via the sidebar link, which only shows for

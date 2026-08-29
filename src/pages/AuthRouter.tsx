@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { takeCheckoutIntent } from '../lib/billing';
 
 /**
  * Landing point after login/signup.
  * Reads the user's profile and routes them to:
+ *   - /checkout           if they were part-way through choosing a membership
  *   - /onboarding   if they haven't completed onboarding
  *   - /dashboard          if student
  *   - /parent-dashboard   if parent
@@ -29,7 +31,17 @@ export default function AuthRouter() {
       if (!profile || !profile.onboarded) {
         // Save role hint for the onboarding page
         if (profile?.role) localStorage.setItem('signup_role', profile.role);
+        // A pending checkout is deliberately left in place here rather than
+        // consumed: setting the account up comes first, and OnboardingPage
+        // hands them on to /checkout when it finishes.
         navigate('/onboarding');
+        return;
+      }
+
+      // Someone who picked a plan before signing in gets taken back to it.
+      const intent = takeCheckoutIntent();
+      if (intent) {
+        navigate(`/checkout?plan=${intent.planId}&seats=${intent.seats}`);
         return;
       }
 

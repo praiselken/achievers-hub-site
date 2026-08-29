@@ -1,5 +1,6 @@
 import { useEffect, useState, createContext, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { DemoJourneyBar } from '../../components/demo/DemoJourneyBar';
 import { supabase } from '../../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 import MindsetPopup from '../../components/MindsetPopup';
@@ -128,9 +129,19 @@ export default function DashboardLayout({ children, activeTab }: DashboardLayout
           />
 
           {demo && (
-            <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs font-semibold text-amber-950" role="status">
-              Demonstration data only. This preview is not a student record or evidence of product results.
-            </div>
+            <>
+              <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs font-semibold text-amber-950" role="status">
+                Demonstration data only. This preview is not a student record or evidence of
+                product results.{' '}
+                {/* The paid journey starts on Pricing, and nothing else in the
+                    dashboard links there — without this it cannot be found. */}
+                <Link to="/pricing" className="underline underline-offset-2 hover:no-underline">
+                  Walk through the membership journey
+                </Link>
+                .
+              </div>
+              <DemoJourneyBar />
+            </>
           )}
 
           <main className="mx-auto w-full max-w-7xl px-3 py-5 sm:px-6 lg:py-7">
