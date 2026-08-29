@@ -7,7 +7,7 @@ export function ArchiAvatar({
 }) {
   return (
     <span
-      className={`inline-flex shrink-0 overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-violet-200 ${className}`}
+      className={`inline-flex shrink-0 overflow-hidden rounded-full bg-white/90 shadow-sm ${className}`}
       style={{ width: size, height: size }}
       aria-hidden="true"
     >

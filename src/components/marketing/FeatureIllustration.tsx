@@ -34,7 +34,7 @@ export function FeatureIllustration({
   const [column, row] = cells[feature];
 
   return (
-    <div className={`relative aspect-square overflow-hidden bg-white ${className}`} aria-hidden="true">
+    <div className={`relative aspect-square overflow-hidden ${className}`} aria-hidden="true">
       <img
         src="/images/feature-illustrations-v3.png"
         alt=""
