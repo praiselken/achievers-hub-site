@@ -517,3 +517,41 @@ export function getDemoSubjectProgress(subjectSlug: string) {
     lastPracticed,
   };
 }
+
+// ── Admin panel demo data ────────────────────────────────────────────────────
+// Lets the admin panel be shown without a database, the same way the student
+// dashboard is. Writes in demo mode change local state only — nothing reaches
+// Supabase.
+
+export const DEMO_ADMIN_QUESTIONS = [
+  { id: 'aq-1', subject: 'maths', topic_title: 'Place value', question: 'Write 2,306 in words.', answer: 'Two thousand three hundred and six', marks: 1, question_number: 1, month: 'August', day: 29, difficulty: 'foundation', skill_type: 'retrieval', solution_steps: 'Split into thousands, hundreds, tens and ones.', hints: 'Say each place-value chunk separately.' },
+  { id: 'aq-2', subject: 'maths', topic_title: 'Rounding', question: 'Round 4,781 to the nearest 100.', answer: '4800', marks: 1, question_number: 2, month: 'August', day: 29, difficulty: 'foundation', skill_type: 'fluency', solution_steps: 'The tens digit is 8, so round up.', hints: 'Look at the digit to the right of the hundreds.' },
+  { id: 'aq-3', subject: 'maths', topic_title: 'Quadratic Equations', question: 'Factorise x² + 7x + 12.', answer: '(x + 3)(x + 4)', marks: 2, question_number: 3, month: 'August', day: 29, difficulty: 'higher', skill_type: 'reasoning', solution_steps: 'Find two numbers that multiply to 12 and add to 7.', hints: 'What multiplies to 12?' },
+  { id: 'aq-4', subject: 'economics', topic_title: 'Demand', question: 'What happens to quantity demanded when price rises, ceteris paribus?', answer: 'It falls', marks: 1, question_number: 1, month: 'August', day: 29, difficulty: 'foundation', skill_type: 'retrieval', solution_steps: 'Movement along the demand curve.', hints: 'Think contraction, not a shift.' },
+  { id: 'aq-5', subject: 'economics', topic_title: 'Elasticity', question: 'State what price elasticity of demand measures.', answer: 'The responsiveness of quantity demanded to a change in price', marks: 2, question_number: 2, month: 'August', day: 29, difficulty: 'higher', skill_type: 'application', solution_steps: 'Link a price change to the response in quantity demanded.', hints: 'Use the word responsiveness.' },
+];
+
+export const DEMO_ADMIN_TOPICS = [
+  { id: 'at-1', subject: 'maths', area: 'Number', name: 'Fractions, Decimals & Percentages', description: 'Convert fluently and apply percentage change.', key_points: ['Divide numerator by denominator', 'Change ÷ original × 100'], exam_tip: 'Check increase, decrease or "percentage of".', practice_q: 'A jacket costs £60 after a 20% discount. What was the original price?', practice_a: '£75', video_url: null, command: 'Calculate', card_format: 'worked_example', pathway_min: 'foundation' },
+  { id: 'at-2', subject: 'maths', area: 'Algebra', name: 'Quadratic Equations', description: 'Factorise and solve quadratics.', key_points: ['Look for two numbers that multiply and add', 'Set each bracket to zero'], exam_tip: 'Always check both roots.', practice_q: 'Solve x² + 5x + 6 = 0', practice_a: 'x = −2 or x = −3', video_url: null, command: 'Solve', card_format: 'worked_example', pathway_min: 'foundation_plus' },
+  { id: 'at-3', subject: 'economics', area: 'Markets', name: 'Supply and Demand', description: 'How price is set where supply meets demand.', key_points: ['Demand slopes down', 'Supply slopes up'], exam_tip: 'Label both axes every time.', practice_q: 'Explain what happens to equilibrium price if demand rises.', practice_a: 'Equilibrium price and quantity both rise.', video_url: null, command: 'Explain', card_format: 'definition', pathway_min: 'foundation' },
+];
+
+export const DEMO_ADMIN_PAPERS = [
+  { id: 'ap-1', subject: 'maths', board: 'AQA', year: 2024, paper_number: 1, tier: 'Higher', title: 'AQA Maths Paper 1 (Non-Calculator)', max_score: 80, pdf_url: null },
+  { id: 'ap-2', subject: 'maths', board: 'AQA', year: 2024, paper_number: 2, tier: 'Higher', title: 'AQA Maths Paper 2 (Calculator)', max_score: 80, pdf_url: null },
+  { id: 'ap-3', subject: 'economics', board: 'AQA', year: 2024, paper_number: 1, tier: null, title: 'AQA Economics Paper 1', max_score: 80, pdf_url: null },
+];
+
+export const DEMO_ADMIN_MINDSET = [
+  { id: 'am-1', prompt: 'What is one thing you understand better today than last week?', category: 'reflection', active: true },
+  { id: 'am-2', prompt: 'Mistakes are information. What did your last mistake tell you?', category: 'growth', active: true },
+  { id: 'am-3', prompt: 'Name one topic you would like to feel more confident about.', category: 'goal', active: false },
+];
+
+export const DEMO_ADMIN_USERS = [
+  { id: 'au-1', display_name: 'Alex', avatar: '🚀', role: 'student', subjects: ['maths', 'economics'], year_group: 11, exam_board: 'AQA', onboarded: true, created_at: '2026-06-02T10:00:00Z' },
+  { id: 'au-2', display_name: 'Maya Thompson', avatar: '🎓', role: 'student', subjects: ['maths'], year_group: 11, exam_board: 'Edexcel', onboarded: true, created_at: '2026-06-14T10:00:00Z' },
+  { id: 'au-3', display_name: 'Sarah M.', avatar: '👩', role: 'parent', subjects: [], year_group: null, exam_board: null, onboarded: true, created_at: '2026-06-15T10:00:00Z' },
+  { id: 'au-4', display_name: 'Mr Idris', avatar: '👨‍🏫', role: 'tutor', subjects: ['maths'], year_group: null, exam_board: 'AQA', onboarded: true, created_at: '2026-07-01T10:00:00Z' },
+];

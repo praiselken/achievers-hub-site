@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#0F0E1A' }}>
+    <div className="mkt flex min-h-screen" style={{ background: '#170831' }}>
 
       {/* Sidebar */}
       <aside className="hidden md:flex flex-col w-56 shrink-0 border-r"
@@ -26,10 +26,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="px-5 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                 style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)' }}>A</div>
+                 style={{ background: 'linear-gradient(135deg, var(--color-primary-300), var(--color-primary-400))' }}>A</div>
             <div>
-              <p className="font-body text-xs font-bold text-white">Achievers' Hub</p>
-              <p className="font-body text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Admin Panel</p>
+              <p className="text-xs font-bold text-white">Achievers' Hub</p>
+              <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Admin Panel</p>
             </div>
           </div>
         </div>
@@ -39,9 +39,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             const active = pathname.startsWith(t.path);
             return (
               <Link key={t.key} to={t.path}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-body font-medium text-sm transition-all no-underline"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all no-underline"
                 style={active
-                  ? { background: 'rgba(169,125,192,0.18)', color: '#D4A8E8' }
+                  ? { background: 'rgba(169,125,192,0.18)', color: 'var(--color-primary-200)' }
                   : { color: 'rgba(255,255,255,0.5)' }}
                 onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#fff'; }}
                 onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)'; }}>
@@ -55,7 +55,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="px-4 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
           <button
             onClick={async () => { await supabase?.auth.signOut(); navigate('/login'); }}
-            className="flex items-center gap-2 font-body text-sm transition-colors w-full"
+            className="flex items-center gap-2 text-sm transition-colors w-full"
             style={{ color: 'rgba(255,255,255,0.35)' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)'; }}>

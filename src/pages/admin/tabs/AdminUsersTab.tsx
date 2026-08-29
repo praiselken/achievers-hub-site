@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_ADMIN_USERS } from '../../../lib/demoData';
 
 interface UserRow {
   id: string;
@@ -14,10 +16,10 @@ interface UserRow {
 }
 
 const ROLE_STYLE: Record<string, { bg: string; color: string }> = {
-  student: { bg: 'rgba(169,125,192,0.15)', color: '#D4A8E8' },
-  parent:  { bg: 'rgba(217,119,6,0.15)',   color: '#FCD34D' },
-  tutor:   { bg: 'rgba(74,138,20,0.15)',   color: '#86efac' },
-  admin:   { bg: 'rgba(239,68,68,0.15)',   color: '#FCA5A5' },
+  student: { bg: 'rgba(169,125,192,0.15)', color: 'var(--color-primary-200)' },
+  parent:  { bg: 'rgba(217,119,6,0.15)',   color: 'var(--color-accent-300)' },
+  tutor:   { bg: 'rgba(74,138,20,0.15)',   color: 'var(--color-success-300)' },
+  admin:   { bg: 'rgba(239,68,68,0.15)',   color: 'var(--color-accent-300)' },
 };
 
 export default function AdminUsersTab() {
@@ -27,6 +29,7 @@ export default function AdminUsersTab() {
   const [roleFilter, setRoleFilter] = useState('all');
 
   async function load() {
+    if (isDemoMode()) { setUsers(DEMO_ADMIN_USERS as never); setLoading(false); return; }
     if (!supabase) return;
     const { data } = await supabase
       .from('profiles')
@@ -39,6 +42,10 @@ export default function AdminUsersTab() {
   useEffect(() => { load(); }, []);
 
   async function setRole(id: string, role: string) {
+    if (isDemoMode()) {
+      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
+      return;
+    }
     if (!supabase) return;
     await supabase.from('profiles').update({ role }).eq('id', id);
     setUsers(u => u.map(r => r.id === id ? { ...r, role } : r));
@@ -62,7 +69,7 @@ export default function AdminUsersTab() {
           {Object.entries(counts).map(([role, count]) => {
             const s = ROLE_STYLE[role] ?? { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' };
             return (
-              <span key={role} className="font-body text-xs font-bold px-2.5 py-1 rounded-full capitalize"
+              <span key={role} className="text-xs font-bold px-2.5 py-1 rounded-full capitalize"
                     style={{ background: s.bg, color: s.color }}>
                 {count} {role}{count !== 1 ? 's' : ''}
               </span>
@@ -74,34 +81,34 @@ export default function AdminUsersTab() {
       <div className="flex gap-3 flex-wrap">
         {['all', 'student', 'parent', 'tutor', 'admin'].map(r => (
           <button key={r} onClick={() => setRoleFilter(r)}
-            className="font-body text-sm font-semibold px-3 py-1.5 rounded-lg capitalize transition-all"
+            className="text-sm font-semibold px-3 py-1.5 rounded-lg capitalize transition-all"
             style={roleFilter === r
-              ? { background: 'rgba(169,125,192,0.2)', color: '#D4A8E8', border: '1px solid rgba(169,125,192,0.4)' }
+              ? { background: 'rgba(169,125,192,0.2)', color: 'var(--color-primary-200)', border: '1px solid rgba(169,125,192,0.4)' }
               : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
             {r === 'all' ? 'All' : r}
           </button>
         ))}
         <input type="text" placeholder="Search by name or ID…" value={search} onChange={e => setSearch(e.target.value)}
-          className="font-body text-sm px-4 py-1.5 rounded-lg outline-none ml-auto"
+          className="text-sm px-4 py-1.5 rounded-lg outline-none ml-auto"
           style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', minWidth: 200 }} />
       </div>
 
       {loading ? (
-        <p className="font-body text-sm text-center py-8" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading…</p>
+        <p className="text-sm text-center py-8" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading…</p>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
           <table className="w-full">
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                 {['User', 'Role', 'Subjects', 'Onboarded', 'Joined', 'Change role'].map(h => (
-                  <th key={h} className="font-body text-xs font-bold uppercase tracking-wider text-left px-4 py-3"
+                  <th key={h} className="text-xs font-bold uppercase tracking-wider text-left px-4 py-3"
                       style={{ color: 'rgba(255,255,255,0.35)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={6} className="font-body text-sm text-center py-10" style={{ color: 'rgba(255,255,255,0.25)' }}>No users found</td></tr>
+                <tr><td colSpan={6} className="text-sm text-center py-10" style={{ color: 'rgba(255,255,255,0.25)' }}>No users found</td></tr>
               ) : filtered.map((u, i) => {
                 const rs = ROLE_STYLE[u.role] ?? { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' };
                 return (
@@ -110,32 +117,32 @@ export default function AdminUsersTab() {
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{u.avatar ?? '👤'}</span>
                         <div>
-                          <p className="font-body text-sm font-semibold text-white">{u.display_name ?? 'No name'}</p>
-                          <p className="font-body text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>{u.id.slice(0, 8)}…</p>
+                          <p className="text-sm font-semibold text-white">{u.display_name ?? 'No name'}</p>
+                          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>{u.id.slice(0, 8)}…</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-body text-xs font-bold px-2.5 py-1 rounded-full capitalize"
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full capitalize"
                             style={{ background: rs.bg, color: rs.color }}>{u.role}</span>
                     </td>
-                    <td className="px-4 py-3 font-body text-xs capitalize" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    <td className="px-4 py-3 text-xs capitalize" style={{ color: 'rgba(255,255,255,0.5)' }}>
                       {(u.subjects ?? []).join(', ') || '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-body text-xs" style={{ color: u.onboarded ? '#86efac' : '#FCA5A5' }}>
+                      <span className="text-xs" style={{ color: u.onboarded ? 'var(--color-success-300)' : 'var(--color-accent-300)' }}>
                         {u.onboarded ? '✓ Yes' : '✗ No'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-body text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    <td className="px-4 py-3 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
                       {new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })}
                     </td>
                     <td className="px-4 py-3">
                       <select value={u.role} onChange={e => setRole(u.id, e.target.value)}
-                        className="font-body text-xs px-2 py-1 rounded-lg outline-none capitalize"
+                        className="text-xs px-2 py-1 rounded-lg outline-none capitalize"
                         style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}>
                         {['student', 'parent', 'tutor', 'admin'].map(r => (
-                          <option key={r} value={r} style={{ background: '#1A1928' }}>{r}</option>
+                          <option key={r} value={r} style={{ background: '#241041' }}>{r}</option>
                         ))}
                       </select>
                     </td>

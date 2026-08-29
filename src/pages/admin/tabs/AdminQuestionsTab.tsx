@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { isDemoMode } from '../../../lib/demoMode';
+import { DEMO_ADMIN_QUESTIONS } from '../../../lib/demoData';
 
 interface Question {
   id: string;
@@ -31,6 +33,7 @@ export default function AdminQuestionsTab() {
   const [deleteId, setDeleteId]   = useState<string | null>(null);
 
   async function load() {
+    if (isDemoMode()) { setQuestions(DEMO_ADMIN_QUESTIONS as never); setLoading(false); return; }
     if (!supabase) return;
     const { data } = await supabase.from('questions').select('*').order('subject').order('topic_title').order('day');
     setQuestions(data ?? []);
@@ -51,6 +54,15 @@ export default function AdminQuestionsTab() {
   }
 
   async function save() {
+    if (isDemoMode()) {
+      // Demo writes stay in memory so the tools can be demonstrated safely.
+      setQuestions((prev) => editing
+        ? prev.map((row) => (row.id === editing.id ? { ...row, ...form } : row))
+        : [...prev, { ...form, id: `demo-${Date.now()}` } as never]);
+      setEditing(null);
+      setForm(EMPTY);
+      return;
+    }
     if (!supabase) return;
     setSaving(true);
     if (editing) {
@@ -65,6 +77,11 @@ export default function AdminQuestionsTab() {
   }
 
   async function deleteQuestion(id: string) {
+    if (isDemoMode()) {
+      setQuestions((prev) => prev.filter((row) => row.id !== id));
+      setDeleteId(null);
+      return;
+    }
     if (!supabase) return;
     await supabase.from('questions').delete().eq('id', id);
     setDeleteId(null);
@@ -84,13 +101,13 @@ export default function AdminQuestionsTab() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display font-bold text-2xl text-white">Questions</h1>
-          <p className="font-body text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {questions.length} total · Daily 5 question bank
           </p>
         </div>
         <button onClick={openNew}
-          className="font-body text-sm font-bold px-4 py-2.5 rounded-xl text-white flex items-center gap-2"
-          style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)' }}>
+          className="text-sm font-bold px-4 py-2.5 rounded-xl text-white flex items-center gap-2"
+          style={{ background: 'linear-gradient(135deg, var(--color-primary-300), var(--color-primary-400))' }}>
           + Add question
         </button>
       </div>
@@ -99,60 +116,60 @@ export default function AdminQuestionsTab() {
       <div className="flex gap-3 flex-wrap">
         {['all', 'maths', 'economics'].map(s => (
           <button key={s} onClick={() => setSubjectFilter(s)}
-            className="font-body text-sm font-semibold px-3 py-1.5 rounded-lg capitalize transition-all"
+            className="text-sm font-semibold px-3 py-1.5 rounded-lg capitalize transition-all"
             style={subjectFilter === s
-              ? { background: 'rgba(169,125,192,0.2)', color: '#D4A8E8', border: '1px solid rgba(169,125,192,0.4)' }
+              ? { background: 'rgba(169,125,192,0.2)', color: 'var(--color-primary-200)', border: '1px solid rgba(169,125,192,0.4)' }
               : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
             {s === 'all' ? 'All' : s}
           </button>
         ))}
         <input type="text" placeholder="Search questions…" value={search} onChange={e => setSearch(e.target.value)}
-          className="font-body text-sm px-4 py-1.5 rounded-lg outline-none ml-auto"
+          className="text-sm px-4 py-1.5 rounded-lg outline-none ml-auto"
           style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', minWidth: 200 }} />
       </div>
 
       {/* Table */}
       {loading ? (
-        <p className="font-body text-sm text-center py-8" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading…</p>
+        <p className="text-sm text-center py-8" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading…</p>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
           <table className="w-full">
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                 {['Subject', 'Topic', 'Question', 'Marks', 'Day', 'Actions'].map(h => (
-                  <th key={h} className="font-body text-xs font-bold uppercase tracking-wider text-left px-4 py-3"
+                  <th key={h} className="text-xs font-bold uppercase tracking-wider text-left px-4 py-3"
                       style={{ color: 'rgba(255,255,255,0.35)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={6} className="font-body text-sm text-center py-10"
+                <tr><td colSpan={6} className="text-sm text-center py-10"
                         style={{ color: 'rgba(255,255,255,0.25)' }}>No questions found</td></tr>
               ) : filtered.map((q, i) => (
                 <tr key={q.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
                   <td className="px-4 py-3">
-                    <span className="font-body text-xs font-bold px-2 py-1 rounded capitalize"
-                          style={{ background: 'rgba(169,125,192,0.15)', color: '#D4A8E8' }}>{q.subject}</span>
+                    <span className="text-xs font-bold px-2 py-1 rounded capitalize"
+                          style={{ background: 'rgba(169,125,192,0.15)', color: 'var(--color-primary-200)' }}>{q.subject}</span>
                   </td>
-                  <td className="px-4 py-3 font-body text-sm max-w-32 truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>{q.topic_title ?? '—'}</td>
-                  <td className="px-4 py-3 font-body text-sm max-w-xs truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>{q.question}</td>
-                  <td className="px-4 py-3 font-body text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>{q.marks ?? '—'}</td>
-                  <td className="px-4 py-3 font-body text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <td className="px-4 py-3 text-sm max-w-32 truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>{q.topic_title ?? '—'}</td>
+                  <td className="px-4 py-3 text-sm max-w-xs truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>{q.question}</td>
+                  <td className="px-4 py-3 text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>{q.marks ?? '—'}</td>
+                  <td className="px-4 py-3 text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     {q.month != null && q.day != null ? `${q.day}/${q.month}` : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(q)}
-                        className="font-body text-xs font-semibold px-3 py-1 rounded-lg transition-all"
+                        className="text-xs font-semibold px-3 py-1 rounded-lg transition-all"
                         style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'; }}>
                         Edit
                       </button>
                       <button onClick={() => setDeleteId(q.id)}
-                        className="font-body text-xs font-semibold px-3 py-1 rounded-lg transition-all"
-                        style={{ background: 'rgba(239,68,68,0.1)', color: '#FCA5A5' }}
+                        className="text-xs font-semibold px-3 py-1 rounded-lg transition-all"
+                        style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--color-accent-300)' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.2)'; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)'; }}>
                         Delete
@@ -177,18 +194,18 @@ export default function AdminQuestionsTab() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
              style={{ background: 'rgba(0,0,0,0.7)' }}>
           <div className="rounded-2xl p-6 max-w-sm w-full"
-               style={{ background: '#1A1928', border: '1px solid rgba(255,255,255,0.1)' }}>
+               style={{ background: '#241041', border: '1px solid rgba(255,255,255,0.1)' }}>
             <p className="font-display font-bold text-white text-lg mb-2">Delete question?</p>
-            <p className="font-body text-sm mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>This cannot be undone.</p>
+            <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>This cannot be undone.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)}
-                className="flex-1 py-2.5 rounded-xl font-body font-bold text-sm"
+                className="flex-1 py-2.5 rounded-xl font-bold text-sm"
                 style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>
                 Cancel
               </button>
               <button onClick={() => deleteQuestion(deleteId)}
-                className="flex-1 py-2.5 rounded-xl font-body font-bold text-sm"
-                style={{ background: '#EF4444', color: '#fff' }}>
+                className="flex-1 py-2.5 rounded-xl font-bold text-sm"
+                style={{ background: 'var(--color-accent-600)', color: '#fff' }}>
                 Delete
               </button>
             </div>
@@ -201,7 +218,7 @@ export default function AdminQuestionsTab() {
         <div className="fixed bottom-8 right-8">
           <button onClick={openNew}
             className="w-14 h-14 rounded-full text-white text-2xl shadow-lg flex items-center justify-center transition-transform hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)', boxShadow: '0 8px 32px rgba(153,112,166,0.4)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--color-primary-300), var(--color-primary-400))', boxShadow: '0 8px 32px rgba(153,112,166,0.4)' }}>
             +
           </button>
         </div>
@@ -229,7 +246,7 @@ function QuestionForm({ form, setForm, editing, onSave, onCancel, saving }: Form
          style={{ background: 'rgba(0,0,0,0.6)' }}
          onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
       <div className="h-full max-h-screen overflow-y-auto rounded-2xl w-full max-w-lg flex flex-col gap-4 p-6"
-           style={{ background: '#1A1928', border: '1px solid rgba(255,255,255,0.1)' }}>
+           style={{ background: '#241041', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex items-center justify-between">
           <h2 className="font-display font-bold text-white text-lg">
             {editing ? 'Edit question' : 'New question'}
@@ -241,9 +258,9 @@ function QuestionForm({ form, setForm, editing, onSave, onCancel, saving }: Form
         <div className="flex gap-2">
           {['maths', 'economics'].map(s => (
             <button key={s} onClick={() => f('subject')(s)}
-              className="flex-1 py-2 rounded-xl font-body font-semibold text-sm capitalize transition-all"
+              className="flex-1 py-2 rounded-xl font-semibold text-sm capitalize transition-all"
               style={form.subject === s
-                ? { background: 'rgba(169,125,192,0.25)', color: '#D4A8E8', border: '1px solid rgba(169,125,192,0.4)' }
+                ? { background: 'rgba(169,125,192,0.25)', color: 'var(--color-primary-200)', border: '1px solid rgba(169,125,192,0.4)' }
                 : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
               {s}
             </button>
@@ -298,13 +315,13 @@ function QuestionForm({ form, setForm, editing, onSave, onCancel, saving }: Form
 
         <div className="flex gap-3 pt-2">
           <button onClick={onCancel}
-            className="flex-1 py-3 rounded-xl font-body font-bold text-sm"
+            className="flex-1 py-3 rounded-xl font-bold text-sm"
             style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
             Cancel
           </button>
           <button onClick={onSave} disabled={saving || !form.question || !form.answer}
-            className="flex-1 py-3 rounded-xl font-body font-bold text-sm text-white transition-opacity"
-            style={{ background: 'linear-gradient(135deg, #B57CC8, #9970A6)', opacity: saving ? 0.7 : 1 }}>
+            className="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-opacity"
+            style={{ background: 'linear-gradient(135deg, var(--color-primary-300), var(--color-primary-400))', opacity: saving ? 0.7 : 1 }}>
             {saving ? 'Saving…' : editing ? 'Save changes' : 'Add question'}
           </button>
         </div>
@@ -317,7 +334,7 @@ function QuestionForm({ form, setForm, editing, onSave, onCancel, saving }: Form
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="font-body text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</label>
+      <label className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</label>
       {children}
     </div>
   );
