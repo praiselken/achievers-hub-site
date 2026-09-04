@@ -12,14 +12,39 @@ interface Question {
   solution_steps: string | null;
   hints: string | null;
   marks: number | null;
-  month: number | null;
+  /** Stored as a month name, not a number. Daily 5 looks the day up by name. */
+  month: string | null;
   day: number | null;
+  /** Part of the table's unique key and NOT NULL, so a question cannot be
+   *  saved without one. */
+  question_number: number | null;
   difficulty: string | null;
+  skill_type: string | null;
+  exam_board: string | null;
+  calculator: string | null;
 }
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+/** Fixed so the column cannot drift again. It had been holding three different
+ *  vocabularies at once: easy/medium/hard, Core/Extension and foundation/higher.
+ *  Tier is not stored here — the client's rule is that it falls out of grade. */
+const DIFFICULTIES = ['easy', 'medium', 'hard'];
+
+const SKILL_TYPES = [
+  'retrieval', 'fluency', 'application', 'reasoning', 'problem-solving', 'evaluation',
+];
+
+const EXAM_BOARDS = ['all', 'AQA', 'Edexcel', 'OCR'];
 
 const EMPTY: Omit<Question, 'id'> = {
   subject: 'maths', topic_title: '', question: '', answer: '',
-  solution_steps: '', hints: '', marks: null, month: null, day: null, difficulty: 'medium',
+  solution_steps: '', hints: '', marks: null, month: null, day: null,
+  question_number: null, difficulty: 'medium', skill_type: null,
+  exam_board: 'all', calculator: null,
 };
 
 export default function AdminQuestionsTab() {
@@ -31,6 +56,10 @@ export default function AdminQuestionsTab() {
   const [search, setSearch]       = useState('');
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
   const [deleteId, setDeleteId]   = useState<string | null>(null);
+  const [error, setError]         = useState<string | null>(null);
+  // Was inferred from the form contents, which meant "Add question" opened
+  // nothing at all: a new question starts empty, so the condition never held.
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   async function load() {
     if (isDemoMode()) { setQuestions(DEMO_ADMIN_QUESTIONS as never); setLoading(false); return; }
@@ -45,34 +74,68 @@ export default function AdminQuestionsTab() {
   function openNew() {
     setEditing(null);
     setForm(EMPTY);
+    setError(null);
+    setDrawerOpen(true);
   }
 
   function openEdit(q: Question) {
     setEditing(q);
     const { id: _id, ...rest } = q;
     setForm(rest);
+    setError(null);
+    setDrawerOpen(true);
+  }
+
+  function closeDrawer() {
+    setDrawerOpen(false);
+    setEditing(null);
+    setForm(EMPTY);
+    setError(null);
+  }
+
+  /** Everything the table needs before it will accept a row. Checked here so
+   *  the admin is told what is missing rather than the insert failing silently
+   *  against a NOT NULL constraint. */
+  function validate(f: Omit<Question, 'id'>): string | null {
+    if (!f.question.trim()) return 'The question text is required.';
+    if (!f.month) return 'Pick a month. Daily 5 looks questions up by month and day.';
+    if (!f.day) return 'Pick a day.';
+    if (!f.question_number) return 'Set the question number, 1 to 5.';
+    return null;
   }
 
   async function save() {
+    const problem = validate(form);
+    if (problem) { setError(problem); return; }
+    setError(null);
+
     if (isDemoMode()) {
       // Demo writes stay in memory so the tools can be demonstrated safely.
       setQuestions((prev) => editing
         ? prev.map((row) => (row.id === editing.id ? { ...row, ...form } : row))
         : [...prev, { ...form, id: `demo-${Date.now()}` } as never]);
-      setEditing(null);
-      setForm(EMPTY);
+      closeDrawer();
       return;
     }
     if (!supabase) return;
     setSaving(true);
-    if (editing) {
-      await supabase.from('questions').update(form).eq('id', editing.id);
-    } else {
-      await supabase.from('questions').insert(form);
-    }
+    const { error: writeError } = editing
+      ? await supabase.from('questions').update(form).eq('id', editing.id)
+      : await supabase.from('questions').insert(form);
     setSaving(false);
-    setEditing(null);
-    setForm(EMPTY);
+
+    if (writeError) {
+      // Was swallowed before, so a failed save looked exactly like a successful
+      // one: the form closed and nothing appeared in the list.
+      setError(
+        writeError.code === '23505'
+          ? 'A question already exists for that subject, month, day and number.'
+          : `Could not save: ${writeError.message}`,
+      );
+      return;
+    }
+
+    closeDrawer();
     load();
   }
 
@@ -156,7 +219,9 @@ export default function AdminQuestionsTab() {
                   <td className="px-4 py-3 text-sm max-w-xs truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>{q.question}</td>
                   <td className="px-4 py-3 text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>{q.marks ?? '—'}</td>
                   <td className="px-4 py-3 text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    {q.month != null && q.day != null ? `${q.day}/${q.month}` : '—'}
+                    {q.month && q.day != null
+                      ? `${q.day} ${q.month.slice(0, 3)}${q.question_number != null ? ` · Q${q.question_number}` : ''}`
+                      : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
@@ -184,9 +249,9 @@ export default function AdminQuestionsTab() {
       )}
 
       {/* Edit / Add drawer */}
-      {(editing !== null || form.question !== '' || form === EMPTY && editing === null && false) && (
-        <QuestionForm form={form} setForm={setForm} editing={editing}
-          onSave={save} onCancel={() => { setEditing(null); setForm(EMPTY); }} saving={saving} />
+      {drawerOpen && (
+        <QuestionForm form={form} setForm={setForm} editing={editing} error={error}
+          onSave={save} onCancel={closeDrawer} saving={saving} />
       )}
 
       {/* Confirm delete modal */}
@@ -234,9 +299,10 @@ interface FormProps {
   onSave: () => void;
   onCancel: () => void;
   saving: boolean;
+  error: string | null;
 }
 
-function QuestionForm({ form, setForm, editing, onSave, onCancel, saving }: FormProps) {
+function QuestionForm({ form, setForm, editing, onSave, onCancel, saving, error }: FormProps) {
   const f = <K extends keyof Omit<Question, 'id'>>(key: K) => (
     (val: string | number | null) => setForm(p => ({ ...p, [key]: val }))
   );
@@ -267,29 +333,69 @@ function QuestionForm({ form, setForm, editing, onSave, onCancel, saving }: Form
           ))}
         </div>
 
-        {[
-          { label: 'Topic title', key: 'topic_title' as const, placeholder: 'e.g. Algebra — solving equations' },
-          { label: 'Difficulty', key: 'difficulty' as const, placeholder: 'easy | medium | hard' },
-        ].map(({ label, key, placeholder }) => (
-          <Field key={key} label={label}>
-            <input value={(form[key] as string) ?? ''} onChange={e => f(key)(e.target.value)}
-              placeholder={placeholder}
-              className="admin-input" />
-          </Field>
-        ))}
+        <Field label="Topic title">
+          <input value={form.topic_title ?? ''} onChange={e => f('topic_title')(e.target.value)}
+            placeholder="e.g. Algebra — solving equations" className="admin-input" />
+        </Field>
 
         <div className="flex gap-3">
+          <Field label="Difficulty">
+            <select value={form.difficulty ?? 'medium'} onChange={e => f('difficulty')(e.target.value)}
+              className="admin-input capitalize">
+              {DIFFICULTIES.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </Field>
+          <Field label="Skill type">
+            <select value={form.skill_type ?? ''} onChange={e => f('skill_type')(e.target.value || null)}
+              className="admin-input capitalize">
+              <option value="">Not set</option>
+              {SKILL_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Field>
+        </div>
+
+        <div className="flex gap-3">
+          <Field label="Exam board">
+            <select value={form.exam_board ?? 'all'} onChange={e => f('exam_board')(e.target.value)}
+              className="admin-input">
+              {EXAM_BOARDS.map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </Field>
+          <Field label="Calculator">
+            <select value={form.calculator ?? ''} onChange={e => f('calculator')(e.target.value || null)}
+              className="admin-input">
+              <option value="">Not set</option>
+              <option value="Calc">Calc</option>
+              <option value="Non-Calc">Non-Calc</option>
+            </select>
+          </Field>
           <Field label="Marks">
-            <input type="number" value={form.marks ?? ''} onChange={e => f('marks')(e.target.value ? Number(e.target.value) : null)}
+            <input type="number" min={1} value={form.marks ?? ''} onChange={e => f('marks')(e.target.value ? Number(e.target.value) : null)}
               placeholder="e.g. 3" className="admin-input" />
           </Field>
-          <Field label="Month">
-            <input type="number" min={1} max={12} value={form.month ?? ''} onChange={e => f('month')(e.target.value ? Number(e.target.value) : null)}
-              placeholder="1–12" className="admin-input" />
+        </div>
+
+        {/* Subject, month, day and question number together are the table's
+            unique key, and all four are required. Getting the month wrong is
+            what previously made a saved question invisible to Daily 5. */}
+        <div className="flex gap-3">
+          <Field label="Month *">
+            <select value={form.month ?? ''} onChange={e => f('month')(e.target.value || null)}
+              className="admin-input">
+              <option value="">Pick a month</option>
+              {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
           </Field>
-          <Field label="Day">
+          <Field label="Day *">
             <input type="number" min={1} max={31} value={form.day ?? ''} onChange={e => f('day')(e.target.value ? Number(e.target.value) : null)}
               placeholder="1–31" className="admin-input" />
+          </Field>
+          <Field label="Question no. *">
+            <select value={form.question_number ?? ''} onChange={e => f('question_number')(e.target.value ? Number(e.target.value) : null)}
+              className="admin-input">
+              <option value="">1–5</option>
+              {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
           </Field>
         </div>
 
@@ -312,6 +418,13 @@ function QuestionForm({ form, setForm, editing, onSave, onCancel, saving }: Form
           <textarea value={form.hints ?? ''} onChange={e => f('hints')(e.target.value)}
             rows={2} placeholder="Optional hint shown before the answer…" className="admin-input resize-none" />
         </Field>
+
+        {error && (
+          <p role="alert" className="rounded-xl px-4 py-3 text-sm font-semibold"
+             style={{ background: 'rgba(239,68,68,0.14)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.35)' }}>
+            {error}
+          </p>
+        )}
 
         <div className="flex gap-3 pt-2">
           <button onClick={onCancel}
