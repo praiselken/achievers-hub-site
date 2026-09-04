@@ -3,12 +3,10 @@ import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
-  BarChart3,
   BookOpen,
   Calculator,
   Check,
   Clock3,
-  Eye,
   Flag,
   Lightbulb,
   PenLine,
@@ -17,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
+import { checkAnswer, isAutoCheckable } from '../../../lib/answerCheck';
 import { useSubject } from '../DashboardLayout';
 import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 import { isDemoMode } from '../../../lib/demoMode';
@@ -38,27 +37,25 @@ interface Question {
   hints: string | null;
 }
 
-// The mix behind each slot — this is what the "Why this question?" panel explains.
-const Q_LABELS = [
-  { label: 'At your level' },
-  { label: 'At your level' },
-  { label: 'At your level' },
-  { label: 'Weak topic focus' },
-  { label: 'Stretch' },
-];
-
 export default function DailyFiveTab() {
   const { subject } = useSubject();
   const [phase, setPhase]           = useState<Phase>('intro');
   const [questions, setQuestions]   = useState<Question[]>([]);
   const [current, setCurrent]       = useState(0);
-  const [revealed, setRevealed]     = useState(false);
   const [answers, setAnswers]       = useState<(boolean | null)[]>([]);
   const [alreadyDone, setAlreadyDone] = useState(false);
   const [loading, setLoading]       = useState(true);
   const [hintOpen, setHintOpen]     = useState(false);
   const [workbookOpen, setWorkbookOpen] = useState(false);
   const [flagged, setFlagged]       = useState<string[]>([]);
+
+  // The attempt in progress: what they typed, how many tries they have had,
+  // and the result of the last check. Working is revealed once they are right,
+  // once they have used both attempts, or on a long answer they mark themselves.
+  const [entry, setEntry]           = useState('');
+  const [attempts, setAttempts]     = useState(0);
+  const [lastCheck, setLastCheck]   = useState<boolean | null>(null);
+  const [showWorking, setShowWorking] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -103,9 +100,12 @@ export default function DailyFiveTab() {
 
   function goToQuestion(next: number) {
     setCurrent(next);
-    setRevealed(false);
     setHintOpen(false);
     setWorkbookOpen(false);
+    setEntry('');
+    setAttempts(0);
+    setLastCheck(null);
+    setShowWorking(false);
   }
 
   function startSession() {
@@ -147,10 +147,44 @@ export default function DailyFiveTab() {
     await checkAndAwardAchievements(user.id);
   }
 
-  function handleSelfMark(correct: boolean) {
+  function record(correct: boolean) {
     const updated = [...answers];
     updated[current] = correct;
     setAnswers(updated);
+  }
+
+  /**
+   * One attempt at a short answer. Right, and they are told why it works.
+   * Wrong first time, they get the hint and another go. Wrong again, the
+   * working opens — the point is that they find out where it went, rather
+   * than comparing two answers and guessing.
+   */
+  function submitAnswer() {
+    const q = questions[current];
+    if (!entry.trim()) return;
+
+    const correct = checkAnswer(entry, q.answer);
+    setLastCheck(correct);
+
+    if (correct) {
+      setAttempts(attempts + 1);
+      setShowWorking(true);
+      record(true);
+      return;
+    }
+
+    const used = attempts + 1;
+    setAttempts(used);
+    if (used === 1) {
+      if (q.hints) setHintOpen(true);
+    } else {
+      setShowWorking(true);
+      record(false);
+    }
+  }
+
+  function revealForSelfMark() {
+    setShowWorking(true);
   }
 
   function advance() {
@@ -206,14 +240,16 @@ export default function DailyFiveTab() {
         <p className="mt-6 text-xs font-extrabold uppercase tracking-[.14em] text-[var(--feature-daily-strong)]">Today&apos;s focus</p>
         <h1 className="mt-2 font-display text-3xl font-extrabold text-[var(--color-ink-900)]">Your Daily 5</h1>
         <p className="mt-3 text-sm leading-6 text-[var(--color-ink-500)]">
-          <span className="capitalize">{subject}</span> · {questions.length} questions · Work it out, reveal the answer, then mark yourself honestly.
+          <span className="capitalize">{subject}</span> · {questions.length} questions · Work each one out, put your answer in, and we will tell you how you did.
         </p>
         <ul className="mt-7 grid gap-2 text-left">
           {questions.map((q, i) => (
             <li key={q.id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-extrabold text-slate-400">{i + 1}</span>
               <span className="text-sm font-bold text-[var(--color-ink-700)]">{q.topic_title ?? `Question ${i + 1}`}</span>
-              <span className="ml-auto text-xs font-bold text-[var(--color-ink-500)]">{(Q_LABELS[i] ?? Q_LABELS[0]).label}</span>
+              {q.marks != null && (
+                <span className="ml-auto text-xs font-bold text-[var(--color-ink-500)]">{q.marks} {q.marks === 1 ? 'mark' : 'marks'}</span>
+              )}
             </li>
           ))}
         </ul>
@@ -299,9 +335,10 @@ export default function DailyFiveTab() {
   }
 
   const q = questions[current];
-  const qMeta = Q_LABELS[current] ?? Q_LABELS[0];
   const marked = answers[current];
   const isFlagged = flagged.includes(q.id);
+  const autoCheck = isAutoCheckable(q.answer);
+  const attemptsLeft = Math.max(0, 2 - attempts);
 
   // Split on newlines or "Step N" so uploaded working renders as numbered steps.
   const solutionSteps: string[] = q.solution_steps
@@ -365,7 +402,6 @@ export default function DailyFiveTab() {
           <div className="border-b border-slate-100 px-5 py-5 sm:px-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-[var(--feature-daily-bg)] px-3 py-1 text-xs font-extrabold text-[var(--feature-daily-strong)]">{qMeta.label}</span>
                 {q.topic_title && (
                   <span className="rounded-full bg-[var(--color-primary-50)] px-3 py-1 text-xs font-extrabold text-[var(--color-primary-600)]">{q.topic_title}</span>
                 )}
@@ -384,103 +420,168 @@ export default function DailyFiveTab() {
             </div>
             <h2 className="mt-5 max-w-4xl font-display text-2xl font-extrabold leading-snug text-[var(--color-ink-900)] sm:text-3xl">{q.question}</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--color-ink-500)]">
-              {revealed ? 'Compare your working with the model answer, then mark yourself.' : 'Work it out on paper or in the working space, then reveal the answer.'}
+              {marked !== null
+                ? 'Have a read of the working, then move on.'
+                : autoCheck
+                  ? 'Work it out, then put your answer in and we will check it.'
+                  : 'Write your answer out, then compare it with the model answer.'}
             </p>
           </div>
 
           <div className="min-h-[410px] bg-[#fcfcfd] p-5 sm:p-8">
-            {!revealed ? (
-              workbookOpen ? (
-                <Workbook
-                  open
-                  onClose={() => setWorkbookOpen(false)}
-                  storageKey={`daily5:${q.id}`}
-                  title={q.topic_title ? `Daily 5 — ${q.topic_title}` : 'Daily 5'}
-                />
-              ) : (
-                <div className="flex min-h-56 max-w-2xl flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white p-8 text-center">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-primary-50)] text-[var(--color-primary-600)]"><PenLine size={22} /></span>
-                  <p className="mt-4 font-display text-lg font-extrabold text-[var(--color-ink-900)]">Work it out first</p>
-                  <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--color-ink-500)]">
-                    Open the workbook for squared paper, a ruler, a protractor and a compass.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setWorkbookOpen(true)}
-                    className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--color-primary-200)] bg-white px-5 text-sm font-bold text-[var(--color-primary-700)] transition hover:bg-[var(--color-primary-50)]"
-                  >
-                    <PenLine size={16} /> Open workbook
-                  </button>
-                </div>
-              )
+            {workbookOpen ? (
+              <Workbook
+                open
+                onClose={() => setWorkbookOpen(false)}
+                storageKey={`daily5:${q.id}`}
+                title={q.topic_title ? `Daily 5 — ${q.topic_title}` : 'Daily 5'}
+              />
             ) : (
               <div className="max-w-3xl space-y-4">
-                <div className="overflow-hidden rounded-2xl border border-[var(--color-success-300)]">
-                  <div className="flex items-center gap-2 bg-[var(--color-success-50)] px-5 py-3">
-                    <Check size={16} strokeWidth={3} className="text-[var(--color-success-600)]" />
-                    <p className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-success-600)]">Model answer</p>
-                  </div>
-                  <div className="bg-white px-5 py-4">
-                    <p className="text-sm leading-7 text-[var(--color-ink-700)]">{q.answer}</p>
-                  </div>
+                {/* Their attempt. Stays visible once marked so they can see what
+                    they wrote next to the working. */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <label htmlFor="daily5-answer" className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-ink-500)]">
+                    {autoCheck ? 'Your answer' : 'Your answer, in your own words'}
+                  </label>
+                  {autoCheck ? (
+                    <input
+                      id="daily5-answer"
+                      type="text"
+                      value={entry}
+                      disabled={marked !== null}
+                      onChange={(e) => setEntry(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') submitAnswer(); }}
+                      placeholder="Type your answer"
+                      autoComplete="off"
+                      className="mt-2 w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-display text-lg font-bold text-[var(--color-ink-900)] outline-none transition focus:border-[var(--color-primary-400)] disabled:bg-slate-50 disabled:text-[var(--color-ink-500)]"
+                    />
+                  ) : (
+                    <textarea
+                      id="daily5-answer"
+                      value={entry}
+                      disabled={marked !== null}
+                      onChange={(e) => setEntry(e.target.value)}
+                      rows={4}
+                      placeholder="Write your answer"
+                      className="mt-2 w-full resize-y rounded-xl border-2 border-slate-200 px-4 py-3 text-sm leading-7 text-[var(--color-ink-900)] outline-none transition focus:border-[var(--color-primary-400)] disabled:bg-slate-50 disabled:text-[var(--color-ink-500)]"
+                    />
+                  )}
+
+                  {marked === null && (
+                    <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <button
+                        type="button"
+                        onClick={autoCheck ? submitAnswer : revealForSelfMark}
+                        disabled={autoCheck && !entry.trim()}
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-600)] px-6 font-bold text-white transition hover:bg-[var(--color-primary-700)] disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        {autoCheck ? 'Check my answer' : 'Compare with the model answer'}
+                      </button>
+                      {autoCheck && attempts > 0 && (
+                        <span className="text-xs font-bold text-[var(--color-ink-500)]">
+                          {attemptsLeft === 1 ? 'One more try' : 'Last try used'}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setWorkbookOpen(true)}
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--color-primary-200)] bg-white px-5 text-sm font-bold text-[var(--color-primary-700)] transition hover:bg-[var(--color-primary-50)] sm:ml-auto"
+                      >
+                        <PenLine size={16} /> Workbook
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {solutionSteps.length > 0 && (
-                  <div className="overflow-hidden rounded-2xl border border-[var(--color-primary-200)]">
-                    <div className="flex items-center gap-2 bg-[var(--color-primary-50)] px-5 py-3">
-                      <PenLine size={16} className="text-[var(--color-primary-600)]" />
-                      <p className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-primary-600)]">Step-by-step working</p>
+                {/* Told right or wrong, and why. A first wrong answer gets the
+                    hint and another go rather than the solution. */}
+                {lastCheck !== null && (
+                  <div
+                    role="status"
+                    className={`rounded-2xl border p-5 ${lastCheck ? 'border-[var(--color-success-300)] bg-[var(--color-success-50)]' : 'border-amber-200 bg-amber-50'}`}
+                  >
+                    <div className="flex gap-3">
+                      <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${lastCheck ? 'bg-[var(--color-success-400)] text-white' : 'bg-amber-400 text-amber-950'}`}>
+                        {lastCheck ? <Check size={17} strokeWidth={3} /> : <RotateCcw size={16} />}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-extrabold">
+                          {lastCheck ? 'That’s right' : attemptsLeft > 0 ? 'Not quite, try once more' : 'Not this time'}
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-[var(--color-ink-700)]">
+                          {lastCheck
+                            ? solutionSteps.length > 0
+                              ? 'Here is why that works, so you can check your method as well as your answer.'
+                              : 'Logged as secure. This feeds into what the Hub recommends next.'
+                            : attemptsLeft > 0
+                              ? q.hints
+                                ? 'Have a look at the hint on the right, then have another go.'
+                                : 'Check your working and have another go.'
+                              : `The working is below${q.topic_title ? `, and we will bring ${q.topic_title} back into your practice` : ''}.`}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-3 bg-white px-5 py-4">
-                      {solutionSteps.map((step, i) => (
-                        <div key={i} className="flex items-start gap-3">
-                          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-600)] text-xs font-bold text-white">{i + 1}</span>
-                          <p className="text-sm leading-7 text-[var(--color-ink-700)]">{step.replace(/^step\s*\d+[:\s]*/i, '')}</p>
+                  </div>
+                )}
+
+                {showWorking && (
+                  <>
+                    <div className="overflow-hidden rounded-2xl border border-[var(--color-success-300)]">
+                      <div className="flex items-center gap-2 bg-[var(--color-success-50)] px-5 py-3">
+                        <Check size={16} strokeWidth={3} className="text-[var(--color-success-600)]" />
+                        <p className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-success-600)]">Model answer</p>
+                      </div>
+                      <div className="bg-white px-5 py-4">
+                        <p className="text-sm leading-7 text-[var(--color-ink-700)]">{q.answer}</p>
+                      </div>
+                    </div>
+
+                    {solutionSteps.length > 0 && (
+                      <div className="overflow-hidden rounded-2xl border border-[var(--color-primary-200)]">
+                        <div className="flex items-center gap-2 bg-[var(--color-primary-50)] px-5 py-3">
+                          <PenLine size={16} className="text-[var(--color-primary-600)]" />
+                          <p className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-primary-600)]">
+                            {lastCheck ? 'Why that works' : 'Where it goes'}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        <div className="flex flex-col gap-3 bg-white px-5 py-4">
+                          {solutionSteps.map((step, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-600)] text-xs font-bold text-white">{i + 1}</span>
+                              <p className="text-sm leading-7 text-[var(--color-ink-700)]">{step.replace(/^step\s*\d+[:\s]*/i, '')}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {marked === null && (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm font-extrabold text-[var(--color-ink-700)]">How did you do?</p>
-                    <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-                      <button
-                        type="button"
-                        onClick={() => handleSelfMark(true)}
-                        className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[var(--color-success-300)] bg-[var(--color-success-50)] font-bold text-[var(--color-success-600)] transition hover:bg-[var(--color-success-100)]"
-                      >
-                        <Check size={17} strokeWidth={3} /> I got it right
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSelfMark(false)}
-                        className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 font-bold text-amber-800 transition hover:bg-amber-100"
-                      >
-                        <RotateCcw size={16} /> Not this time
-                      </button>
-                    </div>
-                  </div>
+                    {/* Long written answers cannot be checked by the system, so
+                        the student marks against the model answer. This closes
+                        when marking points and AI marking arrive. */}
+                    {!autoCheck && marked === null && (
+                      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                        <p className="text-sm font-extrabold text-[var(--color-ink-700)]">Did your answer cover that?</p>
+                        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                          <button
+                            type="button"
+                            onClick={() => { record(true); setLastCheck(true); }}
+                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[var(--color-success-300)] bg-[var(--color-success-50)] font-bold text-[var(--color-success-600)] transition hover:bg-[var(--color-success-100)]"
+                          >
+                            <Check size={17} strokeWidth={3} /> Yes, I had that
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { record(false); setLastCheck(false); }}
+                            className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 font-bold text-amber-800 transition hover:bg-amber-100"
+                          >
+                            <RotateCcw size={16} /> Not quite
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
-              </div>
-            )}
-
-            {marked !== null && (
-              <div className={`mt-5 max-w-4xl rounded-2xl border p-5 ${marked ? 'border-[var(--color-success-300)] bg-[var(--color-success-50)]' : 'border-amber-200 bg-amber-50'}`} role="status">
-                <div className="flex gap-3">
-                  <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${marked ? 'bg-[var(--color-success-400)] text-white' : 'bg-amber-400 text-amber-950'}`}>
-                    {marked ? <Check size={17} strokeWidth={3} /> : <RotateCcw size={16} />}
-                  </span>
-                  <div>
-                    <p className="font-extrabold">{marked ? 'That’s right' : 'Let’s take another look'}</p>
-                    <p className="mt-1 text-sm leading-6 text-[var(--color-ink-700)]">
-                      {marked
-                        ? 'Logged as secure. This feeds into what the Hub recommends next.'
-                        : `Noted${q.topic_title ? ` against ${q.topic_title}` : ''}. We'll bring this topic back into your practice.`}
-                    </p>
-                  </div>
-                </div>
               </div>
             )}
           </div>
@@ -494,24 +595,14 @@ export default function DailyFiveTab() {
             >
               <ArrowLeft size={17} /> Previous
             </button>
-            {!revealed ? (
-              <button
-                type="button"
-                onClick={() => setRevealed(true)}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-600)] px-7 font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-700)]"
-              >
-                Reveal answer <Eye size={18} />
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled={marked === null}
-                onClick={advance}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-600)] px-7 font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-700)] disabled:cursor-not-allowed disabled:opacity-35"
-              >
-                {current === questions.length - 1 ? 'See my results' : 'Next question'} <ArrowRight size={18} />
-              </button>
-            )}
+            <button
+              type="button"
+              disabled={marked === null}
+              onClick={advance}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-600)] px-7 font-bold text-white shadow-sm transition hover:bg-[var(--color-primary-700)] disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              {current === questions.length - 1 ? 'See my results' : 'Next question'} <ArrowRight size={18} />
+            </button>
           </footer>
         </section>
 
@@ -530,14 +621,6 @@ export default function DailyFiveTab() {
                 <p className="mt-1">{q.hints}</p>
               </div>
             )}
-          </section>
-          <section className="rounded-3xl bg-[var(--color-primary-900)] p-5 text-white">
-            <div className="flex items-center gap-2 text-[var(--color-accent-300)]">
-              <BarChart3 size={18} /><span className="text-xs font-extrabold uppercase tracking-wide">Why this question?</span>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-white/75">
-              Chosen from your recent evidence to balance retrieval, a weaker topic and one stretch question.
-            </p>
           </section>
         </aside>
       </div>
