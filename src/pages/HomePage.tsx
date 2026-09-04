@@ -221,7 +221,7 @@ export default function HomePage() {
           <div className="hero-visual relative">
             <div className="overflow-hidden rounded-[2rem] border border-white bg-white shadow-[0_30px_80px_rgba(61,36,72,.17)]">
               <img
-                src="/images/archie-hero-v3.png"
+                src="/images/archie-hero-v3.webp"
                 alt="Archi, the Achievers Hub revision guide, holding a revision planner beside Daily 5, topic learning and progress illustrations"
                 className="h-auto w-full"
               />

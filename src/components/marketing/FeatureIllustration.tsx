@@ -23,7 +23,7 @@ export function FeatureIllustration({
     return (
       <div className={`relative aspect-square overflow-hidden ${className}`} aria-hidden="true">
         <img
-          src="/images/archie-book-avatar-v3.png"
+          src="/images/archie-book-avatar-v3.webp"
           alt=""
           className="h-full w-full object-contain"
         />
@@ -36,7 +36,7 @@ export function FeatureIllustration({
   return (
     <div className={`relative aspect-square overflow-hidden ${className}`} aria-hidden="true">
       <img
-        src="/images/feature-illustrations-v3.png"
+        src="/images/feature-illustrations-v3.webp"
         alt=""
         className="absolute max-w-none"
         style={{

@@ -12,7 +12,7 @@ export function ArchiAvatar({
       aria-hidden="true"
     >
       <img
-        src="/images/archie-book-avatar-v3.png"
+        src="/images/archie-book-avatar-v3.webp"
         alt=""
         width={size}
         height={size}
