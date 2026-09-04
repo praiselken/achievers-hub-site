@@ -21,6 +21,7 @@ import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 import { isDemoMode } from '../../../lib/demoMode';
 import { DEMO_DAILY_QUESTIONS } from '../../../lib/demoData';
 import { Workbook } from '../../../components/workbook/Workbook';
+import { ReportQuestionDialog } from '../../../components/dashboard/ReportQuestionDialog';
 
 type Phase = 'intro' | 'question' | 'complete';
 
@@ -47,7 +48,10 @@ export default function DailyFiveTab() {
   const [loading, setLoading]       = useState(true);
   const [hintOpen, setHintOpen]     = useState(false);
   const [workbookOpen, setWorkbookOpen] = useState(false);
-  const [flagged, setFlagged]       = useState<string[]>([]);
+  // Questions this student has reported this session, so the button can show
+  // it was sent rather than inviting a second go.
+  const [reported, setReported]     = useState<string[]>([]);
+  const [reportOpen, setReportOpen] = useState(false);
 
   // The attempt in progress: what they typed, how many tries they have had,
   // and the result of the last check. Working is revealed once they are right,
@@ -336,7 +340,7 @@ export default function DailyFiveTab() {
 
   const q = questions[current];
   const marked = answers[current];
-  const isFlagged = flagged.includes(q.id);
+  const isReported = reported.includes(q.id);
   const autoCheck = isAutoCheckable(q.answer);
   const attemptsLeft = Math.max(0, 2 - attempts);
 
@@ -411,11 +415,11 @@ export default function DailyFiveTab() {
               </div>
               <button
                 type="button"
-                onClick={() => setFlagged((value) => value.includes(q.id) ? value.filter((id) => id !== q.id) : [...value, q.id])}
-                aria-pressed={isFlagged}
-                className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold ${isFlagged ? 'bg-rose-50 text-rose-700' : 'text-[var(--color-ink-500)] hover:bg-slate-50'}`}
+                onClick={() => setReportOpen(true)}
+                disabled={isReported}
+                className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold disabled:cursor-default ${isReported ? 'bg-rose-50 text-rose-700' : 'text-[var(--color-ink-500)] hover:bg-slate-50'}`}
               >
-                <Flag size={15} fill={isFlagged ? 'currentColor' : 'none'} /> {isFlagged ? 'Flagged' : 'Flag for review'}
+                <Flag size={15} fill={isReported ? 'currentColor' : 'none'} /> {isReported ? 'Reported' : 'Report a problem'}
               </button>
             </div>
             <h2 className="mt-5 max-w-4xl font-display text-2xl font-extrabold leading-snug text-[var(--color-ink-900)] sm:text-3xl">{q.question}</h2>
@@ -624,6 +628,15 @@ export default function DailyFiveTab() {
           </section>
         </aside>
       </div>
+
+      {reportOpen && (
+        <ReportQuestionDialog
+          questionId={q.id}
+          questionText={q.question}
+          onClose={() => setReportOpen(false)}
+          onReported={() => setReported((prev) => [...prev, q.id])}
+        />
+      )}
     </>
   );
 }

@@ -608,3 +608,12 @@ export const DEMO_USER_DETAIL: Record<string, {
     subscription: 'Tutor Pro',
   },
 };
+
+/** A couple of open reports so the admin queue has something in it. */
+export const DEMO_QUESTION_REPORTS = [
+  { id: 'r-1', question_id: 'aq-3', user_id: 'au-1', reason: 'incorrect_answer',
+    note: 'I get (x+4)(x+3), is that not the same thing?', resolved_at: null,
+    created_at: '2026-09-04T09:14:00Z' },
+  { id: 'r-2', question_id: 'aq-5', user_id: 'au-2', reason: 'unclear_wording',
+    note: null, resolved_at: null, created_at: '2026-09-03T16:02:00Z' },
+];

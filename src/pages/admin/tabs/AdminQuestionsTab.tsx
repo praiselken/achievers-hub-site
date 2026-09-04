@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { isDemoMode } from '../../../lib/demoMode';
-import { DEMO_ADMIN_QUESTIONS } from '../../../lib/demoData';
+import { DEMO_ADMIN_QUESTIONS, DEMO_QUESTION_REPORTS } from '../../../lib/demoData';
+import { fetchOpenReports, resolveReport, REASON_SHORT, type QuestionReport } from '../../../lib/reports';
 
 interface Question {
   id: string;
@@ -60,6 +61,10 @@ export default function AdminQuestionsTab() {
   // Was inferred from the form contents, which meant "Add question" opened
   // nothing at all: a new question starts empty, so the condition never held.
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Students' reports, so a question that is wrong can be found and corrected
+  // rather than waiting for somebody to notice it.
+  const [reports, setReports]     = useState<QuestionReport[]>([]);
+  const [onlyReported, setOnlyReported] = useState(false);
 
   async function load() {
     if (isDemoMode()) { setQuestions(DEMO_ADMIN_QUESTIONS as never); setLoading(false); return; }
@@ -69,7 +74,22 @@ export default function AdminQuestionsTab() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  async function loadReports() {
+    if (isDemoMode()) { setReports(DEMO_QUESTION_REPORTS as QuestionReport[]); return; }
+    setReports(await fetchOpenReports());
+  }
+
+  useEffect(() => { load(); loadReports(); }, []);
+
+  async function clearReport(id: string) {
+    if (!isDemoMode()) await resolveReport(id);
+    setReports((prev) => prev.filter((r) => r.id !== id));
+  }
+
+  const reportsByQuestion = reports.reduce<Record<string, QuestionReport[]>>((acc, r) => {
+    (acc[r.question_id] ??= []).push(r);
+    return acc;
+  }, {});
 
   function openNew() {
     setEditing(null);
@@ -156,7 +176,8 @@ export default function AdminQuestionsTab() {
     const matchSearch  = !search ||
       q.question.toLowerCase().includes(search.toLowerCase()) ||
       (q.topic_title ?? '').toLowerCase().includes(search.toLowerCase());
-    return matchSubject && matchSearch;
+    const matchReported = !onlyReported || (reportsByQuestion[q.id]?.length ?? 0) > 0;
+    return matchSubject && matchSearch && matchReported;
   });
 
   return (
@@ -186,6 +207,17 @@ export default function AdminQuestionsTab() {
             {s === 'all' ? 'All' : s}
           </button>
         ))}
+        <button onClick={() => setOnlyReported(v => !v)}
+          className="text-sm font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-2"
+          style={onlyReported
+            ? { background: 'rgba(239,68,68,0.18)', color: 'var(--color-accent-300)', border: '1px solid rgba(239,68,68,0.4)' }
+            : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          Reported
+          {reports.length > 0 && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                  style={{ background: 'rgba(239,68,68,0.25)', color: '#fca5a5' }}>{reports.length}</span>
+          )}
+        </button>
         <input type="text" placeholder="Search questions…" value={search} onChange={e => setSearch(e.target.value)}
           className="text-sm px-4 py-1.5 rounded-lg outline-none ml-auto"
           style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', minWidth: 200 }} />
@@ -209,14 +241,22 @@ export default function AdminQuestionsTab() {
               {filtered.length === 0 ? (
                 <tr><td colSpan={6} className="text-sm text-center py-10"
                         style={{ color: 'rgba(255,255,255,0.25)' }}>No questions found</td></tr>
-              ) : filtered.map((q, i) => (
+              ) : filtered.flatMap((q, i) => [
                 <tr key={q.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
                   <td className="px-4 py-3">
                     <span className="text-xs font-bold px-2 py-1 rounded capitalize"
                           style={{ background: 'rgba(169,125,192,0.15)', color: 'var(--color-primary-200)' }}>{q.subject}</span>
                   </td>
                   <td className="px-4 py-3 text-sm max-w-32 truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>{q.topic_title ?? '—'}</td>
-                  <td className="px-4 py-3 text-sm max-w-xs truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>{q.question}</td>
+                  <td className="px-4 py-3 text-sm max-w-xs truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                    {(reportsByQuestion[q.id]?.length ?? 0) > 0 && (
+                      <span className="mr-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full align-middle"
+                            style={{ background: 'rgba(239,68,68,0.22)', color: '#fca5a5' }}>
+                        {reportsByQuestion[q.id].length} report{reportsByQuestion[q.id].length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {q.question}
+                  </td>
                   <td className="px-4 py-3 text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>{q.marks ?? '—'}</td>
                   <td className="px-4 py-3 text-sm text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     {q.month && q.day != null
@@ -241,8 +281,31 @@ export default function AdminQuestionsTab() {
                       </button>
                     </div>
                   </td>
-                </tr>
-              ))}
+                </tr>,
+                ...(reportsByQuestion[q.id] ?? []).map(r => (
+                  <tr key={r.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(239,68,68,0.07)' }}>
+                    <td colSpan={6} className="px-4 py-2.5">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
+                              style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5' }}>
+                          {REASON_SHORT[r.reason]}
+                        </span>
+                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                          {r.note ?? 'Reported by a student, no note left.'}
+                        </span>
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                          {new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        </span>
+                        <button onClick={() => clearReport(r.id)}
+                          className="ml-auto text-xs font-semibold px-3 py-1 rounded-lg"
+                          style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.65)' }}>
+                          Mark resolved
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )),
+              ])}
             </tbody>
           </table>
         </div>
