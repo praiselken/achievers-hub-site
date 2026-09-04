@@ -1,7 +1,29 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { isDemoMode } from '../../../lib/demoMode';
-import { DEMO_ADMIN_USERS } from '../../../lib/demoData';
+import { DEMO_ADMIN_USERS, DEMO_USER_DETAIL } from '../../../lib/demoData';
+
+/** What sits behind a user row once it is opened. */
+interface UserDetail {
+  email: string | null;
+  current_grade: number | null;
+  target_grade: number | null;
+  streak: number;
+  longest_streak: number;
+  sessions: { subject: string; score: number; total: number; completed_at: string }[];
+  topics: { covered: number; secure: number; in_progress: number; total: number };
+  links: { role: string; name: string }[];
+  subscription: string | null;
+}
+
+/** Foundation covers grades 1 to 5 and Higher 5 to 9, so grade 5 is the
+ *  crossover. Tier is never stored, it falls out of the grade. */
+function tierFor(grade: number | null): string | null {
+  if (grade == null) return null;
+  if (grade < 5) return 'Foundation';
+  if (grade > 5) return 'Higher';
+  return 'Crossover';
+}
 
 interface UserRow {
   id: string;
@@ -27,6 +49,56 @@ export default function AdminUsersTab() {
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [selected, setSelected]   = useState<UserRow | null>(null);
+  const [detail, setDetail]       = useState<UserDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  /**
+   * Pull the rest of a user's picture on demand rather than for every row.
+   * Grades, email and subscription are not here yet: grades still live in the
+   * browser until migration 0002 runs, email sits in the auth table the panel
+   * cannot read until it is copied onto the profile, and subscriptions arrive
+   * with migration 0003.
+   */
+  async function openUser(user: UserRow) {
+    setSelected(user);
+    setDetail(null);
+
+    if (isDemoMode()) {
+      setDetail(DEMO_USER_DETAIL[user.id] ?? null);
+      return;
+    }
+    if (!supabase) return;
+
+    setDetailLoading(true);
+    const [sessionsRes, progressRes, streakRes] = await Promise.all([
+      supabase.from('daily_sessions').select('subject, score, total, completed_at')
+        .eq('user_id', user.id).order('completed_at', { ascending: false }).limit(5),
+      supabase.from('topic_progress').select('status').eq('user_id', user.id),
+      supabase.from('streaks').select('current_streak, longest_streak').eq('user_id', user.id).maybeSingle(),
+    ]);
+
+    const progress = progressRes.data ?? [];
+    setDetail({
+      email: null,
+      current_grade: null,
+      target_grade: null,
+      streak: streakRes.data?.current_streak ?? 0,
+      longest_streak: streakRes.data?.longest_streak ?? 0,
+      sessions: sessionsRes.data ?? [],
+      topics: {
+        covered:     progress.filter((p) => p.status === 'covered').length,
+        secure:      progress.filter((p) => p.status === 'secure').length,
+        in_progress: progress.filter((p) => p.status === 'in_progress').length,
+        total:       progress.length,
+      },
+      // parent_child_links is readable only by the parent on it under the
+      // current policy, so an admin sees nothing until a policy is added.
+      links: [],
+      subscription: null,
+    });
+    setDetailLoading(false);
+  }
 
   async function load() {
     if (isDemoMode()) { setUsers(DEMO_ADMIN_USERS as never); setLoading(false); return; }
@@ -114,13 +186,16 @@ export default function AdminUsersTab() {
                 return (
                   <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <button onClick={() => openUser(u)}
+                        className="flex items-center gap-2 text-left rounded-lg -mx-1 px-1 py-0.5 transition-colors hover:bg-white/5">
                         <span className="text-xl">{u.avatar ?? '👤'}</span>
                         <div>
-                          <p className="text-sm font-semibold text-white">{u.display_name ?? 'No name'}</p>
+                          <p className="text-sm font-semibold text-white underline decoration-white/20 underline-offset-2">
+                            {u.display_name ?? 'No name'}
+                          </p>
                           <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>{u.id.slice(0, 8)}…</p>
                         </div>
-                      </div>
+                      </button>
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-bold px-2.5 py-1 rounded-full capitalize"
@@ -153,6 +228,165 @@ export default function AdminUsersTab() {
           </table>
         </div>
       )}
+
+      {selected && (
+        <UserDrawer
+          user={selected}
+          detail={detail}
+          loading={detailLoading}
+          onClose={() => { setSelected(null); setDetail(null); }}
+          onRoleChange={(role) => { setRole(selected.id, role); setSelected({ ...selected, role }); }}
+        />
+      )}
+    </div>
+  );
+}
+
+/** A labelled value. Anything the platform cannot answer yet says why, rather
+ *  than showing a blank an admin would read as "none". */
+function Row({ label, value, pending }: { label: string; value?: React.ReactNode; pending?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 py-2"
+         style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <span className="text-xs font-semibold flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
+      {pending
+        ? <span className="text-xs italic text-right" style={{ color: 'rgba(255,255,255,0.25)' }}>{pending}</span>
+        : <span className="text-sm text-right text-white">{value ?? '—'}</span>}
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="text-[10px] font-bold uppercase tracking-[.14em] mb-1"
+          style={{ color: 'var(--color-primary-200)' }}>{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function UserDrawer({ user, detail, loading, onClose, onRoleChange }: {
+  user: UserRow;
+  detail: UserDetail | null;
+  loading: boolean;
+  onClose: () => void;
+  onRoleChange: (role: string) => void;
+}) {
+  const rs = ROLE_STYLE[user.role] ?? { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' };
+  const isStudent = user.role === 'student';
+  const tier = tierFor(detail?.current_grade ?? null);
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-start justify-end p-4"
+         style={{ background: 'rgba(0,0,0,0.6)' }}
+         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="h-full max-h-screen w-full max-w-lg overflow-y-auto rounded-2xl p-6 flex flex-col gap-5"
+           style={{ background: '#241041', border: '1px solid rgba(255,255,255,0.1)' }}>
+
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-3xl">{user.avatar ?? '👤'}</span>
+            <div className="min-w-0">
+              <h2 className="font-display font-bold text-white text-lg truncate">{user.display_name ?? 'No name'}</h2>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full capitalize"
+                    style={{ background: rs.bg, color: rs.color }}>{user.role}</span>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-sm px-3 py-1.5 rounded-lg flex-shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>Close</button>
+        </div>
+
+        <Section title="Account">
+          <Row label="Email" value={detail?.email}
+               pending={detail?.email ? undefined : 'Captured at signup once the profile carries it'} />
+          <Row label="User ID" value={<span className="font-mono text-xs">{user.id}</span>} />
+          <Row label="Joined" value={new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} />
+          <Row label="Onboarding" value={user.onboarded ? 'Complete' : 'Not finished'} />
+          <Row label="Subscription" value={detail?.subscription}
+               pending={detail?.subscription ? undefined : 'Needs the subscriptions migration'} />
+        </Section>
+
+        {isStudent && (
+          <Section title="Studying">
+            <Row label="Subjects" value={<span className="capitalize">{(user.subjects ?? []).join(', ') || '—'}</span>} />
+            <Row label="Exam board" value={user.exam_board} />
+            <Row label="Year group" value={user.year_group ? `Year ${user.year_group}` : null} />
+            <Row label="Working grade" value={detail?.current_grade}
+                 pending={detail?.current_grade == null ? 'Still in the browser until the grades migration runs' : undefined} />
+            <Row label="Target grade" value={detail?.target_grade}
+                 pending={detail?.target_grade == null ? 'Same as above' : undefined} />
+            <Row label="Tier" value={tier} pending={tier ? undefined : 'Follows from the working grade'} />
+          </Section>
+        )}
+
+        {isStudent && (
+          <Section title="Activity">
+            {loading ? (
+              <p className="text-sm py-3" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading…</p>
+            ) : (
+              <>
+                <Row label="Current streak" value={`${detail?.streak ?? 0} days`} />
+                <Row label="Longest streak" value={`${detail?.longest_streak ?? 0} days`} />
+                <Row label="Topics" value={detail
+                  ? `${detail.topics.secure} secure · ${detail.topics.covered} covered · ${detail.topics.in_progress} in progress`
+                  : null} />
+                <div className="pt-3">
+                  <p className="text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Recent Daily 5</p>
+                  {detail && detail.sessions.length > 0 ? (
+                    <ul className="flex flex-col gap-1.5">
+                      {detail.sessions.map((s, i) => (
+                        <li key={i} className="flex items-center justify-between text-sm rounded-lg px-3 py-2"
+                            style={{ background: 'rgba(255,255,255,0.04)' }}>
+                          <span className="capitalize text-white">{s.subject}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            {s.score}/{s.total} · {new Date(s.completed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs italic" style={{ color: 'rgba(255,255,255,0.25)' }}>No sessions completed yet.</p>
+                  )}
+                </div>
+              </>
+            )}
+          </Section>
+        )}
+
+        <Section title="Linked accounts">
+          {detail && detail.links.length > 0 ? (
+            <ul className="flex flex-col gap-1.5 pt-1">
+              {detail.links.map((l, i) => (
+                <li key={i} className="flex items-center justify-between text-sm rounded-lg px-3 py-2"
+                    style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <span className="text-white">{l.name}</span>
+                  <span className="capitalize text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{l.role}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs italic pt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              None readable. Links are visible only to the parent on them until an admin policy is added.
+            </p>
+          )}
+        </Section>
+
+        <Section title="Role">
+          <div className="pt-2">
+            <select value={user.role} onChange={(e) => onRoleChange(e.target.value)}
+              className="w-full text-sm px-3 py-2.5 rounded-xl outline-none capitalize"
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}>
+              {['student', 'parent', 'tutor', 'admin'].map(r => (
+                <option key={r} value={r} style={{ background: '#241041' }}>{r}</option>
+              ))}
+            </select>
+            <p className="text-[11px] mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              Think. Speak. Grow. reflections are deliberately not shown here. They stay private to the student.
+            </p>
+          </div>
+        </Section>
+      </div>
     </div>
   );
 }

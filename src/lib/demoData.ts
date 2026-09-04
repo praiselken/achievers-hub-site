@@ -556,3 +556,55 @@ export const DEMO_ADMIN_USERS = [
   { id: 'au-3', display_name: 'Sarah M.', avatar: '👩', role: 'parent', subjects: [], year_group: null, exam_board: null, onboarded: true, created_at: '2026-06-15T10:00:00Z' },
   { id: 'au-4', display_name: 'Mr Idris', avatar: '👨‍🏫', role: 'tutor', subjects: ['maths'], year_group: null, exam_board: 'AQA', onboarded: true, created_at: '2026-07-01T10:00:00Z' },
 ];
+
+/**
+ * Extra detail behind a user row in the admin panel. In the real app this is
+ * assembled from daily_sessions, topic_progress, streaks and parent_child_links;
+ * here it is fixed so the panel can be demonstrated with the database down.
+ */
+export const DEMO_USER_DETAIL: Record<string, {
+  email: string;
+  current_grade: number | null;
+  target_grade: number | null;
+  streak: number;
+  longest_streak: number;
+  sessions: { subject: string; score: number; total: number; completed_at: string }[];
+  topics: { covered: number; secure: number; in_progress: number; total: number };
+  links: { role: string; name: string }[];
+  subscription: string;
+}> = {
+  'au-1': {
+    email: 'alex.n@example.com', current_grade: 5, target_grade: 7,
+    streak: 6, longest_streak: 11,
+    sessions: [
+      { subject: 'maths', score: 4, total: 5, completed_at: '2026-09-04T08:12:00Z' },
+      { subject: 'economics', score: 3, total: 5, completed_at: '2026-09-03T19:40:00Z' },
+      { subject: 'maths', score: 5, total: 5, completed_at: '2026-09-02T08:05:00Z' },
+    ],
+    topics: { covered: 3, secure: 2, in_progress: 4, total: 12 },
+    links: [{ role: 'parent', name: 'Sarah M.' }, { role: 'tutor', name: 'Mr Idris' }],
+    subscription: 'Student Complete · renews 2 Oct',
+  },
+  'au-2': {
+    email: 'maya.t@example.com', current_grade: 4, target_grade: 6,
+    streak: 2, longest_streak: 5,
+    sessions: [{ subject: 'maths', score: 2, total: 5, completed_at: '2026-09-01T17:22:00Z' }],
+    topics: { covered: 1, secure: 0, in_progress: 3, total: 12 },
+    links: [],
+    subscription: 'Free Starter',
+  },
+  'au-3': {
+    email: 'sarah.m@example.com', current_grade: null, target_grade: null,
+    streak: 0, longest_streak: 0, sessions: [],
+    topics: { covered: 0, secure: 0, in_progress: 0, total: 0 },
+    links: [{ role: 'student', name: 'Alex' }],
+    subscription: 'Family · renews 18 Sep',
+  },
+  'au-4': {
+    email: 'idris@example.com', current_grade: null, target_grade: null,
+    streak: 0, longest_streak: 0, sessions: [],
+    topics: { covered: 0, secure: 0, in_progress: 0, total: 0 },
+    links: [{ role: 'student', name: 'Alex' }],
+    subscription: 'Tutor Pro',
+  },
+};
