@@ -35,6 +35,7 @@ export interface DemoTopic {
   status: DemoStatus;
   score_avg: number;
   attempts: number;
+  spaced_success?: boolean;
 }
 
 export const DEMO_TOPICS: DemoTopic[] = [
@@ -51,7 +52,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     practice_q: 'A jacket costs £60 after a 20% discount. What was the original price?',
     practice_a: '£75 — divide £60 by 0.8 (100% − 20%) to find the original price.',
     video_url: null, command: 'Calculate', card_format: 'worked_example', pathway_min: '4', exam_board: null,
-    status: 'covered', score_avg: 88, attempts: 5,
+    status: 'covered', score_avg: 88, attempts: 5, spaced_success: true,
   },
   {
     id: 'm2', subject: 'maths', area: 'Number', name: 'Standard Form',
@@ -79,7 +80,7 @@ export const DEMO_TOPICS: DemoTopic[] = [
     practice_q: 'Solve: 3(x + 2) = 5x − 4',
     practice_a: 'x = 5',
     video_url: null, command: 'Solve', card_format: 'worked_example', pathway_min: '4', exam_board: null,
-    status: 'covered', score_avg: 91, attempts: 6,
+    status: 'covered', score_avg: 91, attempts: 6, spaced_success: true,
   },
   {
     id: 'm4', subject: 'maths', area: 'Algebra', name: 'Quadratic Equations',

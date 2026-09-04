@@ -1,4 +1,5 @@
 import { Workbook } from '../../../components/workbook/Workbook';
+import { FileText, GraduationCap, Layers, PenLine } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useSubject } from '../DashboardLayout';
@@ -6,7 +7,9 @@ import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 import { isDemoMode } from '../../../lib/demoMode';
 import { DEMO_TOPICS } from '../../../lib/demoData';
 
-type Status = 'not_started' | 'in_progress' | 'covered';
+/** The client's four statuses (E1). Secure sits above Covered: it is not just
+ *  a good score, it is a good score that survived a gap. */
+type Status = 'not_started' | 'in_progress' | 'covered' | 'secure';
 
 interface Topic {
   id: string;
@@ -25,13 +28,51 @@ interface Topic {
   status: Status;
   score_avg: number;
   attempts: number;
+  /** Whether a correct answer survived a gap. Not in topic_progress yet, so it
+   *  is optional until attempt-level history exists. */
+  spaced_success?: boolean;
 }
 
-const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string; border: string }> = {
-  not_started: { label: 'Not started', color: 'var(--color-ink-300)', bg: '#fbfafc',  border: 'var(--color-border)' },
-  in_progress: { label: 'In progress', color: 'var(--feature-daily-strong)', bg: 'var(--feature-daily-bg)',  border: 'var(--color-accent-200)' },
-  covered:     { label: 'Covered',     color: 'var(--color-success-600)', bg: 'var(--color-success-50)',  border: 'var(--color-success-300)' },
+/** The client asked for these same colours across the Spec Mapper, the topic
+ *  list and progress, so they live in one place. */
+const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string; border: string; dot: string }> = {
+  not_started: { label: 'Not started', color: 'var(--color-ink-300)',     bg: '#fbfafc',                   border: 'var(--color-border)',        dot: '#cbd5e1' },
+  in_progress: { label: 'In progress', color: '#b45309',                  bg: '#fffbeb',                   border: '#fcd34d',                    dot: '#f59e0b' },
+  covered:     { label: 'Covered',     color: 'var(--color-primary-700)', bg: 'var(--color-primary-50)',   border: 'var(--color-primary-200)',   dot: 'var(--color-primary-500)' },
+  secure:      { label: 'Secure',      color: 'var(--color-success-600)', bg: 'var(--color-success-50)',   border: 'var(--color-success-300)',   dot: 'var(--color-success-400)' },
 };
+
+/**
+ * E1's rules, applied to whatever evidence exists. Falls back to the stored
+ * status for topics nobody has attempted, so a student's own marking still
+ * shows until there is real data to derive from.
+ *
+ * `spacedSuccess` is the part the current tables cannot answer: it needs
+ * attempt-level dates, which `topic_progress` does not keep. `hasSpacedSuccess`
+ * in src/lib/daily5 already implements the check for when they exist.
+ */
+function deriveStatus(attempts: number, scoreAvg: number, spacedSuccess: boolean, stored: Status): Status {
+  if (attempts === 0) return stored === 'not_started' ? 'not_started' : stored;
+  if (attempts < 5) return 'in_progress';
+  if (scoreAvg >= 80 && spacedSuccess) return 'secure';
+  if (scoreAvg >= 60) return 'covered';
+  return 'in_progress';
+}
+
+/** The four things a student can do with a topic, in the order the client set
+ *  out: learn it, review it, practise it, test it. */
+const TOPIC_ACTIONS = [
+  { key: 'lesson',   label: 'Mini Lesson',     Icon: GraduationCap, purpose: 'Learn it'    },
+  { key: 'card',     label: 'Knowledge Card',  Icon: Layers,        purpose: 'Review it'   },
+  { key: 'practice', label: 'Practice',        Icon: PenLine,       purpose: 'Practise it' },
+  { key: 'exam',     label: 'Exam Questions',  Icon: FileText,      purpose: 'Test it'     },
+] as const;
+
+type ActionKey = (typeof TOPIC_ACTIONS)[number]['key'];
+
+/** Mini lessons and exam-question sets are not built yet. Shown but not
+ *  pretending to work, rather than opening onto nothing. */
+const AVAILABLE_ACTIONS: ActionKey[] = ['card', 'practice'];
 
 function PracticeQuestion({ q, a, storageKey, topicTitle }: { q: string; a: string; storageKey: string; topicTitle: string }) {
   const [show, setShow] = useState(false);
@@ -71,18 +112,21 @@ function PracticeQuestion({ q, a, storageKey, topicTitle }: { q: string; a: stri
 }
 
 function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: Status) => void }) {
-  const [open, setOpen] = useState(false);
+  // Which resource is showing, if any. Opening a second one swaps to it;
+  // pressing the same icon again closes the row.
+  const [section, setSection] = useState<ActionKey | null>(null);
+  const open = section !== null;
   const cfg = STATUS_CONFIG[topic.status];
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all"
-         style={{ boxShadow: 'var(--shadow-soft)' }}>
+    <div className="bg-white rounded-2xl border overflow-hidden transition-all"
+         style={{ boxShadow: 'var(--shadow-soft)', borderColor: 'var(--color-border)', borderLeft: `4px solid ${cfg.dot}` }}>
 
-      {/* Card header — always visible */}
-      <button onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-4 px-5 py-4 text-left">
+      {/* Topic row — name on the left, the four resources on the right, so a
+          student can see every topic and reach any of them without leaving. */}
+      <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-bold text-[var(--color-ink-900)] text-sm">{topic.name}</span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
@@ -97,24 +141,48 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
                 <span className="text-xs font-semibold" style={{ color: 'var(--color-primary-500)' }}>{topic.command}</span>
               </>
             )}
+            {topic.attempts > 0 && (
+              <>
+                <span className="text-gray-200">·</span>
+                <span className="font-mono text-xs font-bold text-[var(--color-ink-300)]">{Math.round(topic.score_avg)}%</span>
+              </>
+            )}
           </div>
         </div>
-        {topic.attempts > 0 && (
-          <span className="font-mono text-xs font-bold text-[var(--color-ink-300)] flex-shrink-0">{Math.round(topic.score_avg)}%</span>
-        )}
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-             className="w-4 h-4 text-[var(--color-ink-300)] flex-shrink-0 transition-transform"
-             style={{ transform: open ? 'rotate(180deg)' : 'none' }}>
-          <path d="M5 8l5 5 5-5"/>
-        </svg>
-      </button>
 
-      {/* Expanded study card content */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {TOPIC_ACTIONS.map(({ key, label, Icon, purpose }) => {
+            const ready = AVAILABLE_ACTIONS.includes(key);
+            const active = section === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                disabled={!ready}
+                aria-pressed={active}
+                title={ready ? `${label} — ${purpose}` : `${label} — not built yet`}
+                onClick={() => setSection(active ? null : key)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl transition-all disabled:cursor-not-allowed"
+                style={active
+                  ? { background: 'var(--color-primary-600)', color: 'white' }
+                  : ready
+                    ? { background: 'var(--color-primary-50)', color: 'var(--color-primary-700)' }
+                    : { background: '#f8fafc', color: '#cbd5e1' }}
+              >
+                <Icon size={16} />
+                <span className="sr-only">{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* The resource the student asked for */}
       {open && (
         <div className="border-t border-slate-100">
 
           {/* Description / rule */}
-          {topic.description && (
+          {section === 'card' && topic.description && (
             <div className="px-5 pt-4 pb-2">
               <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink-300)] mb-1.5">
                 {topic.card_format === 'definition' ? 'Definition' : 'The rule'}
@@ -124,7 +192,7 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
           )}
 
           {/* Key points / steps */}
-          {topic.key_points && topic.key_points.length > 0 && (
+          {section === 'card' && topic.key_points && topic.key_points.length > 0 && (
             <div className="px-5 py-3">
               <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink-300)] mb-2">
                 {topic.card_format === 'worked_example' ? 'How to do it' : 'Key points'}
@@ -142,7 +210,7 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
           )}
 
           {/* Exam tip */}
-          {topic.exam_tip && (
+          {section === 'card' && topic.exam_tip && (
             <div className="mx-5 my-3 rounded-xl px-4 py-3"
                  style={{ background: 'var(--color-primary-50)', border: '1px solid var(--color-primary-200)' }}>
               <div className="flex items-center gap-1.5 mb-1">
@@ -156,14 +224,14 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
           )}
 
           {/* Practice question */}
-          {topic.practice_q && (
+          {section === 'practice' && topic.practice_q && (
             <div className="px-5 py-3">
               <PracticeQuestion q={topic.practice_q} a={topic.practice_a ?? ''} storageKey={`practice:${topic.id}`} topicTitle={topic.name} />
             </div>
           )}
 
           {/* Video */}
-          {topic.video_url && (
+          {section === 'card' && topic.video_url && (
             <div className="px-5 pb-4">
               <a href={topic.video_url} target="_blank" rel="noopener noreferrer"
                  className="flex items-center gap-2 text-sm font-semibold no-underline"
@@ -177,6 +245,17 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
                 Watch video explanation
               </a>
             </div>
+          )}
+
+          {section === 'practice' && !topic.practice_q && (
+            <p className="px-5 py-6 text-sm text-[var(--color-ink-300)]">
+              No practice question has been written for this topic yet.
+            </p>
+          )}
+          {section === 'card' && !topic.description && !topic.key_points?.length && (
+            <p className="px-5 py-6 text-sm text-[var(--color-ink-300)]">
+              No knowledge card has been written for this topic yet.
+            </p>
           )}
 
           {/* Mark as */}
@@ -253,7 +332,14 @@ export default function TopicHubTab() {
     }
   }
 
-  const filtered = topics.filter(t => {
+  // E1's statuses are earned, not chosen, so they are worked out from the
+  // evidence before anything is filtered or counted.
+  const resolved = topics.map(t => ({
+    ...t,
+    status: deriveStatus(t.attempts, t.score_avg, t.spaced_success ?? false, t.status),
+  }));
+
+  const filtered = resolved.filter(t => {
     const matchSearch = !search ||
       t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.area.toLowerCase().includes(search.toLowerCase());
@@ -261,7 +347,7 @@ export default function TopicHubTab() {
     return matchSearch && matchFilter;
   });
 
-  const covered = topics.filter(t => t.status === 'covered').length;
+  const covered = resolved.filter(t => t.status === 'covered' || t.status === 'secure').length;
   const areas = [...new Set(filtered.map(t => t.area))];
 
   return (
@@ -301,14 +387,16 @@ export default function TopicHubTab() {
             onFocus={e => e.currentTarget.style.borderColor = 'var(--color-primary-500)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border)'} />
         </div>
-        <div className="flex gap-1.5">
-          {(['all', 'not_started', 'in_progress', 'covered'] as const).map(f => (
+        {/* Five filters do not fit a phone, so the row scrolls rather than
+            putting Secure out of reach. */}
+        <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-1">
+          {(['all', 'not_started', 'in_progress', 'covered', 'secure'] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className="px-3 py-2 rounded-xl text-xs font-semibold transition-all capitalize whitespace-nowrap"
               style={filter === f
                 ? { background: 'var(--color-primary-50)', color: 'var(--color-primary-700)', border: '1.5px solid var(--color-primary-200)' }
                 : { background: 'white', color: 'var(--color-ink-300)', border: '1.5px solid var(--color-border)' }}>
-              {f === 'all' ? 'All' : f === 'not_started' ? 'Not started' : f === 'in_progress' ? 'In progress' : 'Covered'}
+              {f === 'all' ? 'All' : STATUS_CONFIG[f].label}
             </button>
           ))}
         </div>
@@ -326,7 +414,7 @@ export default function TopicHubTab() {
         areas.map(area => {
           const areaTopics = filtered.filter(t => t.area === area);
           if (!areaTopics.length) return null;
-          const areaCovered = areaTopics.filter(t => t.status === 'covered').length;
+          const areaCovered = areaTopics.filter(t => t.status === 'covered' || t.status === 'secure').length;
           return (
             <div key={area}>
               <div className="flex items-center justify-between mb-2">
