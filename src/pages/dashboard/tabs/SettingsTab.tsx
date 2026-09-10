@@ -3,7 +3,7 @@ import { supabase } from '../../../lib/supabase';
 import { isDemoMode } from '../../../lib/demoMode';
 import { useSubject } from '../DashboardLayout';
 import { GradeSelector } from '../../../components/dashboard/GradeSelector';
-import { loadGrades, saveGrades, type Grades } from '../../../lib/grades';
+import { useGrades, type Grades } from '../../../lib/grades';
 import { DEMO_PROFILE } from '../../../lib/demoData';
 import { MembershipPanel } from '../../../components/dashboard/MembershipPanel';
 
@@ -16,7 +16,8 @@ export default function SettingsTab() {
   const [avatar, setAvatar]           = useState('🎓');
   const [subjects, setSubjects]       = useState<string[]>([]);
   const { subject } = useSubject();
-  const [grades, setGrades]           = useState<Grades>({ working: null, target: null });
+  const { grades, loading: gradesLoading, save: persistGrades } = useGrades(subject);
+  const [gradesFailed, setGradesFailed] = useState(false);
   const [examBoard, setExamBoard]     = useState('');
   const [yearGroup, setYearGroup]     = useState<number | null>(null);
   const [saving, setSaving]           = useState(false);
@@ -114,15 +115,13 @@ export default function SettingsTab() {
     setSubjects(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   }
 
-  // Hooks must run on every render, so this has to stay above the early
-  // return below — otherwise the hook order changes once loading finishes.
-  useEffect(() => { setGrades(loadGrades(subject)); }, [subject]);
+  if (loading || gradesLoading) return <p className="text-sm text-[var(--color-ink-300)] py-8 text-center">Loading…</p>;
 
-  if (loading) return <p className="text-sm text-[var(--color-ink-300)] py-8 text-center">Loading…</p>;
-
-  function updateGrades(next: Grades) {
-    setGrades(next);
-    saveGrades(subject, next);
+  // The picker has no save button — each tap writes. `persistGrades` updates the
+  // selection first so the buttons respond, then reports whether it landed.
+  async function updateGrades(next: Grades) {
+    const ok = await persistGrades(next);
+    setGradesFailed(!ok);
   }
 
   return (
@@ -163,6 +162,11 @@ export default function SettingsTab() {
           onChange={updateGrades}
           subjectLabel={subject === 'economics' ? 'Economics' : 'Maths'}
         />
+        {gradesFailed && (
+          <p className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            That did not save. Check your connection and tap the grade again.
+          </p>
+        )}
       </div>
 
       {/* Basic info */}

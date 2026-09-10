@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, BarChart3, BookOpen, FileText, Sparkles, Sprout } from 'lucide-react';
 import { ArchiAvatar } from '../../../components/marketing/ArchiAvatar';
 import { GROW_ACTIONS, todaysReflection } from '../../../lib/tsg';
-import { loadGrades } from '../../../lib/grades';
+import { useGrades } from '../../../lib/grades';
 import { supabase } from '../../../lib/supabase';
 import { useSubjects, type SubjectRow } from '../../../lib/useSubjects';
 import { useSubject } from '../DashboardLayout';
@@ -39,6 +39,9 @@ export default function HomeTab() {
   const [stats, setStats] = useState<GlobalStats>(DEFAULT_STATS);
   const [subjectProgress, setSubjectProgress] = useState<SubjectProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  // Loaded alongside the rest of the dashboard, and gated with it below —
+  // otherwise the grade tiles paint "Not set" before the row arrives.
+  const { grades, loading: gradesLoading } = useGrades(subject);
 
   useEffect(() => {
     async function load() {
@@ -118,7 +121,6 @@ export default function HomeTab() {
   }, [subject, activeSubjects.length]);
 
 
-  const grades = loadGrades(subject);
   const overallPct = subjectProgress.length
     ? Math.round(subjectProgress.reduce((a, s) => a + s.pct, 0) / subjectProgress.length)
     : 0;
@@ -128,7 +130,7 @@ export default function HomeTab() {
     navigate('/dashboard/topics');
   }
 
-  if (loading) {
+  if (loading || gradesLoading) {
     return (
       <div className="flex items-center justify-center py-24">
         <p className="text-sm text-[var(--color-ink-500)]">Loading your dashboard…</p>
