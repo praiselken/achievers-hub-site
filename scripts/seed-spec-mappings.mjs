@@ -14,7 +14,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const XLSX = require('xlsx');
 
-const SUPABASE_URL     = 'https://tylqvznkuoywcouyiadc.supabase.co';
+const SUPABASE_URL     = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_KEY || '';
 
 const { values } = parseArgs({
@@ -25,8 +25,8 @@ const { values } = parseArgs({
   },
 });
 
-if (!SUPABASE_SERVICE) {
-  console.error('Set SUPABASE_SERVICE_KEY env var');
+if (!SUPABASE_URL || !SUPABASE_SERVICE) {
+  console.error('Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY (service_role) for the target project.');
   process.exit(1);
 }
 

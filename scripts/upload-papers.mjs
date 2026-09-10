@@ -35,7 +35,7 @@ import { join, extname, basename } from 'path';
 import { parseArgs } from 'util';
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const SUPABASE_URL     = process.env.VITE_SUPABASE_URL     || 'https://tylqvznkuoywcouyiadc.supabase.co';
+const SUPABASE_URL     = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_KEY  || '';  // needs service_role key for storage uploads
 const BUCKET           = 'past-papers';
 
@@ -54,8 +54,8 @@ if (!values.dir) {
   process.exit(1);
 }
 
-if (!SUPABASE_SERVICE) {
-  console.error('Set SUPABASE_SERVICE_KEY env var (service_role key from Supabase → Settings → API)');
+if (!SUPABASE_URL || !SUPABASE_SERVICE) {
+  console.error('Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY (service_role) for the target project.');
   process.exit(1);
 }
 
