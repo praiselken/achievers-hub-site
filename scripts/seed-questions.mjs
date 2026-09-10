@@ -82,6 +82,39 @@ function parsePathwayEconomics(filePath) {
   return 'paper_1';
 }
 
+// ── Reading cells the spreadsheets don't agree on ───────────────────────────
+//
+// The client's workbooks were built at different times and the column headings
+// drifted. Across the sixty maths files there are four different layouts: most
+// say "Q#", but five say "Question Number" or "Question No", and the casing of
+// "Step-by-step solution" and "Helpful hints" moves around too. Reading a
+// column by one exact name means a renamed heading silently yields nothing.
+//
+// Look a cell up by any of its known spellings, case- and space-insensitively.
+function cellReader(row) {
+  const normal = {};
+  for (const key of Object.keys(row)) {
+    normal[key.toLowerCase().replace(/\s+/g, ' ').trim()] = row[key];
+  }
+  return (...aliases) => {
+    for (const alias of aliases) {
+      const value = normal[alias.toLowerCase().replace(/\s+/g, ' ').trim()];
+      if (value !== undefined && value !== null && value !== '') return value;
+    }
+    return undefined;
+  };
+}
+
+// Day and question numbers arrive as 3, "3" or "Q3" depending on the file.
+// parseInt("Q3") is NaN, which used to become 0 — and because 0 is a valid
+// value for the unique key, all five of a day's questions collapsed onto one
+// row and four were lost without an error. Strip to digits instead.
+function parseIndex(value) {
+  if (value === undefined || value === null) return 0;
+  const digits = String(value).replace(/[^0-9]/g, '');
+  return digits ? parseInt(digits, 10) : 0;
+}
+
 function processMathsWorkbook(filePath) {
   const wb = XLSX.readFile(filePath);
   const ws = wb.Sheets['All Questions'];
@@ -101,27 +134,32 @@ function processMathsWorkbook(filePath) {
   const month    = parseMonth(filePath);
   const pathway  = parsePathwayMaths(filePath);
 
-  return rows.map(row => ({
-    subject:         'maths',
-    pathway,
-    month,
-    day:             parseInt(row['Day']) || 0,
-    question_number: parseInt(row['Q#']) || 0,
-    question_id:     row['QID']?.toString().trim() || null,
-    topic_id:        null,
-    topic_title:     row['Topic']?.toString().trim() || null,
-    question:        row['Question']?.toString().trim(),
-    answer:          row['Answer']?.toString().trim() || null,
-    marks:           null,
-    difficulty:      null,
-    skill_type:      null,
-    solution_steps:  row['Step-by-step solution']?.toString().trim() || null,
-    hints:           row['Helpful hints']?.toString().trim() || null,
-    exam_board:      'all',
-    calculator:      row['Calculator?']?.toString().trim() || null,
-    has_diagram:     row['Needs image/table?']?.toString().toLowerCase().includes('yes') || false,
-    diagram_notes:   row['Asset notes']?.toString().trim() || null,
-  })).filter(q => q.question && q.day > 0);
+  return rows.map(row => {
+    const cell = cellReader(row);
+    const text = (...aliases) => cell(...aliases)?.toString().trim() || null;
+    return {
+      subject:         'maths',
+      pathway,
+      month,
+      day:             parseIndex(cell('Day')),
+      question_number: parseIndex(cell('Q#', 'Question Number', 'Question No')),
+      question_id:     text('QID'),
+      topic_id:        null,
+      topic_title:     text('Topic'),
+      question:        text('Question'),
+      answer:          text('Answer'),
+      marks:           null,
+      difficulty:      null,
+      skill_type:      null,
+      solution_steps:  text('Step-by-step solution'),
+      hints:           text('Helpful hints', 'Helpful Hint'),
+      exam_board:      'all',
+      calculator:      text('Calculator?', 'Calculator or Non-calculator'),
+      has_diagram:     !!cell('Needs image/table?', 'Image/Table Needed?', 'Asset Needed?',
+                                'Relevant image/table needed?')?.toString().toLowerCase().includes('yes'),
+      diagram_notes:   text('Asset notes', 'Assets Needed', 'Asset brief', 'Asset ID'),
+    };
+  }).filter(q => q.question && q.day > 0);
 }
 
 function processEconomicsWorkbook(filePath) {
@@ -136,8 +174,9 @@ function processEconomicsWorkbook(filePath) {
     subject:         'economics',
     pathway,
     month:           row['Calendar month']?.toString().trim() || parseMonth(filePath),
-    day:             parseInt(row['Day number']) || 0,
-    question_number: parseInt(row['Question number']) || 0,
+    // September to December write these as "Q1"…"Q5" rather than 1…5.
+    day:             parseIndex(row['Day number']),
+    question_number: parseIndex(row['Question number']),
     question_id:     row['Topic ID']?.toString().trim() || null,
     topic_id:        row['Topic ID']?.toString().trim() || null,
     topic_title:     row['Topic title']?.toString().trim() || null,
@@ -179,6 +218,47 @@ async function main() {
   }
 
   console.log(`\nTotal: ${allQuestions.length} questions\n`);
+
+  // The failure this guards against lost a fifth of the question bank on the
+  // first run and reported "0 errors" while doing it. Two questions sharing a
+  // unique key don't collide — the upsert quietly overwrites one with the
+  // other — so nothing surfaces unless we look for it here. Refuse to write.
+  const slot = (q, n = q.question_number) =>
+    [q.subject, q.pathway, q.month, q.day, n].join(' | ');
+
+  // A question number that wouldn't parse is a bug in this script, not in the
+  // client's data — every such row lands on number 0 and a whole day collapses
+  // to one question. Stop, rather than write a quarter of the day away.
+  const unnumbered = allQuestions.filter(q => q.question_number === 0).length;
+  if (unnumbered) {
+    console.error(`❌ Refusing to write: ${unnumbered} questions have no readable question number.`);
+    console.error(`   Check the question-number column's heading in the source files — the`);
+    console.error(`   layouts are not consistent, and an unrecognised one reads as nothing.`);
+    process.exit(1);
+  }
+
+  // A repeated number, by contrast, is a content error: Higher Plus June days 7
+  // and 9 each carry two Q4s and no Q5. Both questions are real, so dropping
+  // one loses content and keeping both is impossible. Move the later one into
+  // the day's first free slot and report it, so the client can confirm what the
+  // numbering was meant to be.
+  const taken = new Set();
+  const renumbered = [];
+  for (const q of allQuestions) {
+    if (taken.has(slot(q))) {
+      let n = 1;
+      while (taken.has(slot(q, n))) n++;
+      renumbered.push(`${q.month} day ${q.day} (${q.pathway}): Q${q.question_number} → Q${n}  ${q.question.slice(0, 48)}…`);
+      q.question_number = n;
+    }
+    taken.add(slot(q));
+  }
+
+  if (renumbered.length) {
+    console.warn(`⚠️  ${renumbered.length} question(s) had a number already used that day, and were moved:`);
+    for (const line of renumbered) console.warn(`     ${line}`);
+    console.warn(`   Nothing was lost, but the source numbering needs the client's eye.\n`);
+  }
 
   if (values.dryrun) {
     allQuestions.slice(0, 10).forEach(q =>
