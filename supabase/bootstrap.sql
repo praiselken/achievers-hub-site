@@ -721,6 +721,90 @@ create policy "question_reports_admin_all"
   );
 
 
+-- ── Question bank ──────────────────────────────────────────────────────────
+--
+-- Deliberately NOT the `questions` table. That one is Daily 5: every row needs
+-- a month, a day and a number 1-5, and its unique key is built from them. This
+-- is a topic-organised bank — ~29,000 questions across ten topic areas, one
+-- spreadsheet per sub-topic — with no dates at all. Merging them would mean
+-- inventing calendar positions for content that has none.
+--
+-- Seeded by scripts/seed-question-bank.mjs.
+create table if not exists public.question_bank (
+  id              uuid primary key default gen_random_uuid(),
+  subject         text not null,
+  -- Both come from the folder and file names, as with the past papers:
+  -- topic_area is 'Algebra', 'Number 2'…; topic is the spreadsheet's name.
+  topic_area      text not null,
+  topic           text not null,
+  -- Position within the spreadsheet. The source has no question-number column —
+  -- the number is written into the question text ("1. Solve…") — so row order
+  -- is the only stable identity, and it makes re-running the seed idempotent.
+  ordinal         integer not null,
+  -- The sheet's own "Question ID" where it has one; two thirds of files do.
+  source_ref      text,
+
+  question        text not null,
+  answer          text,
+  -- The sheet's "Topic" column, which describes what the question tests rather
+  -- than naming a topic — e.g. "Solve a two-step linear inequality".
+  skill           text,
+
+  aqa_code        text,
+  edexcel_code    text,
+  ocr_code        text,
+
+  calculator      text check (calculator in ('calculator', 'non_calculator', 'either')),
+  solution_steps  text,
+  hint            text,
+  -- "SOLVE-INEQUALITY; NEGATIVE-COEFFICIENT; REVERSE-SIGN" split on the
+  -- semicolons, so a wrong answer can be traced to a named gap.
+  skill_tags      text[],
+  question_type   text,
+
+  -- No constraint, on purpose. The source mixes at least four vocabularies in
+  -- this column — exam tier (Foundation/Higher), purpose (Fluency/Exam),
+  -- effort (Easy…Very Hard) and others (Low/Standard/Core/Accessible). A check
+  -- would reject most of the bank. Filter on estimated_grade instead, which is
+  -- consistent across 29,106 of the 29,136 rows.
+  difficulty      text,
+  estimated_grade smallint check (estimated_grade between 1 and 9),
+  -- Kept because a handful of rows say "8/9" or "2-3", which estimated_grade
+  -- cannot hold and which are still meaningful to a teacher.
+  grade_label     text,
+
+  needs_image     boolean not null default false,
+  needs_table     boolean not null default false,
+  asset_ref       text,
+  asset_notes     text,
+
+  created_at      timestamptz not null default now(),
+  unique (subject, topic_area, topic, ordinal)
+);
+
+create index if not exists question_bank_subject_area_idx
+  on public.question_bank (subject, topic_area);
+create index if not exists question_bank_grade_idx
+  on public.question_bank (subject, estimated_grade);
+
+alter table public.question_bank enable row level security;
+
+drop policy if exists "Question bank is public" on public.question_bank;
+create policy "Question bank is public"
+  on public.question_bank for select using (true);
+
+-- Admins maintain it from the admin panel.
+drop policy if exists "question_bank_admin_all" on public.question_bank;
+create policy "question_bank_admin_all"
+  on public.question_bank for all to authenticated
+  using (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+  )
+  with check (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+  );
+
+
 -- ===========================================================================
 -- 7. STORAGE BUCKETS
 --
