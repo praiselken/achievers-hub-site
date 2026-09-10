@@ -519,6 +519,80 @@ export function getDemoSubjectProgress(subjectSlug: string) {
   };
 }
 
+// ── Topic Hub exam questions ─────────────────────────────────────────────────
+// Keyed on the demo topic's name, matching how `loadExamQuestions` is called.
+// Three topics carry a set so the demo shows a real run of questions; the rest
+// show the empty state, which is also true of the live bank (economics is not
+// seeded, and 59 maths topics have no sheet).
+
+export interface DemoExamQuestion {
+  id: string;
+  question: string;
+  answer: string | null;
+  hint: string | null;
+  solutionSteps: string | null;
+  skill: string | null;
+  estimatedGrade: number | null;
+  calculator: 'calculator' | 'non_calculator' | 'either' | null;
+  sourceRef: string | null;
+}
+
+export const DEMO_EXAM_QUESTIONS: Record<string, DemoExamQuestion[]> = {
+  'Quadratic Equations': [
+    { id: 'eq-1', question: 'Factorise fully x² + 9x + 20.', answer: '(x + 4)(x + 5)',
+      hint: 'Find two numbers that multiply to 20 and add to 9.',
+      solutionSteps: '1. List factor pairs of 20: 1×20, 2×10, 4×5.\n2. 4 + 5 = 9, so those are the two numbers.\n3. Write (x + 4)(x + 5).',
+      skill: 'Factorise a quadratic with a unit coefficient', estimatedGrade: 5,
+      calculator: 'non_calculator', sourceRef: 'ALG-QUAD-014' },
+    { id: 'eq-2', question: 'Solve x² − 5x − 14 = 0.', answer: 'x = 7 or x = −2',
+      hint: 'Factorise first — the two numbers multiply to −14.',
+      solutionSteps: '1. Two numbers multiplying to −14 and adding to −5: −7 and 2.\n2. (x − 7)(x + 2) = 0.\n3. Each bracket can be zero, so x = 7 or x = −2.',
+      skill: 'Solve a quadratic by factorising', estimatedGrade: 5,
+      calculator: 'non_calculator', sourceRef: 'ALG-QUAD-031' },
+    { id: 'eq-3', question: 'Solve 2x² + 7x + 3 = 0.', answer: 'x = −1/2 or x = −3',
+      hint: 'The coefficient of x² is not 1 — split the middle term.',
+      solutionSteps: '1. Multiply 2 × 3 = 6. Two numbers multiplying to 6 and adding to 7: 6 and 1.\n2. 2x² + 6x + x + 3.\n3. 2x(x + 3) + 1(x + 3) = (2x + 1)(x + 3).\n4. x = −1/2 or x = −3.',
+      skill: 'Solve a quadratic where a ≠ 1', estimatedGrade: 7,
+      calculator: 'non_calculator', sourceRef: 'ALG-QUAD-058' },
+    { id: 'eq-4', question: 'Solve x² + 4x − 6 = 0. Give your answers to 2 decimal places.',
+      answer: 'x = 1.16 or x = −5.16',
+      hint: 'It does not factorise — use the quadratic formula.',
+      solutionSteps: '1. a = 1, b = 4, c = −6.\n2. b² − 4ac = 16 + 24 = 40.\n3. x = (−4 ± √40) ÷ 2.\n4. x = 1.16 or x = −5.16 to 2 d.p.',
+      skill: 'Apply the quadratic formula', estimatedGrade: 7,
+      calculator: 'calculator', sourceRef: 'ALG-QUAD-072' },
+  ],
+  'Solving Linear Equations': [
+    { id: 'eq-5', question: 'Solve 5x − 3 = 17.', answer: 'x = 4',
+      hint: 'Undo the −3 first.',
+      solutionSteps: '1. Add 3 to both sides: 5x = 20.\n2. Divide both sides by 5: x = 4.',
+      skill: 'Solve a two-step linear equation', estimatedGrade: 3,
+      calculator: 'non_calculator', sourceRef: 'ALG-LIN-008' },
+    { id: 'eq-6', question: 'Solve 4(x + 2) = 3x + 11.', answer: 'x = 3',
+      hint: 'Expand the bracket before collecting terms.',
+      solutionSteps: '1. Expand: 4x + 8 = 3x + 11.\n2. Subtract 3x: x + 8 = 11.\n3. Subtract 8: x = 3.',
+      skill: 'Solve an equation with brackets and letters on both sides', estimatedGrade: 4,
+      calculator: 'non_calculator', sourceRef: 'ALG-LIN-023' },
+    { id: 'eq-7', question: 'Solve (2x − 1)/3 = 5.', answer: 'x = 8',
+      hint: 'Clear the fraction by multiplying both sides by 3.',
+      solutionSteps: '1. Multiply both sides by 3: 2x − 1 = 15.\n2. Add 1: 2x = 16.\n3. Divide by 2: x = 8.',
+      skill: 'Solve an equation with an algebraic fraction', estimatedGrade: 5,
+      calculator: 'non_calculator', sourceRef: 'ALG-LIN-041' },
+  ],
+  'Standard Form': [
+    { id: 'eq-8', question: 'Write 0.00047 in standard form.', answer: '4.7 × 10⁻⁴',
+      hint: 'The first significant figure must end up in the units column.',
+      solutionSteps: '1. Move the decimal point 4 places right to get 4.7.\n2. Moving right means a negative power.\n3. 4.7 × 10⁻⁴.',
+      skill: 'Write a small number in standard form', estimatedGrade: 5,
+      calculator: 'non_calculator', sourceRef: 'NUM-SF-006' },
+    { id: 'eq-9', question: 'Work out (3 × 10⁵) × (4 × 10⁻²). Give your answer in standard form.',
+      answer: '1.2 × 10⁴',
+      hint: 'Multiply the numbers, then add the powers.',
+      solutionSteps: '1. 3 × 4 = 12.\n2. 10⁵ × 10⁻² = 10³.\n3. 12 × 10³ is not standard form — adjust to 1.2 × 10⁴.',
+      skill: 'Multiply numbers in standard form', estimatedGrade: 6,
+      calculator: 'non_calculator', sourceRef: 'NUM-SF-019' },
+  ],
+};
+
 // ── Admin panel demo data ────────────────────────────────────────────────────
 // Lets the admin panel be shown without a database, the same way the student
 // dashboard is. Writes in demo mode change local state only — nothing reaches

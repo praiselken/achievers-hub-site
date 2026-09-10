@@ -1,4 +1,5 @@
 import { Workbook } from '../../../components/workbook/Workbook';
+import { ExamQuestions } from '../../../components/dashboard/ExamQuestions';
 import { FileText, GraduationCap, Layers, PenLine } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
@@ -70,9 +71,11 @@ const TOPIC_ACTIONS = [
 
 type ActionKey = (typeof TOPIC_ACTIONS)[number]['key'];
 
-/** Mini lessons and exam-question sets are not built yet. Shown but not
- *  pretending to work, rather than opening onto nothing. */
-const AVAILABLE_ACTIONS: ActionKey[] = ['card', 'practice'];
+/** Mini lessons are not built yet — blocked on the client sending structured
+ *  lesson content. Shown but not pretending to work, rather than opening onto
+ *  nothing. Exam Questions reads the question bank; a topic with no questions
+ *  says so inside the panel, which is a different thing from not being built. */
+const AVAILABLE_ACTIONS: ActionKey[] = ['card', 'practice', 'exam'];
 
 function PracticeQuestion({ q, a, storageKey, topicTitle }: { q: string; a: string; storageKey: string; topicTitle: string }) {
   const [show, setShow] = useState(false);
@@ -228,6 +231,12 @@ function StudyCard({ topic, onMark }: { topic: Topic; onMark: (id: string, s: St
             <div className="px-5 py-3">
               <PracticeQuestion q={topic.practice_q} a={topic.practice_a ?? ''} storageKey={`practice:${topic.id}`} topicTitle={topic.name} />
             </div>
+          )}
+
+          {/* Exam questions — mounted only while open, so nothing is fetched
+              for the other topics in the list. */}
+          {section === 'exam' && (
+            <ExamQuestions subject={topic.subject} topicName={topic.name} />
           )}
 
           {/* Video */}
