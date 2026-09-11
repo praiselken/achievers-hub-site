@@ -264,14 +264,14 @@ In rough order, stopping at the first failure:
 5. Daily 5 loads questions; the Topic Hub loads topics; Past Papers lists papers
    and a PDF opens.
 6. Sign up a second account as a parent, link it to the student with an invite
-   code, and confirm the parent sees the child's progress — topics, Daily 5
-   sessions, logged papers, streak — and **cannot** see any other student's.
+   code, and have the student set grades in Settings. Confirm the parent sees the
+   child's progress — grades on the Progress tab, topics, Daily 5 sessions,
+   logged papers, streak — and **cannot** see any other student's.
 
-   Grades need checking separately, because **the parent dashboard does not
-   display them yet**. The data and the parent read policy exist, and
-   `loadGradesFor()` in `src/lib/grades.ts` is written, but nothing calls it. Have
-   the student set grades in Settings. Then, signed in as the parent, run this in
-   the browser console:
+   The screens cannot prove that last part on their own. They only ever ask for
+   the linked child, so they would look right even if the database handed out
+   every student's rows. For grades, sign in as the parent and run this in the
+   browser console. It asks for *all* rows and lets the policy decide:
 
    ```js
    const ref = 'fkpjoubmmxajbeibrodq';

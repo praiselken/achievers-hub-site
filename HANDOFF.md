@@ -111,12 +111,14 @@ The platform holds data about under-18s, so the first two items matter most.
     secrets expire after at most 24 months, so **record the expiry date**.
   - **Apple:** needs the $99/year Apple Developer Program. It is optional for a
     website, and the decision is the client's.
-- **Parents cannot see their child's grades yet.** Grades are in
-  `student_grades`, and the RLS policy for linked parents exists. Nothing on the
-  parent dashboard displays grades, though. `loadGradesFor(userId, subject)` in
-  `src/lib/grades.ts` is written but has no callers. Until it is wired in, runbook
-  §8 step 6 checks the grades policy directly from the browser console rather than
-  through the parent screens.
+- **The parent's view of grades is built but has never shown real data.** The
+  Progress tab shows the linked child's working and target grade for each
+  subject (`ChildGradesCard`, loaded through `loadGradesFor`). The parent
+  dashboard has no demo mode, so it could not be viewed without a real parent
+  account. Its states are covered only by `ParentProgressTab.test.tsx`. Runbook
+  §8 step 6 checks it for real, including the console check that proves a parent
+  cannot read any *other* child's grades. The screen alone cannot prove that,
+  because it only ever asks for the linked child.
 
 ---
 
@@ -189,8 +191,9 @@ dashboard home rebuilt.
 - **New public pages:** add an entry to `src/lib/publicContent.ts` rather than a
   new component. A catch-all route renders any entry.
 - **Demo mode** is a `sessionStorage` flag (`src/lib/demoMode.ts`). `/demo` enters
-  it. Every tab, the admin panel, and the whole payment journey read demo data
-  and **write nothing** to Supabase in demo.
+  it. Every student tab, the admin panel, and the whole payment journey read demo
+  data and **write nothing** to Supabase in demo. **The parent dashboard has no
+  demo mode.** It needs a real session, so it cannot be shown through `/demo`.
   - The payment journey lives in `src/lib/demoBilling.ts`. `exitDemoMode()`
     clears it so a real sign-in cannot inherit a pretend membership.
   - Grades are the one thing demo keeps in `localStorage`, seeded by

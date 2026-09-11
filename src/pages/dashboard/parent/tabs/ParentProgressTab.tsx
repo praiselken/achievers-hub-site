@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../../lib/supabase';
+import { EMPTY_GRADES, gradeGap, loadGradesFor, type Grades } from '../../../../lib/grades';
 
 interface Session {
   subject: string;
@@ -17,6 +18,71 @@ interface PaperLog {
 
 const SUBJECTS = ['maths', 'economics'] as const;
 
+function GradeFigure({ label, value, hint, accent = false }: {
+  label: string; value: number | null; hint: string; accent?: boolean;
+}) {
+  return (
+    <div>
+      <p className="font-body text-xs font-semibold uppercase tracking-wider text-gray-400">{label}</p>
+      {value !== null ? (
+        <p className="font-display font-bold text-3xl mt-1" style={{ color: accent ? '#BA7517' : '#111827' }}>{value}</p>
+      ) : (
+        <p className="font-display font-bold text-xl mt-1 text-gray-300">Not set</p>
+      )}
+      <p className="font-body text-xs text-gray-400 mt-0.5">{hint}</p>
+    </div>
+  );
+}
+
+/**
+ * The child's working and target grade for one subject. Read-only: the child
+ * sets these in their own Settings, and a linked parent can read them but never
+ * change them (policy `student_grades_linked_parent_read`).
+ *
+ * GCSE grades only. The internal pathway tiers stay hidden from parents too, so
+ * nobody is reading two grading systems at once.
+ */
+export function ChildGradesCard({ grades, subject }: { grades: Grades; subject: string }) {
+  const label = subject === 'economics' ? 'Economics' : 'Maths';
+  const unset = grades.working === null && grades.target === null;
+  const gap = gradeGap(grades);
+
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-orange-100"
+         style={{ boxShadow: '0 2px 8px rgba(186,117,23,0.05)' }}>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-body font-bold text-gray-900">{label} grades</h2>
+        <span className="font-body text-xs text-gray-400">Set by your child</span>
+      </div>
+
+      {unset ? (
+        <p className="font-body text-sm text-gray-500">
+          Your child hasn't set their {label} grades yet. They can add them in Settings on their dashboard.
+        </p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <GradeFigure label="Working at" value={grades.working} hint="where they are now" />
+            <GradeFigure label="Aiming for" value={grades.target} hint="their target grade" accent />
+          </div>
+          {gap && (
+            <p className="font-body text-sm text-gray-600 mt-4">
+              {gap.steps === 0
+                ? 'Working at or above their target.'
+                : `${gap.steps} grade${gap.steps === 1 ? '' : 's'} to go to reach their target.`}
+            </p>
+          )}
+        </>
+      )}
+
+      {/* Parents should not mistake a self-chosen number for a teacher's assessment. */}
+      <p className="font-body text-xs text-gray-400 mt-4">
+        Your child's own estimate — not a prediction or an official result.
+      </p>
+    </div>
+  );
+}
+
 export default function ParentProgressTab() {
   const [sessions, setSessions]   = useState<Session[]>([]);
   const [papers, setPapers]       = useState<PaperLog[]>([]);
@@ -24,6 +90,7 @@ export default function ParentProgressTab() {
   const [loading, setLoading]     = useState(true);
   const [childLinked, setChildLinked] = useState(false);
   const [activeSubject, setActiveSubject] = useState<'maths' | 'economics'>('maths');
+  const [grades, setGrades] = useState<Record<string, Grades>>({});
 
   useEffect(() => {
     async function load() {
@@ -38,17 +105,20 @@ export default function ParentProgressTab() {
       setChildLinked(true);
       const childId = link.child_id;
 
-      const [sessRes, papersRes, progressRes, topicsRes] = await Promise.all([
+      const [sessRes, papersRes, progressRes, topicsRes, childGrades] = await Promise.all([
         supabase.from('daily_sessions').select('subject,score,total,completed_at').eq('user_id', childId)
           .order('completed_at', { ascending: false }).limit(30),
         supabase.from('past_paper_logs').select('score,max_score,logged_at,past_papers(title,subject,year)')
           .eq('user_id', childId).order('logged_at', { ascending: false }),
         supabase.from('topic_progress').select('topic_id,status').eq('user_id', childId),
         supabase.from('topics').select('id,subject'),
+        // One row per subject; any failure reads as "not set" rather than an error.
+        Promise.all(SUBJECTS.map(s => loadGradesFor(childId, s))),
       ]);
 
       setSessions(sessRes.data ?? []);
       setPapers((papersRes.data ?? []) as unknown as PaperLog[]);
+      setGrades(Object.fromEntries(SUBJECTS.map((s, i) => [s, childGrades[i]])));
 
       const progress = progressRes.data ?? [];
       const allTopics = topicsRes.data ?? [];
@@ -104,6 +174,9 @@ export default function ParentProgressTab() {
           </button>
         ))}
       </div>
+
+      {/* Grades — the child's own working and target grade for this subject */}
+      <ChildGradesCard grades={grades[activeSubject] ?? EMPTY_GRADES} subject={activeSubject} />
 
       {/* Topic coverage */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

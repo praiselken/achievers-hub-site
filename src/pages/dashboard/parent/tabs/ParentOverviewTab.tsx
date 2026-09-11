@@ -277,7 +277,7 @@ export default function ParentOverviewTab() {
         <h2 className="font-body font-bold text-sm text-gray-500 uppercase tracking-wider mb-3">Quick access</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { to: '/parent-dashboard/progress',  icon: '📈', title: 'Full progress',   sub: 'Charts and trend data' },
+            { to: '/parent-dashboard/progress',  icon: '📈', title: 'Full progress',   sub: 'Grades, charts and trend data' },
             { to: '/parent-dashboard/spec',       icon: '🗺️', title: 'Spec coverage',  sub: 'Topic-by-topic breakdown' },
             { to: '/parent-dashboard/bookings',   icon: '📅', title: 'Tutor bookings', sub: 'Upcoming sessions' },
           ].map(c => (
