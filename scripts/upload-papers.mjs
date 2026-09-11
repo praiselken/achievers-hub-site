@@ -61,6 +61,21 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE);
 
+// Which subjects are split into Foundation/Higher. Filled from the `subjects`
+// table in main() so this file does not become a second place the answer is
+// written down — parsePaperPath is synchronous, hence the module-level set.
+const TIERED_SUBJECTS = new Set();
+
+async function loadTieredSubjects() {
+  const { data, error } = await supabase.from('subjects').select('slug, tiered');
+  if (error) {
+    // Refuse rather than guess: falling back would silently reinstate the tier
+    // in every title, which is the bug migration 0005 exists to fix.
+    throw new Error(`Could not read subjects.tiered — run migration 0005 first. (${error.message})`);
+  }
+  for (const row of data) if (row.tiered) TIERED_SUBJECTS.add(row.slug);
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function walkDir(dir) {
   const results = [];
@@ -98,8 +113,14 @@ function parsePaperPath(filePath, baseDir, subject) {
   const paperMatch = paperFolder.match(/paper\s*(\d)/i);
   const paper_number = paperMatch ? parseInt(paperMatch[1]) : 1;
 
-  // Tier
+  // Tier. Only some GCSEs have one: Maths is Foundation/Higher, Economics is a
+  // single paper everyone sits. `paper_type` is still written for every row
+  // because it is part of past_papers' unique key and of the storage path
+  // below, but for a non-tiered subject it is an implementation detail and
+  // must not reach the student — see migration 0005. It is kept out of the
+  // title here; the dashboard suppresses the badge.
   const paper_type = /higher/i.test(paperFolder) ? 'higher' : 'foundation';
+  const isTiered = TIERED_SUBJECTS.has(subject);
 
   // File type
   let fileType = 'question';
@@ -109,8 +130,9 @@ function parsePaperPath(filePath, baseDir, subject) {
   // Storage path
   const storagePath = `${subject}/${exam_board.toLowerCase()}/${year}/${sitting.toLowerCase()}/paper-${paper_number}-${paper_type}-${fileType}.pdf`;
 
-  // Human title
-  const title = `${exam_board} ${subject.charAt(0).toUpperCase() + subject.slice(1)} ${year} ${sitting} — Paper ${paper_number} ${paper_type.charAt(0).toUpperCase() + paper_type.slice(1)}`;
+  // Human title. The tier is appended only where the qualification has one.
+  const tierSuffix = isTiered ? ` ${paper_type.charAt(0).toUpperCase() + paper_type.slice(1)}` : '';
+  const title = `${exam_board} ${subject.charAt(0).toUpperCase() + subject.slice(1)} ${year} ${sitting} — Paper ${paper_number}${tierSuffix}`;
 
   return { exam_board, year, sitting: sitting.toLowerCase(), paper_number, paper_type, title, fileType, storagePath };
 }
@@ -119,8 +141,11 @@ function parsePaperPath(filePath, baseDir, subject) {
 async function main() {
   const subject = values.subject;
   const baseDir = values.dir;
+
+  await loadTieredSubjects();
+
   console.log(`\n📂 Scanning: ${baseDir}`);
-  console.log(`📚 Subject:  ${subject}\n`);
+  console.log(`📚 Subject:  ${subject}${TIERED_SUBJECTS.has(subject) ? ' (tiered)' : ' (no tiers — Foundation/Higher will not appear in titles)'}\n`);
 
   const allPdfs = walkDir(baseDir);
   console.log(`Found ${allPdfs.length} PDFs\n`);

@@ -341,9 +341,9 @@ export const DEMO_PAST_PAPERS: DemoPaper[] = [
   { id: 'p1', subject: 'maths', exam_board: 'AQA', year: 2024, paper_number: 1, paper_type: 'higher', title: 'AQA Maths Paper 1 (Non-Calculator)', pdf_url: null, mark_scheme_url: null, examiner_url: null },
   { id: 'p2', subject: 'maths', exam_board: 'AQA', year: 2024, paper_number: 2, paper_type: 'higher', title: 'AQA Maths Paper 2 (Calculator)', pdf_url: null, mark_scheme_url: null, examiner_url: null },
   { id: 'p3', subject: 'maths', exam_board: 'Edexcel', year: 2023, paper_number: 1, paper_type: 'foundation', title: 'Edexcel Maths Paper 1 (Non-Calculator)', pdf_url: null, mark_scheme_url: null, examiner_url: null },
-  { id: 'p4', subject: 'economics', exam_board: 'AQA', year: 2024, paper_number: 1, paper_type: 'higher', title: 'AQA Economics Paper 1', pdf_url: null, mark_scheme_url: null, examiner_url: null },
-  { id: 'p5', subject: 'economics', exam_board: 'AQA', year: 2023, paper_number: 2, paper_type: 'higher', title: 'AQA Economics Paper 2', pdf_url: null, mark_scheme_url: null, examiner_url: null },
-  { id: 'p6', subject: 'economics', exam_board: 'OCR', year: 2022, paper_number: 1, paper_type: 'higher', title: 'OCR Economics Paper 1', pdf_url: null, mark_scheme_url: null, examiner_url: null },
+  { id: 'p4', subject: 'economics', exam_board: 'AQA', year: 2024, paper_number: 1, paper_type: 'foundation', title: 'AQA Economics Paper 1', pdf_url: null, mark_scheme_url: null, examiner_url: null },
+  { id: 'p5', subject: 'economics', exam_board: 'AQA', year: 2023, paper_number: 2, paper_type: 'foundation', title: 'AQA Economics Paper 2', pdf_url: null, mark_scheme_url: null, examiner_url: null },
+  { id: 'p6', subject: 'economics', exam_board: 'OCR', year: 2022, paper_number: 1, paper_type: 'foundation', title: 'OCR Economics Paper 1', pdf_url: null, mark_scheme_url: null, examiner_url: null },
 ];
 
 export interface DemoPaperLog {

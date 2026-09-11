@@ -11,11 +11,13 @@ export interface SubjectRow {
   active: boolean;
   coming_soon: boolean;
   sort_order: number;
+  /** Split into Foundation and Higher tiers. Maths is; Economics is not. */
+  tiered: boolean;
 }
 
 const FALLBACK_SUBJECTS: SubjectRow[] = [
-  { slug: 'maths', name: 'GCSE Maths', icon: '📐', color: '#9970A6', exam_boards: null, active: true, coming_soon: false, sort_order: 1 },
-  { slug: 'economics', name: 'GCSE Economics', icon: '📊', color: '#639922', exam_boards: null, active: true, coming_soon: false, sort_order: 2 },
+  { slug: 'maths', name: 'GCSE Maths', icon: '📐', color: '#9970A6', exam_boards: null, active: true, coming_soon: false, sort_order: 1, tiered: true },
+  { slug: 'economics', name: 'GCSE Economics', icon: '📊', color: '#639922', exam_boards: null, active: true, coming_soon: false, sort_order: 2, tiered: false },
 ];
 
 export function useSubjects() {
@@ -28,7 +30,7 @@ export function useSubjects() {
       if (!supabase || isDemoMode()) { setLoading(false); return; }
       const { data } = await supabase
         .from('subjects')
-        .select('slug, name, icon, color, exam_boards, active, coming_soon, sort_order')
+        .select('slug, name, icon, color, exam_boards, active, coming_soon, sort_order, tiered')
         .order('sort_order', { ascending: true });
       if (!cancelled && data && data.length > 0) setSubjects(data as SubjectRow[]);
       if (!cancelled) setLoading(false);

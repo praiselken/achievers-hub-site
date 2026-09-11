@@ -237,8 +237,17 @@ create table if not exists public.subjects (
   exam_boards text[],
   active      boolean default false,
   coming_soon boolean default false,
-  sort_order  integer default 0
+  sort_order  integer default 0,
+  -- Maths is tiered (Foundation 1-5 / Higher 4-9); Economics is not. Controls
+  -- whether a tier is shown against a past paper. See migration 0005.
+  tiered      boolean not null default false
 );
+
+-- `create table if not exists` leaves an existing table untouched, so the
+-- column has to be added explicitly for this file to stay re-runnable against
+-- a database that predates it.
+alter table public.subjects
+  add column if not exists tiered boolean not null default false;
 
 alter table public.topics             enable row level security;
 alter table public.topic_progress     enable row level security;
@@ -281,10 +290,15 @@ create policy "Questions are public" on public.questions for select using (true)
 drop policy if exists "Subjects are public" on public.subjects;
 create policy "Subjects are public" on public.subjects for select using (true);
 
-insert into public.subjects (slug, name, icon, color, exam_boards, active, coming_soon, sort_order) values
-  ('maths',     'GCSE Maths',     '📐', '#9970A6', '{AQA,Edexcel,OCR}', true, false, 1),
-  ('economics', 'GCSE Economics', '📊', '#639922', '{AQA,Edexcel,OCR}', true, false, 2)
+insert into public.subjects (slug, name, icon, color, exam_boards, active, coming_soon, sort_order, tiered) values
+  ('maths',     'GCSE Maths',     '📐', '#9970A6', '{AQA,Edexcel,OCR}', true, false, 1, true),
+  ('economics', 'GCSE Economics', '📊', '#639922', '{AQA,Edexcel,OCR}', true, false, 2, false)
 on conflict (slug) do nothing;
+
+-- The insert above does nothing on an existing row, so the tier flags are set
+-- separately - otherwise a database seeded before 0005 keeps the default.
+update public.subjects set tiered = true  where slug = 'maths';
+update public.subjects set tiered = false where slug = 'economics';
 
 
 -- ===========================================================================

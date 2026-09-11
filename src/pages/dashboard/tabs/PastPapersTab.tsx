@@ -4,6 +4,7 @@ import { useSubject } from '../DashboardLayout';
 import { awardXp, checkAndAwardAchievements } from '../../../lib/xp';
 import { isDemoMode } from '../../../lib/demoMode';
 import { DEMO_PAST_PAPERS, DEMO_PAPER_LOGS } from '../../../lib/demoData';
+import { useSubjects } from '../../../lib/useSubjects';
 
 interface Paper {
   id: string;
@@ -92,7 +93,7 @@ function ScoreModal({ paper, onClose, onSave }: {
   );
 }
 
-function PaperCard({ paper, log, onLog }: { paper: Paper; log?: PaperLog; onLog: () => void }) {
+function PaperCard({ paper, log, onLog, showTier }: { paper: Paper; log?: PaperLog; onLog: () => void; showTier: boolean }) {
   const pct = log ? Math.round((log.score / log.max_score) * 100) : null;
   const scoreColor = pct === null ? '' : pct >= 70 ? 'var(--color-success-600)' : pct >= 50 ? 'var(--feature-daily-strong)' : 'var(--color-accent-700)';
 
@@ -102,11 +103,17 @@ function PaperCard({ paper, log, onLog }: { paper: Paper; log?: PaperLog; onLog:
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="font-bold text-[var(--color-ink-900)] text-sm">{paper.title}</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{ background: paper.paper_type === 'higher' ? 'var(--color-success-50)' : '#EDE0F4',
-                           color: paper.paper_type === 'higher' ? 'var(--color-success-600)' : '#7A5489' }}>
-              {paper.paper_type === 'higher' ? 'Higher' : 'Foundation'}
-            </span>
+            {/* Only for subjects that actually have tiers. Economics does not —
+                everyone sits the same paper — and the uploader defaults a
+                missing tier to 'foundation', so showing it there would state
+                something untrue about the qualification. */}
+            {showTier && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: paper.paper_type === 'higher' ? 'var(--color-success-50)' : '#EDE0F4',
+                             color: paper.paper_type === 'higher' ? 'var(--color-success-600)' : '#7A5489' }}>
+                {paper.paper_type === 'higher' ? 'Higher' : 'Foundation'}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-[var(--color-ink-300)]">{paper.exam_board}</span>
@@ -163,6 +170,7 @@ function PaperCard({ paper, log, onLog }: { paper: Paper; log?: PaperLog; onLog:
 
 export default function PastPapersTab() {
   const { subject } = useSubject();
+  const { subjects } = useSubjects();
   const [papers, setPapers] = useState<Paper[]>([]);
   const [logs, setLogs] = useState<Record<string, PaperLog>>({});
   const [loading, setLoading] = useState(true);
@@ -175,6 +183,10 @@ export default function PastPapersTab() {
   }, [subject]);
   const [yearFilter, setYearFilter] = useState('All');
   const [logTarget, setLogTarget] = useState<Paper | null>(null);
+
+  // Which subjects have Foundation/Higher tiers at all, so a paper only carries
+  // a tier badge where the qualification actually has one.
+  const tieredSubjects = new Set(subjects.filter(s => s.tiered).map(s => s.slug));
 
   useEffect(() => {
     async function load() {
@@ -287,7 +299,8 @@ export default function PastPapersTab() {
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map(p => (
-            <PaperCard key={p.id} paper={p} log={logs[p.id]} onLog={() => setLogTarget(p)} />
+            <PaperCard key={p.id} paper={p} log={logs[p.id]} onLog={() => setLogTarget(p)}
+                       showTier={tieredSubjects.has(p.subject)} />
           ))}
         </div>
       )}
