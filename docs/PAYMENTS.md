@@ -128,14 +128,16 @@ thing that opens the paid journey early.
 
 ## 3. Switching it on
 
-### a. Run the migration
+### a. The tables — already done
 
-`supabase/migrations/0003_add_subscriptions.sql`, in the Supabase SQL editor or
-via `supabase db push`. Safe to re-run.
+`subscriptions` and `stripe_events` are part of `supabase/bootstrap.sql`, which
+was run on the client's project on 9 Sep 2026. Both tables were confirmed present
+on 11 Sep. There is nothing to run here: skip
+`supabase/migrations/0003_add_subscriptions.sql`, which is kept only as history.
+See HANDOFF.md §1.
 
-This is blocked on the Supabase project being restored — see HANDOFF.md §1.
-Without it the app does not break: `loadSubscription()` treats a missing table
-the same as any other failure and returns Free Starter.
+If a table is ever missing, the app still does not break: `loadSubscription()`
+treats a missing table the same as any other failure and returns Free Starter.
 
 ### b. Create the products in Stripe
 

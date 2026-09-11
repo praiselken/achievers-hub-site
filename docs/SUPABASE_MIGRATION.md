@@ -264,8 +264,26 @@ In rough order, stopping at the first failure:
 5. Daily 5 loads questions; the Topic Hub loads topics; Past Papers lists papers
    and a PDF opens.
 6. Sign up a second account as a parent, link it to the student with an invite
-   code, and confirm the parent sees the child's grades — and **cannot** see any
-   other student's.
+   code, and confirm the parent sees the child's progress — topics, Daily 5
+   sessions, logged papers, streak — and **cannot** see any other student's.
+
+   Grades need checking separately, because **the parent dashboard does not
+   display them yet**. The data and the parent read policy exist, and
+   `loadGradesFor()` in `src/lib/grades.ts` is written, but nothing calls it. Have
+   the student set grades in Settings. Then, signed in as the parent, run this in
+   the browser console:
+
+   ```js
+   const ref = 'fkpjoubmmxajbeibrodq';
+   const { access_token } = JSON.parse(localStorage.getItem(`sb-${ref}-auth-token`));
+   const res = await fetch(`https://${ref}.supabase.co/rest/v1/student_grades?select=user_id,subject,working_grade,target_grade`, {
+     headers: { apikey: '<the anon key>', Authorization: `Bearer ${access_token}` },
+   });
+   await res.json();
+   ```
+
+   Only the linked child's rows should come back. If a grades row belonging to
+   any other student appears, stop.
 7. Report a question from Daily 5; it appears in the admin panel's queue.
 8. `/demo` still works end to end, including the payment walkthrough.
 
