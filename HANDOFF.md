@@ -2,8 +2,8 @@
 
 Context for picking this up in a new session. Everything below is pushed to
 `main` on `github.com/praiselken/achievers-hub-site` and deploying to Netlify
-(`achievers-hub-live.netlify.app`). **Work off `main`.** The
-`payments-walkthrough` branch is stale and holds nothing `main` does not.
+(`achievers-hub-live.netlify.app`). **`main` is the only branch** —
+`payments-walkthrough` was fully merged and deleted on 11 Sep.
 
 This replaces the 29 Aug handoff, which described a database that no longer
 exists. The old version is in git history.
@@ -30,6 +30,53 @@ exists. The old version is in git history.
   client's feedback rounds.
 - **Earlier prototypes** (Stage 1, Stage 2, stage 3) are in
   `Projects/Teaching Platform/`. They are history, not the live app.
+
+### Where everything lives
+
+| What | Where | Whose account |
+|---|---|---|
+| Code | GitHub `praiselken/achievers-hub-site`, branch `main` | Developer |
+| Live site | Netlify, `achievers-hub-live.netlify.app`. Builds from `main`, 30–150 s after a push | Developer |
+| Database | Supabase project `fkpjoubmmxajbeibrodq` ("My Project"), organisation "Achievers Hub", Pro plan, daily backups | Owner `theachievershubuk@gmail.com`; `praiselken@gmail.com` is Administrator |
+| Past paper PDFs | Supabase Storage, bucket `past-papers`, folders `maths/` and `economics/` — 614 files, ~612 MB. The `mark-schemes` and `examiner-reports` buckets exist but are empty; the uploader puts everything in `past-papers` | Client |
+| Content sources | This Mac, `~/Downloads` — table below. **Not backed up anywhere else** | — |
+| Client's working files | Google Drive, "The Achievers Hub UK". Maths and Economics folders, each with Question Bank, QLA, Past Papers, Study Cards, Daily 5, Spec Tracker and Topic List | Client |
+| Payments | Built but switched off — `docs/PAYMENTS.md` | Client's Stripe, not yet opened |
+
+GitHub and Netlify are still in the developer's name. The reasoning that moved
+Supabase to the client — she is the data controller and the costs are hers —
+applies to both before the project is handed over for good.
+
+**Content sources on this Mac:**
+
+| Folder in `~/Downloads` | Loads into | With |
+|---|---|---|
+| `Study Card Maths`, `Study Card Economics` | `topics` | `scripts/seed-topics.mjs` |
+| `Daily 5 Maths`, `Daily 5 Economics` | `questions` (the Daily 5) | `scripts/seed-questions.mjs` |
+| `Question Bank` (maths only) | `question_bank` | `scripts/seed-question-bank.mjs` |
+| `Think, Speak & Grow.xlsx` | `mindset_prompts` | `scripts/seed-mindset.mjs` — path hardcoded |
+| `Past Papers` (maths), `Past Papers 2` (economics, despite the name) | `past_papers` + Storage | `scripts/upload-papers.mjs` — needs migration 0005 |
+
+The scripts read the target project from the environment and refuse to run
+without it. `seed-spec-mappings.mjs` writes to a table that has never existed —
+don't run it.
+
+**Environment variables** — names only; never commit a value (§3):
+
+| Variable | Set in | Notes |
+|---|---|---|
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Local `.env`, and Netlify for all deploy contexts | Public by design. Baked into the JavaScript at build time, so a change needs a redeploy. The anon key is the one starting `sb_publishable_` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Nowhere yet, deliberately | Only the Stripe functions use it, and it bypasses row-level security. Set it on Netlify the day payments go live |
+| `SUPABASE_SERVICE_KEY` | Your terminal, only while seeding | The same `sb_secret_…` key under the name the seed scripts read |
+| Stripe variables | Not set | `docs/PAYMENTS.md` |
+
+Keys are in Supabase → Project Settings → API Keys.
+
+**Schema:** `supabase/bootstrap.sql` is the source of truth, and
+`supabase/migrations/0001`–`0005` are the history — all applied to the live
+project. The five `supabase-*-setup.sql` files in the repo root are superseded.
+**Don't run them:** run in order, they reopen the role-escalation hole that
+`bootstrap.sql` closes.
 
 ---
 
@@ -88,25 +135,47 @@ The platform holds data about under-18s, so the first two items matter most.
 - **Row-level security beyond `profiles` is asserted, not proven.** Before launch,
   try reading another account's rows on every table, especially
   `daily_sessions`, `topic_progress`, `parent_child_links` and `student_grades`.
-- **No admin account has been confirmed.** The first admin must be set in SQL
-  (runbook §7). After that, the admin panel's Users tab promotes everyone else.
+- **Nobody has signed in to the new project yet.** Checked on 11 Sep: 0 auth
+  users, 0 profiles. Sign-up, onboarding and the first admin have never run
+  against the live database, so none of the checks above has been possible yet.
+  The first admin must be set in SQL (runbook §7). After that, the admin panel's
+  Users tab promotes everyone else.
 - **Auth settings.** Praise was raised to Administrator on the client's Supabase
   org on 10 Sep, so auth settings are no longer blocked. (A Developer cannot save
   them.)
   - It is **unconfirmed whether Authentication → URL Configuration was saved**.
     If the Site URL is still `http://localhost:3000`, every confirmation link
     points there.
-  - **As of 10 Sep, only email sign-in is enabled.** Google, Microsoft (`azure`)
-    and Apple are all off, although the app shows all three buttons. Email
+  - **As of 11 Sep, email and Google sign-in are enabled.** Microsoft (`azure`)
+    and Apple are still off, although the app shows both buttons. Email
     confirmation is on and signups are open. The default Supabase SMTP sends only
     a handful of emails an hour, which is easy to mistake for a broken signup.
-  - **Google:** the old OAuth client is in `papraisel@gmail.com`'s Google Cloud
-    and points at the dead project. Make a fresh client in the client's own
-    Google Cloud rather than transferring it; no real users exist, so nothing
-    breaks. Google Cloud's "$300 free trial" page is not a paywall — OAuth
-    credentials are free and need no billing account. A new consent screen
-    starts in **Testing**, which blocks everyone not on its test-user list until
-    someone presses **Publish app**.
+  - **Google — set up 11 Sep, not yet proven end to end.** The OAuth client is
+    in the client's own Google Cloud: project "Achievers Hub"
+    (`achievers-hub-508217`, organisation `theachievershubuk-org`, signed in as
+    `theachievershubuk@gmail.com`). The old client in `papraisel@gmail.com`'s
+    Google Cloud points at the dead project and can be deleted. Consent screen
+    is External; the Google Auth Platform pages are under `console.cloud.google.com/auth`.
+    - **Checked from outside:** Google is on in Supabase; Supabase sends users
+      to Google with a Client ID from that project (it starts `514492478755`, the
+      project number) and the callback
+      `https://fkpjoubmmxajbeibrodq.supabase.co/auth/v1/callback`; and Google
+      accepts both and shows its account chooser.
+    - **Not yet checked:** the client secret, the return to the live site, and
+      the profile being created. All three happen only after a real sign-in, so
+      do one with a spare Google account. Landing on `localhost:3000` means URL
+      Configuration did not save; a Supabase error about exchanging a code means
+      the secret is wrong.
+    - **Confirm the app is published.** A new consent screen starts in
+      **Testing**, which blocks everyone not on its test-user list. **Publish
+      app** stays greyed out until Branding has an app name, support email, home
+      page and privacy policy link (`/privacy` on the live site). Audience should
+      read "In production".
+    - **The client secret is shown once.** It now lives only in Supabase
+      (Authentication → Sign In / Providers → Google). If it is lost, use **Add
+      secret** on the client in Google Cloud and paste the new one into Supabase.
+    - **Google's screen says "to continue to fkpjoubmmxajbeibrodq.supabase.co",**
+      not the app's name. That is a decision for the client, parked — see §7.
   - **Microsoft:** needs a free Entra (Azure) app registration. Its client
     secrets expire after at most 24 months, so **record the expiry date**.
   - **Apple:** needs the $99/year Apple Developer Program. It is optional for a
@@ -166,7 +235,7 @@ The platform holds data about under-18s, so the first two items matter most.
 | `8e69ee2` | Missing-profile users go to onboarding rather than being locked out |
 | `1389fde` | Login/signup page onto the redesign |
 | `b215dcf` | GCSE grade selector + grades on the dashboard |
-| `efd8c74` | Microsoft and Apple sign-in buttons alongside Google (providers still off — §2) |
+| `efd8c74` | Microsoft and Apple sign-in buttons alongside Google (Google on since 11 Sep; Microsoft and Apple still off — §2) |
 | `292333c` `a82f397` | Admin panel link in the sidebar, incl. demo mode |
 | `5d7f644` | Admin panel demo-able and on the brand palette |
 | `2097370` `3574039` | One Archi character everywhere; illustrations given real transparency |
@@ -298,8 +367,29 @@ dashboard home rebuilt.
 - **Admin panel** — the client asked for it specifically. It covers
   add/edit/delete for questions, topics, past papers and mindset prompts, user
   role changes, and the question-report queue.
+- **Decision for the client — the name on Google's sign-in screen.** It reads
+  "to continue to fkpjoubmmxajbeibrodq.supabase.co". The client would rather it
+  said "The Achievers Hub UK". **No setting changes this:** Google shows an
+  app's name only after brand verification, and until then shows the domain
+  users return to. Getting there takes four steps, each depending on the last:
+  1. **A domain of her own**, e.g. `theachievershub.co.uk`, if she has none
+     (about £10 a year).
+  2. **Supabase's custom domain add-on**, e.g. `auth.theachievershub.co.uk`,
+     about $10 a month on her Pro plan. This one can't be skipped: Google
+     verifies a brand only if every authorised domain is one you can prove you
+     own, and nobody but Supabase can prove `supabase.co`.
+  3. **Verify the domain** in Google Search Console, signed in as her.
+  4. **Brand verification** in Google Auth Platform → Verification Center, after
+     Branding is updated to the new name, links and domain. A few working days
+     for email-and-profile access. The logo goes on here — adding one earlier
+     triggers verification and blocks publishing.
+
+  Then the Google redirect URI, the Supabase Site URL and redirect URLs, and the
+  Netlify site all move to the new domain. The site itself should move too, so
+  families see one name in the address bar and on Google. **Parked on 11 Sep** —
+  sign-in works as it is. Put it to her alongside the other running costs: does
+  she already own a domain, and is she happy to add about $10 a month?
 - **Still waiting on the client:**
-  - logo exports (transparent PNG/SVG, plus a white variant for dark backgrounds)
   - a Stripe account in their name
   - legal review of the drafts (Privacy, Terms, Subscription Terms, Safeguarding,
     AI Use, Accessibility), which are routed and carry a "needs legal review"
