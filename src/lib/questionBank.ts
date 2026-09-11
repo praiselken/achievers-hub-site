@@ -42,12 +42,19 @@ export interface ExamQuestion {
  * ------------------------------------------------------------------ */
 
 /**
- * Both sides of the comparison, reduced to the letters and digits that actually
- * carry the meaning. "Algebra: changing the subject" and "Algebra changing the
- * subject" both become "algebra changing the subject".
+ * Both sides of the comparison, reduced to their letters and digits alone.
+ * "Algebra: changing the subject" and "Algebra changing the subject" both
+ * become "algebrachangingthesubject".
+ *
+ * Squashed completely rather than turned into spaces, because the bank's topic
+ * names come from file names, and a file name cannot contain ":" or "/". The
+ * export deleted those characters instead of replacing them: "Ratio: expressing
+ * as 1:n" became "Ratio expressing as 1n", and "(LCM/HCF)" became "(LCMHCF)".
+ * Mapping punctuation to a space made those "1 n" against "1n", so both topics
+ * said "none yet" over 77 questions that were there all along.
  */
 function normaliseTopic(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  return value.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 /**
