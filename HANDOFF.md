@@ -26,8 +26,9 @@ exists. The old version is in git history.
 - **GCSE pathways** (Numeracy 1–3, Foundation 3–5, Foundation Plus 4–6, Higher
   6–7, Higher Plus 8–9) drive question selection and are never shown to students.
 - **Where the rest lives:** `docs/SUPABASE_MIGRATION.md` is the database and auth
-  runbook; `docs/PAYMENTS.md` covers Stripe; `CLIENT_FEEDBACK_*.md` holds the
-  client's feedback rounds.
+  runbook; `docs/MICROSOFT_SIGNIN.md` turns on the Microsoft button;
+  `docs/PAYMENTS.md` covers Stripe; `CLIENT_FEEDBACK_*.md` holds the client's
+  feedback rounds.
 - **Earlier prototypes** (Stage 1, Stage 2, stage 3) are in
   `Projects/Teaching Platform/`. They are history, not the live app.
 
@@ -178,6 +179,9 @@ The platform holds data about under-18s, so the first two items matter most.
       not the app's name. That is a decision for the client, parked — see §7.
   - **Microsoft:** needs a free Entra (Azure) app registration. Its client
     secrets expire after at most 24 months, so **record the expiry date**.
+    Step by step, including the account-type choice that decides whether school
+    Microsoft accounts can sign in at all: `docs/MICROSOFT_SIGNIN.md`. No new
+    email address is needed — the existing Gmail one works.
   - **Apple:** needs the $99/year Apple Developer Program. It is optional for a
     website, and the decision is the client's.
 - **The parent's view of grades is built but has never shown real data.** The

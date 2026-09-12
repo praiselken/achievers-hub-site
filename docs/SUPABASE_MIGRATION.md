@@ -221,9 +221,10 @@ None of this carries over from a bootstrap file; it is dashboard configuration.
   `npx netlify dev`) as redirect URLs. Sign-in fails in a way that looks like a
   code bug if this is missed.
 - **Authentication → Providers** — Google needs reconfiguring against the new
-  project's callback URL. Microsoft needs a free Azure app registration. Apple
-  needs the paid Apple Developer Program membership, $99/year, which is the
-  client's call and not a blocker for testing.
+  project's callback URL. Microsoft needs a free Azure app registration —
+  `docs/MICROSOFT_SIGNIN.md` walks through it. Apple needs the paid Apple
+  Developer Program membership, $99/year, which is the client's call and not a
+  blocker for testing.
 - **Email confirmations** — decide deliberately. On is right for real students;
   off makes the test round much faster. If left on, the default Supabase SMTP is
   rate-limited to a handful of emails an hour, which is easy to mistake for a
